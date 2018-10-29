@@ -1,0 +1,18 @@
+---
+# Endpoints, which will be added to hosts on all nodes of cluster. Target is control-plane
+endpoints:
+ - "ceph-mon.ceph.svc.{{cluster_name}}"
+# Packages are required on nodes
+packages:
+ - ceph-common
+# k8s node labels
+compute_plane_labels:
+ - openstack-compute-node
+ - opencontrail.org/vrouter-kernel
+control_plane_labels:
+ - ceph-mon
+ - ceph-rgw
+ - ceph-mgr
+ - openstack-control-plane
+ - opencontrail.org/controller
+
