@@ -1,2 +1,4 @@
 *.retry
 */artifacts/
+test.yaml
+*.swp
