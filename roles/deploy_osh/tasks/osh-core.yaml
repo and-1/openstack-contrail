@@ -1,0 +1,19 @@
+- name: Init helm
+  shell: helm init --client-only --history-max 5 
+  args:
+    creates: "~/.helm"
+- name: create folder for helm-toolkit charts
+  file: 
+    state: directory 
+    path: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
+- name: Build helm-toolkit
+  shell: helm package -d "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts" openstack-helm-infra/helm-toolkit
+- name: Link helm-toolkit package to OSH charts
+  file: 
+    src: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
+    dest: "{{playbook_dir}}/{{item.path}}charts"
+    state: link
+  with_items:
+  - "{{components.OSH_CORE}}"
+#- name: Deploy OSH CORE
+#  shell: 

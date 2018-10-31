@@ -1,0 +1,13 @@
+clouds:
+  {{region}}:
+    region_name: {{region}}
+    identity_api_version: 3
+    auth:
+{% with ep=endpoints.identity.auth.admin %}
+      username: {{ep.username}}
+      project_name: {{ep.project_name}}
+      project_domain_name: {{ep.project_domain_name}}
+      user_domain_name: {{ep.user_domain_name}}
+{% endwith %}
+      password: {{identity_admin}}
+      auth_url: 'http://keystone.openstack.svc.{{global_domain_suffix}}/v3'

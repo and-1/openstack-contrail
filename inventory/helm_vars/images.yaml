@@ -1,0 +1,290 @@
+---
+osh:
+  barbican_api:
+    image: 'ubuntu-binary-barbican-api'
+  cinder_backup:
+    image: 'ubuntu-binary-cinder-backup'
+  cinder_db_sync:
+    image: 'ubuntu-binary-cinder-api'
+  cinder_scheduler:
+    image: 'ubuntu-binary-cinder-scheduler'
+  cinder_volume:
+    image: 'ubuntu-binary-cinder-volume'
+  congress_api:
+    image: 'ubuntu-binary-congress-api'
+  congress_datasource:
+    image: 'ubuntu-binary-congress-datasource'
+  congress_policy_engine:
+    image: 'ubuntu-binary-congress-policy-engine'
+  glance_api:
+    image: 'ubuntu-binary-glance-api'
+  glance_registry:
+    image: 'ubuntu-binary-glance-registry'
+  heat_api:
+    image: 'ubuntu-binary-heat-api'
+  heat_engine:
+    image: 'ubuntu-binary-heat-engine'
+  horizon:
+    image: 'ubuntu-binary-horizon'
+  ironic_api:
+    image: 'ubuntu-binary-ironic-api'
+  ironic_conductor:
+    image: 'ubuntu-binary-ironic-conductor'
+  ironic_pxe:
+    image: 'ubuntu-binary-ironic-pxe'
+  keystone_api:
+    image: 'ubuntu-binary-keystone'
+  magnum_api:
+    image: 'ubuntu-binary-magnum-api'
+  magnum_conductor:
+    image: 'ubuntu-binary-magnum-conductor'
+  neutron_dhcp:
+    image: 'ubuntu-binary-neutron-dhcp-agent'
+  neutron_l3:
+    image: 'ubuntu-binary-neutron-l3-agent'
+  neutron_linuxbridge_agent:
+    image: 'ubuntu-binary-neutron-linuxbridge-agent'
+  neutron_metadata:
+    image: 'ubuntu-binary-neutron-metadata-agent'
+  neutron_openvswitch_agent:
+    image: 'ubuntu-binary-neutron-openvswitch-agent'
+  neutron_server:
+    image: 'ubuntu-binary-neutron-server'
+  nova_api:
+    image: 'ubuntu-binary-nova-api'
+  nova_compute:
+    image: 'ubuntu-binary-nova-compute'
+  nova_compute_ironic:
+    image: 'ubuntu-binary-nova-compute-ironic'
+  nova_compute_ssh:
+    image: 'ubuntu-binary-nova-ssh'
+  nova_conductor:
+    image: 'ubuntu-binary-nova-conductor'
+  nova_consoleauth:
+    image: 'ubuntu-binary-nova-consoleauth'
+  nova_novncproxy:
+    image: 'ubuntu-binary-nova-novncproxy'
+  nova_placement:
+    image: 'ubuntu-binary-nova-placement-api'
+  nova_scheduler:
+    image: 'ubuntu-binary-nova-scheduler'
+  nova_spiceproxy:
+    image: 'ubuntu-binary-nova-spicehtml5proxy'
+  senlin_api:
+    image: 'ubuntu-binary-senlin-api'
+  senlin_engine:
+    image: 'ubuntu-binary-senlin-engine'
+  tempest:
+    image: 'ubuntu-binary-tempest'
+  test:
+    image: 'ubuntu-binary-rally'
+  ceph_osd:
+    image: 'ubuntu-binary-ceph-osd'
+  ceph_mon:
+    image: 'ubuntu-binary-ceph-mon'
+  ceph_mds:
+    image: 'ubuntu-binary-ceph-mds'
+  ceph_mgr:
+    image: 'ubuntu-binary-ceph-mgr'
+  ceph_rgw:
+    image: 'ubuntu-binary-ceph-rgw'
+  prometheus_mysql_exporter:
+    image: 'ubuntu-binary-prometheus-mysqld-exporter'
+  rabbitmq:
+    image: 'ubuntu-binary-rabbitmq'
+  openvswitch_vswitchd:
+    image: 'ubuntu-binary-openvswitch-vswitchd'
+  openvswitch_db_server:
+    image: 'ubuntu-binary-openvswitch-db-server'
+  libvirt:
+    image: 'ubuntu-binary-nova-libvirt'
+  mongodb:
+    image: 'ubuntu-binary-mongodb'
+  ceilometer_central:
+    image: 'ubuntu-binary-ceilometer-central'
+  ceilometer_compute:
+    image: 'ubuntu-binary-ceilometer-compute'
+  ceilometer_notification:
+    image: 'ubuntu-binary-ceilometer-notification'
+  elasticsearch:
+    image: 'ubuntu-binary-elasticsearch'
+  memcached:
+    image: 'memcached'
+    tag: 1.5.5
+    repo: docker.io
+  mariadb:
+    image: 'mariadb'
+    repo: docker.io
+    tag: 10.2.13
+  cinder_api:
+    image: 'openstackhelm/cinder'
+    repo: docker.io
+    tag: queens
+  barbican_db_sync:
+    link: barbican_api
+  bootstrap:
+    link: heat_engine
+  cinder_volume_usage_audit:
+    link: cinder_volume
+  congress_db_sync:
+    link: congress_api
+  congress_ds_create:
+    link: congress_api
+  congress_scripted_test:
+    link: congress_api
+  db_drop:
+    link: heat_engine
+  db_init:
+    link: heat_engine
+  glance_bootstrap:
+    link: heat_engine
+  glance_db_sync:
+    link: glance_api
+  heat_cfn:
+    link: heat_api
+  heat_cloudwatch:
+    link: heat_api
+  heat_db_sync:
+    link: heat_api
+  heat_engine_cleaner:
+    link: heat_engine
+  horizon_db_sync:
+    link: horizon
+  ironic_bootstrap:
+    link: heat_engine
+  ironic_db_sync:
+    link: ironic_api
+  ironic_pxe_init:
+    link: ironic_pxe
+  keystone_bootstrap:
+    link: keystone_api
+  keystone_credential_rotate:
+    link: keystone_api
+  keystone_credential_setup:
+    link: keystone_api
+  keystone_db_sync:
+    link: keystone_api
+  keystone_domain_manage:
+    link: keystone_api
+  keystone_fernet_rotate:
+    link: keystone_api
+  keystone_fernet_setup:
+    link: keystone_api
+  ks_endpoints:
+    link: heat_engine
+  ks_service:
+    link: heat_engine
+  ks_user:
+    link: heat_engine
+  magnum_db_sync:
+    link: magnum_api
+  neutron_db_sync:
+    link: neutron_server
+  nova_cell_setup:
+    link: nova_api
+  nova_cell_setup_init:
+    link: nova_api
+  nova_db_sync:
+    link: nova_api
+  nova_novncproxy_assets:
+    link: nova_novncproxy
+  nova_spiceproxy_assets:
+    link: nova_spiceproxy
+  scripted_test:
+    link: heat_engine
+  senlin_db_sync:
+    link: senlin_api
+  senlin_engine_cleaner:
+    link: senlin_engine
+  ceph_bootstrap:
+    link: ceph_osd
+  prometheus_mysql_exporter_helm_tests:
+    link: heat_engine
+  rabbit_init:
+    link: rabbitmq
+  scripted_test:
+    link: rabbitmq
+  prometheus_rabbitmq_exporter_helm_tests:
+    link: heat_engine
+  db_init_mongodb:
+    link: mongodb
+  ceilometer_db_sync:
+    link: ceilometer_central
+  memory_init:
+    link: heat_engine
+  helm_tests:
+    link: heat_engine
+  snapshot_repository:
+    link: heat_engine
+  prometheus_create_mysql_user:
+    link: mariadb
+contrail:
+  opencontrail_compute_init:
+    image: 'contrail-openstack-compute-init'
+    move: osh
+  opencontrail_neutron_init:
+    image: 'contrail-openstack-neutron-init'
+    move: osh
+  opencontrail_heat_init:
+    image: 'contrail-openstack-heat-init'
+    move: osh
+  kafka:
+    image: "contrail-external-kafka"
+  cassandra:
+    image: "contrail-external-cassandra"
+  redis:
+    image: "contrail-external-redis"
+  zookeeper:
+    image: "contrail-external-zookeeper"
+  rabbitmq:
+    image: "contrail-external-rabbitmq"
+  contrail_control:
+    image: "contrail-controller-control-control"
+  control_dns:
+    image: "contrail-controller-control-dns"
+  control_named:
+    image: "contrail-controller-control-named"
+  config_api:
+    image: "contrail-controller-config-api"
+  config_devicemgr:
+    image: "contrail-controller-config-devicemgr"
+  config_schema_transformer:
+    image: "contrail-controller-config-schema"
+  config_svcmonitor:
+    image: "contrail-controller-config-svcmonitor"
+  webui_middleware:
+    image: "contrail-controller-webui-job"
+  webui:
+    image: "contrail-controller-webui-web"
+  analytics_api:
+    image: "contrail-analytics-api"
+  contrail_collector:
+    image: "contrail-analytics-collector"
+  analytics_alarm_gen:
+    image: "contrail-analytics-alarm-gen"
+  analytics_query_engine:
+    image: "contrail-analytics-query-engine"
+  analytics_snmp_collector:
+    image: "contrail-analytics-snmp-collector"
+  contrail_topology:
+    image: "contrail-analytics-topology"
+  build_driver_init:
+    image: "contrail-vrouter-kernel-build-init"
+  vrouter_agent:
+    image: "contrail-vrouter-agent"
+  vrouter_init_kernel:
+    image: "contrail-vrouter-kernel-init"
+  vrouter_dpdk:
+    image: "contrail-vrouter-agent-dpdk"
+  vrouter_init_dpdk:
+    image: "contrail-vrouter-kernel-init-dpdk"
+  nodemgr:
+    image: "contrail-nodemgr"
+  contrail_status:
+    image: "contrail-status"
+  node_init:
+    image: "contrail-node-init"
+  dep_check:
+    image: "quay.io/stackanetes/kubernetes-entrypoint"
+    repo: quay.io
+    tag: v0.2.1

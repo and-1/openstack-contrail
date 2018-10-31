@@ -1,0 +1,42 @@
+global:
+   contrail_env:
+     CONTROL_NODES: 192.168.0.80,192.168.0.81
+     BGP_ASN: 64546
+     SUBCLUSTER: dmz
+     BGP_AUTO_MESH: 'false'
+     XMPP_SERVER_PORT: 15512
+     BGP_PORT: 2179
+     CONTROL_INTROSPECT_LISTEN_PORT: 18082
+     CONTROL_DATA_NET_LIST: 192.168.0.0/24
+     VROUTER_GATEWAY: 10.233.44.1
+labels:
+  control_only:
+    node_selector_key: opencontrail.org/controller-dmz
+    node_selector_value: "enabled"
+  vrouter_agent_kernel:
+    node_selector_key: opencontrail.org/vrouter-kernel-dmz
+    node_selector_value: "enabled"
+manifests:
+  configmap_controller_env: false
+  configmap_controller_keystone: false
+  configmap_controller_rabbitmq: false
+  daemonset_config: false
+  daemonset_control: false
+  daemonset_control_only: true
+  daemonset_webui: false
+  service_config_api_server: false
+  service_config_ingress: false
+  service_web_controller: false
+  service_webui_ingress: false
+  ingress_webui: false
+  ingress_config_api: false
+  secret_controller_keystone_admin: false
+  daemonset_kernel_remote: true
+  configmap_vrouter_kernel: false
+  configmap_vrouter_keystone: false
+  configmap_vrouter_dpdk: false
+  configmap_vrouter_sriov: false
+  daemonset_kernel: false
+  daemonset_dpdk: false
+  daemonset_vrouter_sriov: false
+  secret_vrouter_keystone_admin: false

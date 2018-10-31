@@ -1,0 +1,179 @@
+endpoints:
+  identity:
+    namespace: openstack
+  object_store:
+    namespace: ceph
+  ceph_mon:
+    namespace: ceph
+deployment:
+  storage_secrets: true
+  ceph: true
+  rbd_provisioner: true
+  cephfs_provisioner: false
+  client_secrets: false
+  rgw_keystone_user_and_endpoints: false
+bootstrap:
+  enabled: true
+storageclass:
+  cephfs:
+    provision_storage_class: false
+conf:
+  features:
+    mds: false
+  ceph:
+    global:
+      fsid: "b07bdf62-c1be-435e-b140-de7315d342d2"
+      bluestore_block_db_size: "1073741824"
+      bluestore_block_wal_size: "2147483648"
+      mon osd full ratio: .90
+      mon osd nearfull ratio: .80
+  rgw_ks:
+    enabled: true
+  pool:
+    crush:
+      tunables: hammer
+    target:
+      # NOTE(portdirect): 5 nodes, with one osd per node
+      osd: 12
+      pg_per_osd: 100
+    spec:
+      # RBD pool
+      - name: cloud.infra 
+        application: rbd
+        replication: 3
+        percent_total_data: 30
+      # RadosGW pools
+      - name: .rgw.root
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.control
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.data.root
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.gc
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.log
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.intent-log
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.meta
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.usage
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.users.keys
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.users.email
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.users.swift
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.users.uid
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.buckets.extra
+        application: rgw
+        replication: 3
+        percent_total_data: 0.1
+      - name: default.rgw.buckets.index
+        application: rgw
+        replication: 3
+        percent_total_data: 3
+      - name: default.rgw.buckets.data
+        application: rgw
+        replication: 3
+        percent_total_data: 34.8
+
+  storage:
+    mon:
+      directory: /var/lib/ceph/mon
+  overrides:
+    ceph_osd:
+      labels:
+       - label:
+           key: Dvdb-Jvdd-Dev
+           values: 
+           - "enabled"
+         #exclusive: true
+         conf:
+           storage:
+             osd:
+               - data:
+                   type: block-bluestore
+                   location: /dev/vdb
+                 journal:
+                   type: block-bluestore
+                   location: /dev/vdd
+       - label:
+           key: Dvdc-Jvdd-Dev
+           values:
+           - "enabled"
+         conf:
+           storage:
+             osd:
+               - data:
+                   type: block-bluestore
+                   location: /dev/vdc
+                 journal:
+                   type: block-bluestore
+                   location: /dev/vdd
+       - label:
+           key: Dvdb-Jvdd-Prod
+           values: 
+           - "enabled"
+         #exclusive: true
+         conf:
+           storage:
+             osd:
+               - data:
+                   type: block-bluestore
+                   location: /dev/vdb
+                 journal:
+                   type: block-bluestore
+                   location: /dev/vdd
+       - label:
+           key: Dvdc-Jvdd-Prod
+           values:
+           - "enabled"
+         conf:
+           storage:
+             osd:
+               - data:
+                   type: block-bluestore
+                   location: /dev/vdc
+                 journal:
+                   type: block-bluestore
+                   location: /dev/vdd
+ceph_mgr_enabled_modules:
+  - restful
+  - status
+  - prometheus
+# Manager default port conflict with cassandra(TungstenFabric)
+ceph_mgr_modules_config:
+  dashboard:
+    port: 7001
+endpoints:
+  ceph_mgr:
+    port:
+      mgr:
+        default: 7001

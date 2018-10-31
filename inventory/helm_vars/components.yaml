@@ -1,0 +1,38 @@
+OSH_CORE:
+- name: ingress-kube-system
+  path: openstack-helm-infra/ingress/
+  namespace: kube-system
+- name: ingress-openstack
+  path: openstack-helm-infra/ingress/
+  namespace: openstack
+- name: ingress-ceph
+  path: openstack-helm-infra/ingress/
+  namespace: ceph
+- name: ingress-contrail
+  path: openstack-helm-infra/ingress/
+  namespace: contrail
+#- name: ceph-mon
+#  path: openstack-helm-infra//
+#  namespace: ceph
+#- name: ceph-osd
+#  path:
+#  namespace: ceph
+#- name: ceph-client
+#  path:
+#  namespace: ceph
+#- name: ceph-provisioners
+#  path:
+#  namespace: ceph
+#- name: mariadb
+#  path:
+#  namespace: openstack
+#- name: rabbitmq
+#  path:
+#  namespace: openstack
+#- name: memcached
+#  path:
+#  namespace: openstack
+#- name: keystone
+#  path:
+#  namespace: openstack
+

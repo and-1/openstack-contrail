@@ -1,0 +1,21 @@
+- name: Gen password
+  include: gen_password.yaml
+  with_dict:
+  - "{{endpoints}}"
+  loop_control:
+    loop_var: endpoint
+- name: Generate helm common override values
+  template:
+    src: helm_vars_common.yaml.j2
+    force: true
+    dest: "{{inventory_dir}}/artifacts/helm_vars_common.yaml"
+- name: Generate cloud credentials
+  template:
+    src: cloud.yaml.j2
+    dest: "{{inventory_dir}}/artifacts/cloud.yaml"
+- name: Generate OSH CORE helm override values
+  template:
+    src: "{{item.name}}.yaml.j2"
+    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
+  with_items:
+  - "{{components.OSH_CORE}}"

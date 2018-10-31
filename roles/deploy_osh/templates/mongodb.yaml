@@ -1,0 +1,5 @@
+pod:
+  replicas:
+    server: 1
+volume:
+  size: 5Gi

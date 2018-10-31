@@ -1,25 +1,32 @@
 ---
 - name: Set k8s node labels (control)
-  shell: "kubectl label node {{ item.0 }} {{item.1}}=enabled"
+  shell: "kubectl label node --overwrite {{ item.0 }} {{item.1}}=enabled"
   with_nested:
   - "{{ groups['control-plane'] }}"
   - "{{ control_plane_labels }}"
   ignore_errors: yes
 - name: Set k8s node labels (compute)
-  shell: "kubectl label node {{ item.0 }} {{item.1}}=enabled"
+  shell: "kubectl label node --overwrite {{ item.0 }} {{item.1}}=enabled"
   with_nested:
   - "{{ groups['compute-plane'] }}"
   - "{{ compute_plane_labels }}"
   ignore_errors: yes
 - name: Set k8s node environment (compute)
-  shell: "kubectl label node {{ item }} compute-env={% if item in groups['dev-compute'] %}dev{% else %}prod{% endif %}"
+  shell: "kubectl label node --overwrite {{ item }} compute-env={% if item in groups['dev-compute'] %}dev{% else %}prod{% endif %}"
   with_items:
   - "{{ groups['compute-plane'] }}"
   ignore_errors: yes
+#- name: Set k8s node labels (osd)
+#  shell: "kubectl label node --overwrite {{ item.0.inventory_hostname }}  D{{item.1}}-J{{item.0.osd_jour}}-{% if item.0.inventory_hostname in groups['dev-osd-node'] %}Dev{% else %}Prod{% endif %}=enabled"
+#  with_subelements:
+#  - "{{groups['osd-nodes']| map('extract', hostvars) | list}}"
+#  - ansible_local.osd_disks
+#  ignore_errors: yes
+#  when: "item.1 != item.0.osd_jour"
 - name: Set k8s node labels (osd)
-  shell: "kubectl label node {{ item.0.inventory_hostname }}  D{{item.1}}-J{{item.0.osd_jour}}-{% if item.0.inventory_hostname in groups['dev-osd-node'] %}Dev{% else %}Prod{% endif %}=enabled"
-  with_subelements:
-  - "{{groups['osd-nodes']| map('extract',hostvars) | list}}"
-  - ansible_local.osd_disks
-  ignore_errors: yes
-  when: "item.1 != item.0.osd_jour"
+  include: "osd-labels.yaml"
+#  include: "{{ role_path }}/tasks/osd-labels.yaml"
+  with_items:
+  - "{{groups['osd-nodes']}}"
+  loop_control:
+    loop_var: node

@@ -1,0 +1,17 @@
+---
+- name: import helm variables
+  include_vars:
+    file: "{{inventory_dir}}/helm_vars/{{item}}.yaml"
+    name: "{{item}}"
+  with_items:
+  - images
+  - endpoints
+  - components
+- name: Generate info
+  include: generate_main.yaml
+  tags:
+  - gen_values
+- name: Deploy OSH essensial
+  include: osh-core.yaml
+  tags:
+  - deploy_core

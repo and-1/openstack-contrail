@@ -1,0 +1,10 @@
+# radosgw, rbd, swift or pvc
+storage: swift
+pod:
+  replicas:
+    api: 2
+endpoints:
+  object_store:
+    namespace: openstack
+  ceph_object_store:
+    namespace: openstack

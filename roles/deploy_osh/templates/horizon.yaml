@@ -1,0 +1,66 @@
+modules:
+  ENABLE_CLOUDKITTY: 'no'
+  ENABLE_DESIGNATE: 'no'
+  ENABLE_FWAAS: 'no'
+  ENABLE_FREEZER: 'no'
+  ENABLE_HEAT: 'yes'
+  ENABLE_IRONIC: 'no'
+  ENABLE_KARBOR: 'no'
+  ENABLE_MAGNUM: 'no'
+  ENABLE_MANILA: 'no'
+  ENABLE_MURANO: 'no'
+  ENABLE_MISTRAL: 'no'
+  ENABLE_NEUTRON_LBAAS: 'yes'
+  ENABLE_OCTAVIA: 'no'
+  ENABLE_SAHARA: 'no'
+  ENABLE_SEARCHLIGHT: 'no'
+  ENABLE_SENLIN: 'no'
+  ENABLE_SOLUM: 'no'
+  ENABLE_TACKER: 'no'
+  ENABLE_TROVE: 'no'
+  ENABLE_VITRAGE: 'no'
+  ENABLE_WATCHER: 'no'
+  ENABLE_ZAQAR: 'no'
+  ENABLE_ZUN: 'no'
+
+pod:
+  replicas:
+    server: 3
+
+# Bug in horizon. https://bugzilla.redhat.com/show_bug.cgi?id=1478042
+conf:
+  horizon:
+    apache: |
+      Listen 0.0.0.0:{{ tuple "dashboard" "internal" "web" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+      LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
+      SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+      CustomLog /dev/stdout combined env=!forwarded
+      CustomLog /dev/stdout proxy env=forwarded
+      <VirtualHost *:{{ tuple "dashboard" "internal" "web" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}>
+          WSGIScriptReloading On
+          WSGIDaemonProcess horizon-http processes=5 threads=1 user=horizon group=horizon display-name=%{GROUP} python-path=/var/lib/kolla/venv/lib/python2.7/site-packages
+          WSGIProcessGroup horizon-http
+          WSGIScriptAlias / /var/www/cgi-bin/horizon/django.wsgi
+          WSGIPassAuthorization On
+          WSGIApplicationGroup %{GLOBAL}
+          <Location "/">
+              Require all granted
+          </Location>
+          Alias /static /var/www/html/horizon
+          <Location "/static">
+              SetHandler None
+          </Location>
+
+          <IfVersion >= 2.4>
+            ErrorLogFormat "%{cu}t %M"
+          </IfVersion>
+          ErrorLog /dev/stdout
+          TransferLog /dev/stdout
+          SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+          CustomLog /dev/stdout combined env=!forwarded
+          CustomLog /dev/stdout proxy env=forwarded
+      </Virtualhost>
+    local_settings:
+      config:
+        debug: "False"

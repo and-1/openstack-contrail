@@ -1,0 +1,81 @@
+images:
+  pull_policy: {{pull_policy}}
+  tags:
+{% for image, param in images.osh.iteritems() %}
+{% if param.link is defined %}
+{% set param = images['osh'][param.link] %}
+{% endif %}
+    {{image}}: {{param.repo|default(local_repo)}}/{{param.image}}:{{param.tag|default(osh_tag)}}
+{% endfor %}
+# Contrail image integration
+{% for image, param in images.contrail.iteritems() %}
+{% if param.move is defined and param.move == 'osh' %}
+{% if param.link is defined %}
+{% set param = images['contrail'][param.link] %}
+{% endif %}
+    {{image}}: {{param.repo|default(local_repo)}}/{{param.image}}:{{param.tag|default(contrail_tag)}}
+{% endif %}
+{% endfor %}
+
+
+# Parameter for ceph network
+network:
+  public: {{ceph_net}}
+  cluster: {{ceph_net}}
+
+pod:
+  #NOTE(portdirect): see https://github.com/openstack/kolla/blob/f62f5ae2fa5e7808722f9b37b48a50b39c20b46d/kolla/common/config.py#L695-L998
+  user:
+    barbican:
+      uid: 42403
+    cinder:
+      uid: 42407
+    congress:
+      uid: 42410
+    glance:
+      uid: 42415
+    heat:
+      uid: 42418
+    magnum:
+      uid: 42428
+    neutron:
+      uid: 42435
+    nova:
+      uid: 42436
+    senlin:
+      uid: 42443
+    ceph-user: 
+      uid': 64045
+    keystone:
+      uid: 42425
+    gnocchi:
+      uid: 42416
+
+endpoints:
+  cluster_domain_suffix: {{global_domain_suffix}}
+{% for endpoint, users in endpoints.iteritems() %}
+  {{endpoint}}:
+    auth:
+{% for user, params in users.auth.iteritems() %}
+      {{user}}
+{% for param, value in params.iteritems() %}
+{% if param == 'password' %}
+        password: {{lookup('vars', endpoint+'_'+user)}}
+{% continue %}
+{% endif %}
+{% if param == 'access_key' %}
+        access_key: {{lookup('vars', endpoint+'_'+user+'_'+param)}}
+{% continue %}
+{% endif %}
+{% if param == 'secret_key' %}
+        secret_key: {{lookup('vars', endpoint+'_'+user+'_'+param)}}
+{% continue %}
+{% endif %}
+{% if endpoint == 'identity' and user == 'heat' and param == 'role' %}
+        {{param}}: [{{value|join(', ')}}]
+{% continue %}
+{% endif %}
+        {{param}}: {{value}}
+{% endfor %}
+{% endfor %}
+{% endfor %}

@@ -2,3 +2,5 @@
 */artifacts/
 test.yaml
 *.swp
+TODO
+*.creds

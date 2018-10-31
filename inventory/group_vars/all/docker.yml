@@ -29,7 +29,7 @@ docker_bin_dir: "/usr/bin"
 ## Can be ipddress and domain_name.
 ## example define 172.19.16.11 or mirror.registry.io
 docker_insecure_registries:
-   - 192.168.0.194 # registry for osh images
+   - "{{local_docker_registry}}" # registry for osh images
 
 ## Add other registry,example China registry mirror.
 #docker_registry_mirrors:

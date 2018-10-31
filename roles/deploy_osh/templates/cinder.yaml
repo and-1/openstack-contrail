@@ -1,0 +1,34 @@
+storage: ceph
+pod:
+  replicas:
+    api: 3
+    volume: 2
+    scheduler: 2
+    backup: 2
+conf:
+  cinder:
+    DEFAULT:
+      backup_driver: cinder.backup.drivers.swift
+      enabled_backends: "ceph_rbd"
+  backends:
+    rbd1: null
+    ceph_rbd:
+      volume_driver: cinder.volume.drivers.rbd.RBDDriver
+      volume_backend_name: ceph_rbd
+      rbd_pool: openstack_rbd
+      rbd_ceph_conf: "/etc/ceph/ceph.conf"
+      rbd_flatten_volume_from_snapshot: false
+      rbd_max_clone_depth: 5
+      rbd_store_chunk_size: 4
+      rados_connect_timeout: -1
+  ceph:
+    pools:
+      backup:
+        replication: 3
+        crush_rule: replicated_rule
+        chunk_size: 64 # pg_num
+      volume:
+        replication: 3
+        crush_rule: replicated_rule
+        chunk_size: 64 # pg_num
+

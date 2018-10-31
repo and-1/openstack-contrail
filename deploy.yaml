@@ -17,3 +17,6 @@
   roles:
    - { role: prepare-node, stage: post-k8s, tags: [init, post-k8s]}
 
+- hosts: master
+  roles:
+  - { role: deploy_osh, tags: [osh]}

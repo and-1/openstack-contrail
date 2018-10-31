@@ -1,0 +1,21 @@
+#---------------------------Networks---------#
+ceph_net: 192.168.1.0/24
+k8s_net: 192.168.0.0/24
+vrouter_net: 10.233.44.0/24
+#---------------------------Images-----------#
+local_docker_registry: 192.168.0.194
+local_docker_registry_port: 5000
+contrail_tag: queens-master-317
+osh_tag: 1.0
+pull_policy: "IfNotPresent"
+#--------------------------OpenStack---------#
+# OpenStack release. Now only queens supported
+os_release: queens
+region: RegionOne
+service_domain: default
+# Generate password and override static. Don't disable it in production env
+gen_passwd: true
+#--------------------------k8s-Helm----------#
+global_domain_suffix: cloud.example.com
+
+

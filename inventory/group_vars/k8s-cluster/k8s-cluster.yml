@@ -106,7 +106,7 @@ kube_encrypt_secret_data: false
 
 # DNS configuration.
 # Kubernetes cluster name, also will be used as DNS domain
-cluster_name: cloud.example.com
+cluster_name: "{{global_domain_suffix}}"
 # Subdomains of DNS domain to be resolved via /etc/resolv.conf for hostnet pods
 ndots: 2
 # Can be dnsmasq_kubedns, kubedns, coredns, coredns_dual, manual or none
@@ -199,4 +199,4 @@ kube_controller_node_monitor_grace_period: 16s
 kube_controller_node_monitor_period: 2s
 kube_controller_pod_eviction_timeout: 30s
 
-ip: "{{ hostvars[inventory_hostname]['ansible_' + k8s_iface]['ipv4']['address']}}"
+#ip: "{{ hostvars[inventory_hostname]['ansible_' + k8s_iface]['ipv4']['address']}}"

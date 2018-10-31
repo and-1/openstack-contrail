@@ -1,0 +1,37 @@
+pod:
+  mounts:
+    libvirt:
+      libvirt:
+        volumeMounts:
+          - name: hugepages-dir
+            mountPath: /dev/hugepages
+        volumes:
+          - name: hugepages-dir
+            hostPath:
+              path: /dev/hugepages
+conf:
+  qemu:
+    cgroup_device_acl: 
+    - "/dev/null"
+    - "/dev/full"
+    - "/dev/zero"
+    - "/dev/random"
+    - "/dev/urandom"
+    - "/dev/ptmx"
+    - "/dev/kvm"
+    - "/dev/kqemu"
+    - "/dev/rtc"
+    - "/dev/hpet"
+    - "/dev/net/tun"
+  libvirt:
+    listen_addr: 0.0.0.0
+
+dependencies:
+  dynamic:
+    targeted: 
+      openvswitch:
+        libvirt: null
+      linuxbridge:
+        libvirt: null
+      sriov:
+        libvirt: null
