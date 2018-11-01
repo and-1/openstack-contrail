@@ -5,7 +5,7 @@ images:
 {% if param.link is defined %}
 {% set param = images['osh'][param.link] %}
 {% endif %}
-    {{image}}: {{param.repo|default(local_repo)}}/{{param.image}}:{{param.tag|default(osh_tag)}}
+    {{image}}: {{param.repo|default(local_docker_registry)}}/{{os_release}}/{{param.image}}:{{param.tag|default(osh_tag)}}
 {% endfor %}
 # Contrail image integration
 {% for image, param in images.contrail.iteritems() %}
@@ -13,7 +13,7 @@ images:
 {% if param.link is defined %}
 {% set param = images['contrail'][param.link] %}
 {% endif %}
-    {{image}}: {{param.repo|default(local_repo)}}/{{param.image}}:{{param.tag|default(contrail_tag)}}
+    {{image}}: {{param.repo|default(local_docker_registry)}}/{{param.image}}:{{param.tag|default(contrail_tag)}}
 {% endif %}
 {% endfor %}
 
@@ -57,18 +57,18 @@ endpoints:
   {{endpoint}}:
     auth:
 {% for user, params in users.auth.iteritems() %}
-      {{user}}
+      {{user}}:
 {% for param, value in params.iteritems() %}
 {% if param == 'password' %}
-        password: {{lookup('vars', endpoint+'_'+user)}}
+        password: {{lookup('vars', endpoint+'_'+user+'_pwd')}}
 {% continue %}
 {% endif %}
 {% if param == 'access_key' %}
-        access_key: {{lookup('vars', endpoint+'_'+user+'_'+param)}}
+        access_key: {{lookup('vars', endpoint+'_'+user+'_'+param+'_pwd')}}
 {% continue %}
 {% endif %}
 {% if param == 'secret_key' %}
-        secret_key: {{lookup('vars', endpoint+'_'+user+'_'+param)}}
+        secret_key: {{lookup('vars', endpoint+'_'+user+'_'+param+'_pwd')}}
 {% continue %}
 {% endif %}
 {% if endpoint == 'identity' and user == 'heat' and param == 'role' %}

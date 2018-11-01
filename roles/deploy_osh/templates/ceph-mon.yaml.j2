@@ -1,3 +1,17 @@
+{%- set osd_pairs = [] %}
+{%- for host in groups['osd-nodes'] %}
+{%- set osd_jour = hostvars[host]['osd_jour'] %}
+{%- if 'dev-osd-node' in hostvars[host].group_names %}
+{%- set env='Dev' %}
+{%- else %}
+{%- set env='Prod' %}
+{%- endif %}
+{%- set disks = hostvars[host]['ansible_local']['osd_disks']|difference([osd_jour]) %}
+{%- for disk in disks %}
+{%- do osd_pairs.append(disk+"-"+osd_jour+"-"+env) %}
+{%- endfor %}
+{%- endfor %}
+---
 endpoints:
   identity:
     namespace: openstack
@@ -22,86 +36,85 @@ conf:
     mds: false
   ceph:
     global:
-      fsid: "b07bdf62-c1be-435e-b140-de7315d342d2"
-      bluestore_block_db_size: "1073741824"
-      bluestore_block_wal_size: "2147483648"
-      mon osd full ratio: .90
-      mon osd nearfull ratio: .80
+      fsid: "{{ceph_fs_id}}"
+      bluestore_block_db_size: "{{bluestore_block_db_size}}"
+      bluestore_block_wal_size: "{{bluestore_block_wal_size}}"
+      mon osd full ratio: "{{mon_osd_full_ratio}}"
+      mon osd nearfull ratio: "{{mon_osd_nearfull_ratio}}"
   rgw_ks:
     enabled: true
   pool:
     crush:
-      tunables: hammer
+      tunables: {{tunables}}
     target:
-      # NOTE(portdirect): 5 nodes, with one osd per node
       osd: 12
-      pg_per_osd: 100
+      pg_per_osd: {{pg_per_osd}}
     spec:
       # RBD pool
       - name: cloud.infra 
         application: rbd
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 30
       # RadosGW pools
       - name: .rgw.root
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.control
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.data.root
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.gc
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.log
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.intent-log
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.meta
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.usage
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.users.keys
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.users.email
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.users.swift
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.users.uid
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.buckets.extra
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 0.1
       - name: default.rgw.buckets.index
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 3
       - name: default.rgw.buckets.data
         application: rgw
-        replication: 3
+        replication: {{replication}}
         percent_total_data: 34.8
 
   storage:
@@ -110,64 +123,28 @@ conf:
   overrides:
     ceph_osd:
       labels:
-       - label:
-           key: Dvdb-Jvdd-Dev
+{% for osd in osd_pairs|unique %}
+{% set params = osd.split('-') %}
+       - label: 
+           key: D{{params[0]}}-J{{params[1]}}-{{params[2]}}
            values: 
            - "enabled"
-         #exclusive: true
+         #exclusive: false
          conf:
            storage:
              osd:
                - data:
                    type: block-bluestore
-                   location: /dev/vdb
+                   location: /dev/{{params[0]}}
                  journal:
                    type: block-bluestore
-                   location: /dev/vdd
-       - label:
-           key: Dvdc-Jvdd-Dev
-           values:
-           - "enabled"
-         conf:
-           storage:
-             osd:
-               - data:
-                   type: block-bluestore
-                   location: /dev/vdc
-                 journal:
-                   type: block-bluestore
-                   location: /dev/vdd
-       - label:
-           key: Dvdb-Jvdd-Prod
-           values: 
-           - "enabled"
-         #exclusive: true
-         conf:
-           storage:
-             osd:
-               - data:
-                   type: block-bluestore
-                   location: /dev/vdb
-                 journal:
-                   type: block-bluestore
-                   location: /dev/vdd
-       - label:
-           key: Dvdc-Jvdd-Prod
-           values:
-           - "enabled"
-         conf:
-           storage:
-             osd:
-               - data:
-                   type: block-bluestore
-                   location: /dev/vdc
-                 journal:
-                   type: block-bluestore
-                   location: /dev/vdd
+                   location: /dev/{{params[1]}}
+{% endfor %}
 ceph_mgr_enabled_modules:
   - restful
   - status
   - prometheus
+  - balancer
 # Manager default port conflict with cassandra(TungstenFabric)
 ceph_mgr_modules_config:
   dashboard:

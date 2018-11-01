@@ -202,8 +202,6 @@ osh:
     link: heat_engine
   rabbit_init:
     link: rabbitmq
-  scripted_test:
-    link: rabbitmq
   prometheus_rabbitmq_exporter_helm_tests:
     link: heat_engine
   db_init_mongodb:

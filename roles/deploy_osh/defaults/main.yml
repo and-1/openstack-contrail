@@ -1,6 +1,2 @@
 ---
-local_repo: "{{local_docker_registry}}:{{local_docker_registry_port}}"
-# Ingeress controller replicas
-ingress_kube_system_replicas: 2
-ingress_osh_replicas: 3
 

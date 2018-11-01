@@ -5,7 +5,7 @@
 #|                                   ------------------                                  |
 #+---------------------------------------------------------------------------------------+
 #
-# Credentials for rabbitmq
+  # Credentials for rabbitmq
 oslo_messaging:
   auth:
     user:

@@ -9,13 +9,18 @@
     src: helm_vars_common.yaml.j2
     force: true
     dest: "{{inventory_dir}}/artifacts/helm_vars_common.yaml"
+  register: helm_vars_common_gen_res
 - name: Generate cloud credentials
   template:
     src: cloud.yaml.j2
     dest: "{{inventory_dir}}/artifacts/cloud.yaml"
+- name: Generate Ceph FS ID
+  set_fact:
+    ceph_fs_id: "{{identity_admin_pwd|to_uuid}}"
 - name: Generate OSH CORE helm override values
   template:
     src: "{{item.name}}.yaml.j2"
     dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
   with_items:
   - "{{components.OSH_CORE}}"
+  register: helm_OSH_CORE_gen_res

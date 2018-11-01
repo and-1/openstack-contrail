@@ -3,11 +3,18 @@ ceph_net: 192.168.1.0/24
 k8s_net: 192.168.0.0/24
 vrouter_net: 10.233.44.0/24
 #---------------------------Images-----------#
-local_docker_registry: 192.168.0.194
-local_docker_registry_port: 5000
+local_docker_registry: 192.168.0.194:5000
 contrail_tag: queens-master-317
 osh_tag: 1.0
 pull_policy: "IfNotPresent"
+#---------------------------Ceph-------------#
+tunables: hammer
+replication: 3 
+pg_per_osd: 100
+bluestore_block_db_size: "1073741824"
+bluestore_block_wal_size: "2147483648"
+mon_osd_full_ratio: .90
+mon_osd_nearfull_ratio: .80
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
 os_release: queens

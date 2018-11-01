@@ -1,19 +1,24 @@
-- name: Init helm
-  shell: helm init --client-only --history-max 5 
-  args:
-    creates: "~/.helm"
 - name: create folder for helm-toolkit charts
   file: 
     state: directory 
     path: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
 - name: Build helm-toolkit
-  shell: helm package -d "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts" openstack-helm-infra/helm-toolkit
+  shell: "{{helm_bin}} package -d {{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts openstack-helm-infra/helm-toolkit"
+  args:
+    creates: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts/helm-toolkit-0.1.0.tgz"
 - name: Link helm-toolkit package to OSH charts
   file: 
     src: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
-    dest: "{{playbook_dir}}/{{item.path}}charts"
+    dest: "{{playbook_dir}}/{{item.path}}/charts"
     state: link
   with_items:
   - "{{components.OSH_CORE}}"
-#- name: Deploy OSH CORE
-#  shell: 
+- name: Deploy OSH CORE
+  shell: "{{helm_bin}} upgrade --install {{item.name}} {{playbook_dir}}/{{item.path}} \
+         --namespace={{item.namespace}} \
+         --values={{inventory_dir}}/artifacts/helm_vars_common.yaml \
+         --values={{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml && \
+         {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item.namespace}}"
+  with_items:
+  - "{{components.OSH_CORE}}"
+  when: "helm_vars_common_gen_res.changed or helm_OSH_CORE_gen_res.changed"

@@ -1,3 +1,5 @@
+- name: Set common osd label
+  shell: "kubectl label node --overwrite {{ hostvars[node].inventory_hostname }} ceph-osd=enabled"
 - name: label osd
   shell: "kubectl label node --overwrite {{ hostvars[node].inventory_hostname }}  D{{item}}-J{{hostvars[node].osd_jour}}-{% if hostvars[node].inventory_hostname in groups['dev-osd-node'] %}Dev{% else %}Prod{% endif %}=enabled"
   with_items:

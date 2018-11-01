@@ -7,6 +7,29 @@
   - images
   - endpoints
   - components
+- name: Download helm binary
+  unarchive:
+    src: https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz
+    dest: "/tmp"
+    remote_src: true
+    creates: "/tmp/linux-amd64"
+- name: Copy helm binary to artifactsdir
+  copy:
+    src: "/tmp/linux-amd64/helm"
+    dest: "{{inventory_dir}}/artifacts/"
+    mode: 755
+- name: Create helpfull helm script
+  template:
+    src: helm.sh.j2
+    dest: "{{inventory_dir}}/artifacts/helm.sh"
+    mode: 0755
+- name: Set fact for convenient
+  set_fact: 
+    helm_bin: "{{inventory_dir}}/artifacts/helm.sh"
+- name: Init helm
+  shell: "{{helm_bin}} init --client-only --history-max 5"
+  args:
+    creates: "~/.helm"
 - name: Generate info
   include: generate_main.yaml
   tags:
