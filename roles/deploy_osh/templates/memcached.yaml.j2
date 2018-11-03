@@ -1,0 +1,27 @@
+conf:
+  memcached:
+    max_connections: 8192
+    # NOTE(pordirect): this should match the value in
+    #     # `pod.resources.memcached.memory`
+    memory: {{memcache_memory}}
+pod:
+  lifecycle:
+    upgrades:
+      deployments:
+        pod_replacement_strategy: RollingUpdate
+        revision_history: 3
+        rolling_update:
+          max_surge: 3
+          max_unavailable: 1
+    termination_grace_period:
+      memcached:
+        timeout: 30
+      prometheus_memcached_exporter:
+        timeout: 30
+  replicas:
+    server: 1
+    prometheus_memcached_exporter: 1
+
+monitoring:
+  prometheus:
+    enabled: {{monitoring}}

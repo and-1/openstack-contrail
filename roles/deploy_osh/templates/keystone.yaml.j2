@@ -1,0 +1,38 @@
+pod:
+  replicas:
+    api: 3
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+jobs:
+  fernet_rotate:
+    # NOTE(rk760n): key rotation frequency, token expiration, active keys should statisfy the formula
+    # max_active_keys = (token_expiration / rotation_frequency) + 2
+    # as expiration is 12h, and max_active_keys set to 3 by default, rotation_frequency need to be adjusted
+    # 12 hours
+    cron: "0 */12 * * *"
+  credential_rotate:
+    # monthly
+    cron: "0 0 1 * *"
+
+conf:
+  rabbitmq:
+    policies:
+      - vhost: "/"
+        pattern: '^(?!amq\.).*'
+
+endpoints:
+  oslo_messaging:
+# Vhost for keystone service
+    path: /

@@ -1,0 +1,40 @@
+pod:
+  replicas:
+    server: 3
+    ingress: 3
+    error_page: 2
+    prometheus_mysql_exporter: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    termination_grace_period:
+      prometheus_mysql_exporter:
+        timeout: 30
+      error_pages:
+        timeout: 10
+    disruption_budget:
+      mariadb:
+        min_available: 0
+
+volume:
+  size: {{mariadb_vol_size}}
+
+monitoring:
+  prometheus:
+    enabled: {{monitoring}}
+
+network:
+  prometheus_mysql_exporter:
+    port: 9104
+
+database:
+  config_override: null
+  # Any configuration here will override the base config.
+  # config_override: |-
+  #   [mysqld]
+  #   wsrep_slave_threads=1

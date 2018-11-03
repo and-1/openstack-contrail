@@ -1,14 +1,14 @@
 #---------------------------Networks---------#
-ceph_net: 192.168.1.0/24
-k8s_net: 192.168.0.0/24
-vrouter_net: 10.233.44.0/24
+ceph_net: "192.168.1.0/24"
+k8s_net: "192.168.0.0/24"
+vrouter_net: "10.233.44.0/24"
 #---------------------------Images-----------#
-local_docker_registry: 192.168.0.194:5000
-contrail_tag: queens-master-317
+local_docker_registry: "192.168.0.194:5000"
+contrail_tag: "queens-master-317"
 osh_tag: 1.0
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#
-tunables: hammer
+tunables: "hammer"
 replication: 3 
 pg_per_osd: 100
 bluestore_block_db_size: "1073741824"
@@ -17,22 +17,27 @@ mon_osd_full_ratio: .90
 mon_osd_nearfull_ratio: .80
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
-os_release: queens
-region: RegionOne
-service_domain: default
+os_release: "queens"
+region: "RegionOne"
+service_domain: "default"
 # Generate password and override static. Don't disable it in production env
 gen_passwd: true
-#--------------------------k8s-Helm----------#
-global_domain_suffix: cloud.example.com
-# Join one more areas in one cluster
-# If enabled, all areas will be present in inventory
+# Join one more areas in one cluster.
+# If enabled, all areas will be exist in inventory
 # [ AREA-compute ]
 # [ AREA-osd-node ]
 # where 'AREA' is item in join_areas.areas
 join_areas: 
   enabled: true
   areas:
-  - name: dev
+  - name: "dev"
     osd_percent: 35
-  - name: prod
+  - name: "prod"
     osd_percent: 35
+mariadb_vol_size: "5G"
+rabbitmq_vol_size: "256Mi"
+memcache_memory: "1024"
+#--------------------------k8s-Helm----------#
+global_domain_suffix: "cloud.example.com"
+#--------------------------Monitoring--------#
+monitoring: false

@@ -5,7 +5,7 @@ images:
 {% if param.link is defined %}
 {% set param = images['osh'][param.link] %}
 {% endif %}
-    {{image}}: {{param.repo|default(local_docker_registry)}}/{{os_release}}/{{param.image}}:{{param.tag|default(osh_tag)}}
+    {{image}}: {{param.repo|default(local_docker_registry+"/"+os_release)}}/{{param.image}}:{{param.tag|default(osh_tag)}}
 {% endfor %}
 # Contrail image integration
 {% for image, param in images.contrail.iteritems() %}

@@ -1,0 +1,35 @@
+pod:
+  replicas:
+    server: 3
+    prometheus_rabbitmq_exporter: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    termination_grace_period:
+      prometheus_rabbitmq_exporter:
+        timeout: 30
+    disruption_budget:
+      mariadb:
+        min_available: 0
+
+endpoints:
+  oslo_messaging:
+    auth:
+      erlang_cookie: openstack-cookie
+volume:
+  size: {{rabbitmq_vol_size}}
+
+conf:
+  enabled_plugins:
+    - rabbitmq_management
+    - rabbitmq_peer_discovery_k8s # only for rabbitmq 3.7+
+   # - autocluster # only for rabbitmq 3.6
+
+monitoring:
+  prometheus:
+    enabled: {{monitoring}}

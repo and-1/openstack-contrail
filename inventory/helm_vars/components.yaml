@@ -30,13 +30,12 @@ OSH_CORE:
 - name: mariadb
   path: openstack-helm-infra/mariadb
   namespace: openstack
-#- name: rabbitmq
-#  path:
-#  namespace: openstack
-#- name: memcached
-#  path:
-#  namespace: openstack
-#- name: keystone
-#  path:
-#  namespace: openstack
-
+- name: rabbitmq
+  path: openstack-helm-infra/rabbitmq
+  namespace: openstack
+- name: memcached
+  path: openstack-helm-infra/memcached
+  namespace: openstack
+- name: keystone
+  path: openstack-helm/keystone
+  namespace: openstack
