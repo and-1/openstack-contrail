@@ -1,14 +1,17 @@
 {%- set osd_pairs = [] %}
 {%- for host in groups['osd-nodes'] %}
-{%- set osd_jour = hostvars[host]['osd_jour'] %}
-{%- if 'dev-osd-node' in hostvars[host].group_names %}
-{%- set env='Dev' %}
-{%- else %}
-{%- set env='Prod' %}
+{%- set host_osd_jour = hostvars[host]['osd_jour'] %}
+{%- set class = namespace(area="") %}
+{%- if join_areas.enabled %}
+{%- for area in join_areas.areas %}
+{%- if area.name+'-osd-node' in hostvars[host].group_names %}
+{%- set class.area = area.name %}
 {%- endif %}
-{%- set disks = hostvars[host]['ansible_local']['osd_disks']|difference([osd_jour]) %}
+{%- endfor %}
+{%- endif %}
+{%- set disks = hostvars[host]['ansible_local']['osd_disks']|difference([host_osd_jour]) %}
 {%- for disk in disks %}
-{%- do osd_pairs.append(disk+"-"+osd_jour+"-"+env) %}
+{%- do osd_pairs.append(disk+"-"+host_osd_jour+"-"+class.area) %}
 {%- endfor %}
 {%- endfor %}
 ---
@@ -26,11 +29,16 @@ deployment:
   cephfs_provisioner: false
   client_secrets: false
   rgw_keystone_user_and_endpoints: false
+
 bootstrap:
   enabled: true
+
 storageclass:
+  rbd:
+    pool: cloud.infra
   cephfs:
     provision_storage_class: false
+
 conf:
   features:
     mds: false
@@ -54,7 +62,22 @@ conf:
       - name: cloud.infra 
         application: rbd
         replication: {{replication}}
-        percent_total_data: 30
+        percent_total_data: 10
+      # Cinder pools
+{% if join_areas.enabled %}
+{% for area in join_areas.areas %}
+      - name: cloud.cinder.{{area.name}}
+        application: rbd
+        replication: {{replication}}
+        percent_total_data: {{area.osd_percent}}
+        crush_rule: {{area.name}}_rule
+{% endfor %}
+{% else %}
+      - name: cloud.cinder 
+        application: rbd
+        replication: {{replication}}
+        percent_total_data: 70
+{% endif %}
       # RadosGW pools
       - name: .rgw.root
         application: rgw
@@ -115,7 +138,7 @@ conf:
       - name: default.rgw.buckets.data
         application: rgw
         replication: {{replication}}
-        percent_total_data: 34.8
+        percent_total_data: 15.7
 
   storage:
     mon:
@@ -126,7 +149,11 @@ conf:
 {% for osd in osd_pairs|unique %}
 {% set params = osd.split('-') %}
        - label: 
-           key: D{{params[0]}}-J{{params[1]}}-{{params[2]}}
+{% if join_areas.enabled %}
+           key: d{{params[0]}}-j{{params[1]}}-{{params[2]}}
+{% else %}
+           key: d{{params[0]}}-j{{params[1]}}
+{% endif %}
            values: 
            - "enabled"
          #exclusive: false
@@ -154,3 +181,5 @@ endpoints:
     port:
       mgr:
         default: 7001
+group_by_class: 
+  {{ join_areas| to_nice_yaml| indent(2)}}

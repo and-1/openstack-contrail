@@ -27,9 +27,9 @@ OSH_CORE:
 - name: ceph-openstack-config
   path: openstack-helm-infra/ceph-provisioners
   namespace: openstack
-#- name: mariadb
-#  path:
-#  namespace: openstack
+- name: mariadb
+  path: openstack-helm-infra/mariadb
+  namespace: openstack
 #- name: rabbitmq
 #  path:
 #  namespace: openstack

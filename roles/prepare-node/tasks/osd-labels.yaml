@@ -1,7 +1,15 @@
-- name: Set common osd label
-  shell: "kubectl label node --overwrite {{ hostvars[node].inventory_hostname }} ceph-osd=enabled"
-- name: label osd
-  shell: "kubectl label node --overwrite {{ hostvars[node].inventory_hostname }}  D{{item}}-J{{hostvars[node].osd_jour}}-{% if hostvars[node].inventory_hostname in groups['dev-osd-node'] %}Dev{% else %}Prod{% endif %}=enabled"
+- name: label osd (single areas)
+  shell: "kubectl label node --overwrite {{ node }}  \
+         d{{item}}-j{{hostvars[node].osd_jour}}=enabled"
   with_items:
   - "{{hostvars[node]['ansible_local']['osd_disks']}}"
-  when: "item != hostvars[node].osd_jour"
+  when: "item != hostvars[node].osd_jour and not join_areas.enabled"
+- name: label osd (join areas enabled)
+  shell: "kubectl label node --overwrite {{ node }}  \
+         d{{item.0}}-j{{hostvars[node].osd_jour}}-{{item.1.name}}=enabled"
+  with_nested:
+  - "{{hostvars[node]['ansible_local']['osd_disks']}}"
+  - "{{join_areas.areas}}"
+  when: "item.0 != hostvars[node].osd_jour and join_areas.enabled and node in groups[item.1.name+'-osd-node']"
+- name: Set common osd label
+  shell: "kubectl label node --overwrite {{ hostvars[node].inventory_hostname }} ceph-osd=enabled"

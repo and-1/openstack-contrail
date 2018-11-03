@@ -24,5 +24,15 @@ service_domain: default
 gen_passwd: true
 #--------------------------k8s-Helm----------#
 global_domain_suffix: cloud.example.com
-
-
+# Join one more areas in one cluster
+# If enabled, all areas will be present in inventory
+# [ AREA-compute ]
+# [ AREA-osd-node ]
+# where 'AREA' is item in join_areas.areas
+join_areas: 
+  enabled: true
+  areas:
+  - name: dev
+    osd_percent: 35
+  - name: prod
+    osd_percent: 35
