@@ -1,2 +1,8 @@
 ---
-
+infra:
+  pool_name: cloud.infra
+glance:
+  pool_name: cloud.glance
+cinder:
+  pool_name: cloud.cinder
+  backup_pool_name: cloud.cinder.backup

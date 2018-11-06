@@ -27,12 +27,19 @@ jobs:
     cron: "0 0 1 * *"
 
 conf:
+  keystone:
+    database:
+      db_max_retries: -1
   rabbitmq:
     policies:
-      - vhost: "/"
+      - vhost: "keystone"
+        name: "ha_ttl_keystone"
+        definition:
+          #mirror messges to other nodes in rmq cluster
+          ha-mode: "all"
+          ha-sync-mode: "automatic"
+          #70s
+          message-ttl: 70000
+        priority: 0
+        apply-to: all
         pattern: '^(?!amq\.).*'
-
-endpoints:
-  oslo_messaging:
-# Vhost for keystone service
-    path: /

@@ -39,3 +39,12 @@ OSH_CORE:
 - name: keystone
   path: openstack-helm/keystone
   namespace: openstack
+- name: radosgw-openstack
+  path: openstack-helm-infra/ceph-rgw
+  namespace: openstack
+- name: glance 
+  path: openstack-helm/glance
+  namespace: openstack
+- name: cinder
+  path: openstack-helm/glance
+  namespace: openstack

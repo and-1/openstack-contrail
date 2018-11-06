@@ -31,12 +31,18 @@ join_areas:
   enabled: true
   areas:
   - name: "dev"
-    osd_percent: 35
+# Percent of capacity for cinder pool
+    cinder_pool_percent: 25
+    cinder_backup_pool_percent: 10
   - name: "prod"
-    osd_percent: 35
+    cinder_pool_percent: 25
+    cinder_backup_pool_percent: 10
+infra_pool_percent: 10
+glance_pool_percent: 5
+rgw_pool_percent: 15.7
 mariadb_vol_size: "5G"
 rabbitmq_vol_size: "256Mi"
-memcache_memory: "1024"
+memcache_memory: 1024
 #--------------------------k8s-Helm----------#
 global_domain_suffix: "cloud.example.com"
 #--------------------------Monitoring--------#

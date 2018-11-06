@@ -1,9 +1,9 @@
 ---
-#+---------------------------------------------------------------------------------------+
-#|                                   ------WARNING-----                                  | 
-#|  If gen_passwd in group_vars/all/osh.yml set to true password fields will be ignored  |
-#|                                   ------------------                                  |
-#+---------------------------------------------------------------------------------------+
+#+--------------------------------------------------------+
+#|                 ------WARNING-----                     | 
+#|  If gen_passwd in group_vars/all/osh.yml set to true   |
+#|          password fields will be ignored               |
+#+--------------------------------------------------------+
 #
   # Credentials for rabbitmq
 oslo_messaging:
@@ -35,6 +35,10 @@ oslo_messaging:
     ceilometer:
       username: ceilometer
       password: password
+# TODO Add generated cookie
+#    erlang_cookie: 
+#      cookie: openstack-cookie
+    
 # Credentials for mysql
 oslo_db:
   auth:
