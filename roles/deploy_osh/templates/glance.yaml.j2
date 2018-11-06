@@ -1,0 +1,53 @@
+# radosgw, rbd, swift or pvc
+storage: rbd
+pod:
+  replicas:
+    api: 2
+    registry: 2
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+      registry:
+        min_available: 0
+conf:
+  glance:
+    DEFAULT:
+      workers: 2
+      show_image_direct_url: "True"
+    glance_store:
+      default_store: rbd
+      rbd_store_chunk_size: 8
+      rbd_store_pool: {{glance.pool_name}}
+      rbd_store_user: glance
+  glance_registry:
+    DEFAULT:
+      workers: 2
+    database:
+      db_max_retries: -1
+  rabbitmq:
+    #NOTE(rk760n): adding rmq policy to mirror messages from notification queues and set expiration time for the ones
+    policies:
+    - vhost: "glance"
+      name: "ha_ttl_glance"
+      definition:
+        #mirror messges to other nodes in rmq cluster
+        ha-mode: "all"
+        ha-sync-mode: "automatic"
+        #70s
+        message-ttl: 70000
+      priority: 0
+      apply-to: all
+      pattern: '^(?!amq\.).*'
+eadpoints:
+  object_store:
+    namespace: openstack
+  ceph_object_store:
+    namespace: openstack

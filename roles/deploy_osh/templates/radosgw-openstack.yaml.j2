@@ -1,0 +1,43 @@
+endpoints:
+  identity:
+    namespace: openstack
+  object_store:
+    namespace: openstack
+  ceph_mon:
+    namespace: ceph
+deployment:
+  storage_secrets: false
+  ceph: true
+  rbd_provisioner: false
+  cephfs_provisioner: false
+  client_secrets: false
+  rgw_keystone_user_and_endpoints: true
+bootstrap:
+  enabled: false
+
+conf:
+  ceph:
+    global:
+      objecter_inflight_op_bytes: "1073741824"
+      objecter_inflight_ops: 10240
+      debug_ms: "0/0"
+  rgw_ks:
+    enabled: true
+    config:
+      rgw_keystone_api_version: 3
+      rgw_keystone_accepted_roles: "admin, member"
+      rgw_keystone_implicit_tenants: true
+      rgw_keystone_make_new_tenants: true
+      rgw_s3_auth_use_keystone: true
+      rgw_swift_account_in_url: true
+      rgw_swift_url: null
+      #NOTE (portdirect): See http://tracker.ceph.com/issues/21226
+      rgw_keystone_token_cache_size: 0
+      #NOTE (JCL): See http://tracker.ceph.com/issues/7073
+      rgw_gc_max_objs: 997
+      #NOTE (JCL): See http://tracker.ceph.com/issues/24937
+      #NOTE (JCL): See https://tracker.ceph.com/issues/24551
+      rgw_dynamic_resharding: false
+      rgw_thread_pool_size: 512
+  rgw_s3:
+    enabled: true
