@@ -1,0 +1,55 @@
+pod:
+  mounts:
+    libvirt:
+      libvirt:
+        volumeMounts:
+          - name: hugepages-dir
+            mountPath: /dev/hugepages
+        volumes:
+          - name: hugepages-dir
+            hostPath:
+              path: /dev/hugepages
+  affinity:
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
+  lifecycle:
+    upgrades:
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        libvirt:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+
+conf:
+  qemu:
+    cgroup_device_acl: 
+    - "/dev/null"
+    - "/dev/full"
+    - "/dev/zero"
+    - "/dev/random"
+    - "/dev/urandom"
+    - "/dev/ptmx"
+    - "/dev/kvm"
+    - "/dev/kqemu"
+    - "/dev/rtc"
+    - "/dev/hpet"
+    - "/dev/net/tun"
+  libvirt:
+    listen_addr: 0.0.0.0
+  ceph:
+    cinder:
+      secret_uuid: {{rbd_secret_uuid}}
+
+dependencies:
+  dynamic:
+    targeted: 
+      openvswitch:
+        libvirt: null
+      linuxbridge:
+        libvirt: null
+      sriov:
+        libvirt: null

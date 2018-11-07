@@ -1,0 +1,114 @@
+network:
+  backend:
+    - opencontrail
+
+dependencies:
+  dynamic:
+    targeted:
+      opencontrail:
+        compute:
+          daemonset: []
+
+bootstrap:
+  enabled: true
+  structured:
+    {{nova.bootstrap | to_nice_yaml | indent(4)}}
+
+console:
+  # serial | spice | novnc | none
+  console_kind: spice
+  spice:
+    compute:
+      # IF blank, search default routing interface
+      server_proxyclient_interface: {{k8s_iface}}
+    proxy:
+      # IF blank, search default routing interface
+      server_proxyclient_interface: {{k8s_iface}}
+conf:
+  ceph:
+    cinder:
+      secret_uuid: {{rbd_secret_uuid}}
+  nova:
+    DEFAULT:
+      ram_allocation_ratio: 1.0
+      disk_allocation_ratio: 1.0
+      cpu_allocation_ratio: 3.0
+      osapi_compute_workers: 4
+      metadata_workers: 4
+      allow_resize_to_same_host: true
+    conductor:
+      workers: 4
+    scheduler:
+      driver: filter_scheduler
+    filter_scheduler:
+      available_filters: nova.scheduler.filters.all_filters
+      enabled_filters: RetryFilter, AvailabilityZoneFilter, ComputeFilter, ComputeCapabilitiesFilter, ImagePropertiesFilter, ServerGroupAntiAffinityFilter, ServerGroupAffinityFilter
+    libvirt:
+      images_type: rbd
+      images_rbd_pool: {{nova.ephimeral_pool_name}}
+      rbd_secret_uuid: {{rbd_secret_uuid}}
+    neutron:
+      metadata_proxy_shared_secret: "password"
+    database:
+      db_max_retries: -1
+    api_database:
+      db_max_retries: -1
+    cell0_database:
+      db_max_retries: -1
+  rabbitmq:
+    policies:
+      - vhost: "nova"
+        name: "ha_ttl_nova"
+        definition:
+          #mirror messges to other nodes in rmq cluster
+          ha-mode: "all"
+          ha-sync-mode: "automatic"
+          #70s
+          message-ttl: 70000
+        priority: 0
+        apply-to: all
+        pattern: '^(?!amq\.).*'
+# Will be added in future for domain instead role
+#  policy:
+#    az_by_role: "(not None:%(availability_zone)s and project_id:%(project_id)s and (( 'private':%(availability_zone)s and not role:dmz) or ('dmz':%(availability_zone)s and role:dmz))) or is_admin:True"
+#    os_compute_api:servers:create: rule:az_by_role
+
+pod:
+  replicas:
+    api_metadata: 2
+    compute_ironic: 2
+    placement: 3
+    osapi: 3
+    conductor: 3
+    consoleauth: 2
+    scheduler: 3
+    novncproxy: 3
+    spiceproxy: 3
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        compute:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+    disruption_budget:
+      metadata:
+        min_available: 0
+      placement:
+        min_available: 0
+      osapi:
+        min_available: 0
+    termination_grace_period:
+      metadata:
+        timeout: 30
+      placement:
+        timeout: 30
+      osapi:
+        timeout: 30
