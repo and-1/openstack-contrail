@@ -46,5 +46,11 @@ OSH_CORE:
   path: openstack-helm/glance
   namespace: openstack
 - name: cinder
-  path: openstack-helm/glance
+  path: openstack-helm/cinder
+  namespace: openstack
+- name: libvirt
+  path: openstack-helm-infra/libvirt
+  namespace: openstack
+- name: nova
+  path: openstack-helm/nova
   namespace: openstack

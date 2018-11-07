@@ -96,27 +96,27 @@ conf:
         replication: {{replication}}
         percent_total_data: {{area.cinder_pool_percent}}
         crush_rule: {{area.name}}_rule
-      - name: {{cinder.backup_pool_name}}.{{area.name}}
-        application: cinder-backup
-        replication: {{replication}}
-        percent_total_data: {{area.cinder_backup_pool_percent}}
-        crush_rule: {{area.name}}_rule
 {% endfor %}
 {% else %}
       - name: {{cinder.pool_name}}
         application: cinder-volume
         replication: {{replication}}
         percent_total_data: 60
+{% endif %}
       - name: {{cinder.backup_pool_name}}
         application: cinder-backup
         replication: {{replication}}
-        percent_total_data: 10
-{% endif %}
+        percent_total_data: {{cinder_backup_pool_percent}}
       # Glance pool
       - name: {{glance.pool_name}}
         application: glance-image
         replication: {{replication}}
         percent_total_data: {{glance_pool_percent}}
+      # Nova ephimeral pool
+      - name: {{nova.ephimeral_pool_name}}
+        application: nova
+        replication: {{replication}}
+        percent_total_data: {{nova_ephimeral_pool_percent}}
       # RadosGW pools
       - name: .rgw.root
         application: rgw

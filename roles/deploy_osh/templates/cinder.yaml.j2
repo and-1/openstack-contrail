@@ -1,3 +1,12 @@
+{% set backends = [] %}
+{% if join_areas.enabled %}
+{% for area in join_areas.areas %}
+{% do backends.append({'name': cinder.volume_backend_name+'-'+area.name, 'pool': cinder.pool_name+'.'+area.name, 'zone': area.name}|combine()) %}
+{% endfor %}
+{% else %}
+{% do backends.append({'name': cinder.volume_backend_name, 'pool': cinder.pool_name}|combine()) %}
+{% endif %}
+
 storage: ceph
 pod:
   replicas:
@@ -19,29 +28,46 @@ pod:
 conf:
   cinder:
     DEFAULT:
-      backup_driver: cinder.backup.drivers.swift
-      enabled_backends: "ceph_rbd"
+      backup_driver: cinder.backup.drivers.ceph
+      enabled_backends: "{{backends | map(attribute='name') | join(',')}}"
+      os_region_name: {{region}}
+      backup_ceph_pool: {{cinder.backup_pool_name}}
+      backup_ceph_chunk_size: 134217728
+      backup_ceph_stripe_unit: 0
+      backup_ceph_stripe_count: 0
+      restore_discard_excess_bytes: "true"
+      osapi_volume_workers: 4
+    database:
+      db_max_retries: -1
+      
   backends:
     rbd1: null
-    ceph_rbd:
+{% for backend in backends|list %}
+    {{backend.name}}:
+      volume_backend_name: {{backend.name}}
       volume_driver: cinder.volume.drivers.rbd.RBDDriver
-      volume_backend_name: ceph_rbd
-      rbd_pool: openstack_rbd
+      rbd_pool: {{backend.pool}}
       rbd_ceph_conf: "/etc/ceph/ceph.conf"
       rbd_flatten_volume_from_snapshot: false
       rbd_max_clone_depth: 5
       rbd_store_chunk_size: 4
       rados_connect_timeout: -1
-  ceph:
-    pools:
-      backup:
-        replication: 3
-        crush_rule: replicated_rule
-        chunk_size: 64 # pg_num
-      volume:
-        replication: 3
-        crush_rule: replicated_rule
-        chunk_size: 64 # pg_num
+      rbd_user: cinder
+      rbd_secret_uuid: {{rbd_secret_uuid}}
+      {% if backend.zone is defined %}backend_availability_zone: {{backend.zone}}{% endif %}
+
+{% endfor %}
+
+# Will be added in the future
+#backup:
+#  external_ceph_rbd:
+#    enabled: false
+#    admin_keyring: null
+#    conf:
+#      global:
+#        mon_host: null
+#      osd:
+
   rabbitmq:
     #NOTE(rk760n): adding rmq policy to mirror messages from notification queues and set expiration time for the ones
     policies:
@@ -55,4 +81,5 @@ conf:
           message-ttl: 70000
         priority: 0
         apply-to: all
-        pattern: '(notifications)\.'
+        pattern: '^(?!amq\.).*'
+

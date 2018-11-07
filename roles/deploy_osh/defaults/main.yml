@@ -6,3 +6,43 @@ glance:
 cinder:
   pool_name: cloud.cinder
   backup_pool_name: cloud.cinder.backup
+# Base name cinder backend name. If join_areas.enabled=true
+# suffix wil be added to end
+  volume_backend_name: cinder-rbd
+nova:
+  ephimeral_pool_name: cloud.nova.ephimeral
+  bootstrap:
+    flavors:
+      enabled: true
+      options:
+        m1_tiny:
+          name: "c1m512"
+          id: "auto"
+          ram: 512
+          disk: 0
+          vcpus: 1
+        m1_small:
+          name: "c1m2048"
+          id: "auto"
+          ram: 2048
+          disk: 0
+          vcpus: 1
+        m1_medium:
+          name: "c2m4096"
+          id: "auto"
+          ram: 4096
+          disk: 0
+          vcpus: 2
+        m1_large:
+          name: "c4m8192"
+          id: "auto"
+          ram: 8192
+          disk: 0
+          vcpus: 4
+        m1_xlarge:
+          name: "c8m16384"
+          id: "auto"
+          ram: 16384
+          disk: 160
+          vcpus: 8
+  

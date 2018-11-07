@@ -20,26 +20,27 @@ mon_osd_nearfull_ratio: .80
 os_release: "queens"
 region: "RegionOne"
 service_domain: "default"
-# Generate password and override static. Don't disable it in production env
+# Generate password and override static.
+# Don't disable it in production env
 gen_passwd: true
 # Join one more areas in one cluster.
-# If enabled, all areas will be exist in inventory
+# If enabled, all areas must present in inventory
 # [ AREA-compute ]
 # [ AREA-osd-node ]
-# where 'AREA' is item in join_areas.areas
+# where 'AREA' is name in join_areas.areas
 join_areas: 
   enabled: true
   areas:
   - name: "dev"
 # Percent of capacity for cinder pool
     cinder_pool_percent: 25
-    cinder_backup_pool_percent: 10
   - name: "prod"
     cinder_pool_percent: 25
-    cinder_backup_pool_percent: 10
 infra_pool_percent: 10
 glance_pool_percent: 5
 rgw_pool_percent: 15.7
+cinder_backup_pool_percent: 5
+nova_ephimeral_pool_percent: 5
 mariadb_vol_size: "5G"
 rabbitmq_vol_size: "256Mi"
 memcache_memory: 1024

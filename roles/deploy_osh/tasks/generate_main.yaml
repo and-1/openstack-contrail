@@ -17,6 +17,9 @@
 - name: Generate Ceph FS ID
   set_fact:
     ceph_fs_id: "{{identity_admin_pwd|to_uuid}}"
+- name: Generate libvirt sercet uuid
+  set_fact:
+    rbd_secret_uuid: "{{identity_cinder_pwd|to_uuid}}"
 - name: Generate OSH CORE helm override values
   template:
     src: "{{item.name}}.yaml.j2"

@@ -283,6 +283,6 @@ contrail:
   node_init:
     image: "contrail-node-init"
   dep_check:
-    image: "quay.io/stackanetes/kubernetes-entrypoint"
+    image: "stackanetes/kubernetes-entrypoint"
     repo: quay.io
     tag: v0.2.1
