@@ -20,7 +20,7 @@ pod:
 conf:
   glance:
     DEFAULT:
-      workers: 2
+      workers: {{glance.workers.api}}
       show_image_direct_url: "True"
     glance_store:
       default_store: rbd
@@ -29,7 +29,7 @@ conf:
       rbd_store_user: glance
   glance_registry:
     DEFAULT:
-      workers: 2
+      workers: {{glance.workers.registry}}
     database:
       db_max_retries: -1
   rabbitmq:

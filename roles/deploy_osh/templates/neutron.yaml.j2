@@ -1,11 +1,23 @@
 network:
-  interface:
-    tunnel: eth0
   backend:
     - opencontrail
 pod:
   replicas:
     server: 3
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      server:
+        min_available: 0
+    termination_grace_period:
+      server:
+        timeout: 30
 conf:
   neutron:
     DEFAULT:
@@ -14,20 +26,13 @@ conf:
       l3_ha: False
       api_extensions_path: /opt/plugin/site-packages/neutron_plugin_contrail/extensions:/opt/plugin/site-packages/neutron_lbaas/extensions
       interface_driver: null
+      api_workers: {{neutron.workers.api}}
+      rpc_workers: {{neutron.workers.rpc}}
     quotas:
       quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
     agent:
       root_helper: sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
   plugins:
-    ml2_conf:
-      ml2:
-        type_drivers: flat,vxlan
-        tenant_network_types: vxlan
-      ml2_type_vxlan:
-        vni_ranges: 1:1000
-        vxlan_group: 239.1.1.1
-      ml2_type_flat:
-        flat_networks: public
     opencontrail:
       APISERVER:
         api_server_ip: config-api-server.contrail
@@ -40,9 +45,19 @@ conf:
       KEYSTONE:
         insecure: True
 
-  metadata_agent:
-    DEFAULT:
-      metadata_proxy_shared_secret: "password"
+  rabbitmq:
+    policies:
+      - vhost: "neutron"
+        name: "ha_ttl_neutron"
+        definition:
+          #mirror messges to other nodes in rmq cluster
+          ha-mode: "all"
+          ha-sync-mode: "automatic"
+          #70s
+          message-ttl: 70000
+        priority: 0
+        apply-to: all
+        pattern: '^(?!amq\.).*'
 
 
 dependencies:

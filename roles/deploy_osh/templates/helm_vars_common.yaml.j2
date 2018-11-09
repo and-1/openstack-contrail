@@ -1,19 +1,19 @@
 images:
   pull_policy: {{pull_policy}}
   tags:
-{% for image, param in images.osh.iteritems() %}
-{% if param.link is defined %}
-{% set param = images['osh'][param.link] %}
+{% for image, params in images.osh.iteritems() %}
+{% if params.link is defined %}
+{% set params = images['osh'][params.link] %}
 {% endif %}
-    {{image}}: {{param.repo|default(local_docker_registry+"/"+os_release)}}/{{param.image}}:{{param.tag|default(osh_tag)}}
+    {{image}}: {{params.repo|default(local_docker_registry+"/"+os_release)}}/{{params.image}}:{{params.tag|default(osh_tag)}}
 {% endfor %}
 # Contrail image integration
-{% for image, param in images.contrail.iteritems() %}
-{% if param.move is defined and param.move == 'osh' %}
-{% if param.link is defined %}
-{% set param = images['contrail'][param.link] %}
+{% for image, params in images.contrail.iteritems() %}
+{% if params.move is defined and params.move == 'osh' %}
+{% if params.link is defined %}
+{% set params = images['contrail'][params.link] %}
 {% endif %}
-    {{image}}: {{param.repo|default(local_docker_registry)}}/{{param.image}}:{{param.tag|default(contrail_tag)}}
+    {{image}}: {{params.repo|default(local_docker_registry)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}
 {% endif %}
 {% endfor %}
 

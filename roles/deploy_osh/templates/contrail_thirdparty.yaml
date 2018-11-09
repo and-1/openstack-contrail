@@ -1,4 +1,0 @@
-global:
-  contrail_env:
-    MAX_HEAP_SIZE: 3G #Xmx for cassandra
-    HEAP_NEWSIZE: 500M #Xmn for cassandra

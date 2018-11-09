@@ -33,11 +33,11 @@ conf:
       ram_allocation_ratio: 1.0
       disk_allocation_ratio: 1.0
       cpu_allocation_ratio: 3.0
-      osapi_compute_workers: 4
-      metadata_workers: 4
+      osapi_compute_workers: {{nova.workers.osapi_compute}}
+      metadata_workers: {{nova.workers.metadata}}
       allow_resize_to_same_host: true
     conductor:
-      workers: 4
+      workers: {{nova.workers.conductor}}
     scheduler:
       driver: filter_scheduler
     filter_scheduler:
@@ -47,14 +47,20 @@ conf:
       images_type: rbd
       images_rbd_pool: {{nova.ephimeral_pool_name}}
       rbd_secret_uuid: {{rbd_secret_uuid}}
+      cpu_mode: {{nova.cpu_mode}}
+      virt_type: {{nova.virt_type}}
     neutron:
-      metadata_proxy_shared_secret: "password"
+      metadata_proxy_shared_secret: "{{metadata_secret_key}}"
     database:
       db_max_retries: -1
     api_database:
       db_max_retries: -1
     cell0_database:
       db_max_retries: -1
+{% if join_areas.enabled %}
+    cinder:
+      cross_az_attach: 'false'
+{% endif %}
   rabbitmq:
     policies:
       - vhost: "nova"

@@ -35,9 +35,6 @@ oslo_messaging:
     ceilometer:
       username: ceilometer
       password: password
-# TODO Add generated cookie
-#    erlang_cookie: 
-#      cookie: openstack-cookie
     
 # Credentials for mysql
 oslo_db:
@@ -208,3 +205,8 @@ ceph_object_store:
       username: elasticsearch
       access_key: "elastic_access_key"
       secret_key: "elastic_secret_key"
+contrail_endpoints:
+  auth:
+    rabbitmq:
+      username: guest
+      password: guest

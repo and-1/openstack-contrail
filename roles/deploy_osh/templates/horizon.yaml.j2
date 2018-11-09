@@ -26,10 +26,25 @@ modules:
 pod:
   replicas:
     server: 3
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      horizon:
+        min_available: 0
+    termination_grace_period:
+      horizon:
+        timeout: 30
 
 # Bug in horizon. https://bugzilla.redhat.com/show_bug.cgi?id=1478042
 conf:
   horizon:
+{% raw %}
     apache: |
       Listen 0.0.0.0:{{ tuple "dashboard" "internal" "web" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
       LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
@@ -61,6 +76,22 @@ conf:
           CustomLog /dev/stdout combined env=!forwarded
           CustomLog /dev/stdout proxy env=forwarded
       </Virtualhost>
+{% endraw %}
     local_settings:
       config:
+        secret_key: {{horizon_secret_key}}
         debug: "False"
+        keystone_multidomain_support: "True"
+        keystone_default_domain: Default
+        openstack_cinder_features:
+          enable_backup: "True"
+        openstack_neutron_network:
+          enable_router: "True"
+          enable_quotas: "True"
+          enable_ipv6: "True"
+          enable_distributed_router: "False"
+          enable_ha_router: "False"
+          enable_lb: "True"
+          enable_firewall: "True"
+          enable_vpn: "True"
+          enable_fip_topology_check: "True"

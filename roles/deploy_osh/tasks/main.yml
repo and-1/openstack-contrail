@@ -38,3 +38,7 @@
   include: osh-core.yaml
   tags:
   - deploy_core
+- name: Deploy CONTRAIL components
+  include: contrail.yaml
+  tags:
+  - contrail

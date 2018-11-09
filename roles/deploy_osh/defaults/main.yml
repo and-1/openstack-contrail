@@ -3,14 +3,30 @@ infra:
   pool_name: cloud.infra
 glance:
   pool_name: cloud.glance
+  workers:
+    api: 2
+    registry: 2
 cinder:
   pool_name: cloud.cinder
   backup_pool_name: cloud.cinder.backup
 # Base name cinder backend name. If join_areas.enabled=true
 # suffix wil be added to end
   volume_backend_name: cinder-rbd
+  workers:
+    osapi_volume: 2
+neutron:
+  workers:
+    api: 4
+    rpc: 4
 nova:
   ephimeral_pool_name: cloud.nova.ephimeral
+# available values: kvm, lxc, qemu, uml, xen, parallels
+  virt_type: qemu
+  cpu_mode: host-model
+  workers:
+    osapi_compute: 4
+    metadata: 4
+    conductor: 4
   bootstrap:
     flavors:
       enabled: true
@@ -45,4 +61,7 @@ nova:
           ram: 16384
           disk: 160
           vcpus: 8
-  
+contrail:
+  cassandra:
+    Xmx: 3G
+    Xmn: 500M

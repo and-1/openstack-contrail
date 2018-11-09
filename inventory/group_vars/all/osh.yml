@@ -2,6 +2,7 @@
 ceph_net: "192.168.1.0/24"
 k8s_net: "192.168.0.0/24"
 vrouter_net: "10.233.44.0/24"
+default_gw: "10.233.44.1"
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.194:5000"
 contrail_tag: "queens-master-317"
@@ -15,6 +16,8 @@ bluestore_block_db_size: "1073741824"
 bluestore_block_wal_size: "2147483648"
 mon_osd_full_ratio: .90
 mon_osd_nearfull_ratio: .80
+#--------------------------k8s-Helm----------#
+global_domain_suffix: "cloud.example.com"
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
 os_release: "queens"
@@ -23,6 +26,8 @@ service_domain: "default"
 # Generate password and override static.
 # Don't disable it in production env
 gen_passwd: true
+# Will be used if join_areas.enabled = false
+cinder_pool_percent: 50
 # Join one more areas in one cluster.
 # If enabled, all areas must present in inventory
 # [ AREA-compute ]
@@ -44,7 +49,8 @@ nova_ephimeral_pool_percent: 5
 mariadb_vol_size: "5G"
 rabbitmq_vol_size: "256Mi"
 memcache_memory: 1024
-#--------------------------k8s-Helm----------#
-global_domain_suffix: "cloud.example.com"
+#--------------------------Contrail----------#
+BGP_port: 1179
+contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
 monitoring: false

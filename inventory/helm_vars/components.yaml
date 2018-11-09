@@ -52,5 +52,24 @@ OSH_CORE:
   path: openstack-helm-infra/libvirt
   namespace: openstack
 - name: nova
-  path: openstack-helm/nova
+  path: openstack-helm/nova_contrail
   namespace: openstack
+- name: neutron
+  path: openstack-helm/neutron_contrail
+  namespace: openstack
+- name: horizon
+  path: openstack-helm/horizon
+  namespace: openstack
+CONTRAIL:
+- name: contrail-thirdparty
+  namespace: contrail
+  path: contrail-helm-deployer/contrail-thirdparty
+- name: contrail-controller
+  namespace: contrail
+  path: contrail-helm-deployer/contrail-controller
+- name: contrail-analytics
+  namespace: contrail
+  path: contrail-helm-deployer/contrail-analytics
+- name: contrail-vrouter
+  namespace: contrail
+  path: contrail-helm-deployer/contrail-vrouter

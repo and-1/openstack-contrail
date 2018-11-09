@@ -1,0 +1,53 @@
+{% set nodes = [] %}
+{% for node in groups['control-plane'] %}
+{% do nodes.append(hostvars[node]['ansible_'+ k8s_iface]['ipv4']['address']) %}
+{% endfor %}
+
+global:
+   contrail_env:
+     CONTROLLER_NODES: "{{nodes | join(',')}}"
+     CONTROL_NODES: "{{nodes | join(',')}}"
+     VROUTER_GATEWAY: "{{default_gw}}"
+     BGP_PORT: "{{BGP_port}}"
+     BGP_ASN: "{{contrail_bgp_asn}}"
+     ENCAP_PRIORITY: "VXLAN,MPLSoUDP,MPLSoGRE"
+     RABBITMQ_USER: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
+     RABBITMQ_PASSWORD: "{{contrail_endpoints_rabbitmq_pwd}}"
+     RABBITMQ_ERLANG_COOKIE: {{rabbitmq_contrail_cookie}}
+     MAX_HEAP_SIZE: "{{contrail.cassandra.Xmx}}"
+     HEAP_NEWSIZE: "{{contrail.cassandra.Xmn}}"
+     METADATA_PROXY_SECRET: "{{metadata_secret_key}}"
+#     VROUTER_AGENT__DEFAULT__gateway_mode: server
+
+   images:
+     imagePullPolicy: {{pull_policy}}
+     tags:
+{% for image, params in images.contrail.iteritems() %}
+{% if params.move is defined and params.move == 'osh' %}
+{% continue %}
+{% endif %}
+{% if params.link is defined %}
+{% set params = images['contrail'][params.link] %}
+{% endif %}
+       {{image}}: "{{params.repo|default(local_docker_registry)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}"
+{% endfor %}
+
+
+endpoints:
+  cluster_domain_suffix: "{{global_domain_suffix}}"
+  keystone:
+    auth:
+      username: "{{endpoints.identity.auth.admin.username}}"
+      password: "{{identity_admin_pwd}}"
+      project_name: "{{endpoints.identity.auth.admin.project_name}}"
+      user_domain_name: "{{service_domain}}"
+      project_domain_name: "{{service_domain}}"
+      region_name: "{{region}}"
+  rabbitmq:
+    auth:
+      username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
+      password: "guest"
+# Will be commented out when will be resolved issue https://github.com/Juniper/contrail-helm-deployer/issues/22
+#      password: "{{contrail_endpoints_rabbitmq_pwd}}"
+    hosts:
+      default: "{{nodes | join(',')}}"

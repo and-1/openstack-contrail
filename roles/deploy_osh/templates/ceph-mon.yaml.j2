@@ -101,7 +101,7 @@ conf:
       - name: {{cinder.pool_name}}
         application: cinder-volume
         replication: {{replication}}
-        percent_total_data: 60
+        percent_total_data: {{cinder_pool_percent}}
 {% endif %}
       - name: {{cinder.backup_pool_name}}
         application: cinder-backup

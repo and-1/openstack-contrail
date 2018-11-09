@@ -20,7 +20,7 @@ pod:
 endpoints:
   oslo_messaging:
     auth:
-      erlang_cookie: openstack-cookie
+      erlang_cookie: {{rabbitmq_osh_cookie}}
 volume:
   size: {{rabbitmq_vol_size}}
 
