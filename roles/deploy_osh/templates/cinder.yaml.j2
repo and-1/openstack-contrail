@@ -31,14 +31,12 @@ conf:
       backup_driver: cinder.backup.drivers.ceph
       enabled_backends: "{{backends | map(attribute='name') | join(',')}}"
       os_region_name: {{region}}
-      backup_ceph_pool: {{cinder.backup_pool_name}}
       backup_ceph_chunk_size: "134217728"
       backup_ceph_stripe_unit: 0
       backup_ceph_stripe_count: 0
       restore_discard_excess_bytes: "true"
       osapi_volume_workers: {{cinder.workers.osapi_volume}}
       scheduler_default_filters: "AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter"
-      storage_availability_zone: dev
     database:
       db_max_retries: -1
       
@@ -84,4 +82,14 @@ conf:
         priority: 0
         apply-to: all
         pattern: '^(?!amq\.).*'
+
+AZ:
+  enabled: {{join_areas.enabled}}
+  default:
+    pool: {{cinder.backup_pool_name}}
+  areas:
+{% for area in join_areas.areas %}
+    {{area.name}}:
+      pool: {{cinder.backup_pool_name}}.{{area.name}}
+{% endfor %}
 

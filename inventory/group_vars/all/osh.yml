@@ -26,8 +26,10 @@ service_domain: "default"
 # Generate password and override static.
 # Don't disable it in production env
 gen_passwd: true
-# Will be used if join_areas.enabled = false
+#- Cinder default pool parameters------------+
 cinder_pool_percent: 50
+cinder_backup_pool_percent: 5
+#--------------------------------------------+
 # Join one more areas in one cluster.
 # If enabled, all areas must present in inventory
 # [ AREA-compute ]
@@ -39,12 +41,13 @@ join_areas:
   - name: "dev"
 # Percent of capacity for cinder pool
     cinder_pool_percent: 25
+    cinder_backup_pool_percent: 5
   - name: "prod"
     cinder_pool_percent: 25
+    cinder_backup_pool_percent: 5
 infra_pool_percent: 10
 glance_pool_percent: 5
 rgw_pool_percent: 15.7
-cinder_backup_pool_percent: 5
 nova_ephimeral_pool_percent: 5
 mariadb_vol_size: "5G"
 rabbitmq_vol_size: "256Mi"
