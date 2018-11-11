@@ -1,4 +1,11 @@
 ---
+- name: Add dns names to hosts for ceph services (when split ceph net)
+  lineinfile:
+    line: "{{hostvars[item]['ansible_'+ceph_iface]['ipv4']['address']}} {{hostvars[item]['ansible_hostname']}}"
+    path: /etc/hosts
+    state: present
+  with_items:
+  - "{{ groups['k8s-cluster'] }}"
 - name: Set k8s node labels (control)
   shell: "kubectl label node --overwrite {{ item.0 }} {{item.1}}=enabled"
   with_nested:
