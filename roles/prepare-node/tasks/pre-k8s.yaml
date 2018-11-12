@@ -4,15 +4,6 @@
   with_items:
   - "{{packages}}"
   register: packages
-- name: Add endpoints to hosts for rbd provision
-  lineinfile: 
-    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
-    path: /etc/hosts
-    state: present
-  with_nested:
-  - "{{ groups['control-plane'] }}" 
-  - "{{ endpoints }}"
-  when: "endpoints | length != 0"
 # Separate kubelet, docker logs from other
 - name: Adjust rsyslog
   copy:

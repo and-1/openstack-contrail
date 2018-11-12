@@ -6,6 +6,15 @@
     state: present
   with_items:
   - "{{ groups['k8s-cluster'] }}"
+- name: Add endpoints to hosts for rbd provision
+  lineinfile:
+    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
+    path: /etc/hosts
+    state: present
+  with_nested:
+  - "{{ groups['control-plane'] }}"
+  - "{{ endpoints }}"
+  when: "endpoints | length != 0"
 - name: Set k8s node labels (control)
   shell: "kubectl label node --overwrite {{ item.0 }} {{item.1}}=enabled"
   with_nested:
