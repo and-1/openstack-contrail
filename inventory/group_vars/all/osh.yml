@@ -2,7 +2,7 @@
 ceph_net: "192.168.1.0/24"
 k8s_net: "192.168.0.0/24"
 vrouter_net: "10.233.44.0/24"
-default_gw: "10.233.44.1"
+default_gw: "10.233.44.194"
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.194:5000"
 contrail_tag: "queens-master-317"

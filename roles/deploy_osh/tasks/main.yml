@@ -42,3 +42,7 @@
   include: contrail.yaml
   tags:
   - contrail
+- name: Deploy OS SUPPLEMENTARY components
+  include: os-suppl.yaml
+  tags:
+  - os-suppl

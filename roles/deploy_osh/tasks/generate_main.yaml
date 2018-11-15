@@ -45,4 +45,10 @@
     force: true
     dest: "{{inventory_dir}}/artifacts/helm_vars_contrail_common.yaml"
   register: helm_vars_contrail_common_gen_res
-
+- name:  Generate OS SUPPLEMENTARY common override values
+  template:
+    src: "{{item.name}}.yaml.j2"
+    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
+  with_items:
+  - "{{components.OS_SUPPL}}"
+  register: helm_OS_SUPPL_gen_res

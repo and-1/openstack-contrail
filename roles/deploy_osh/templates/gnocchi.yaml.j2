@@ -1,53 +1,52 @@
 # This values for mysql indexer only
 images:
+  pull_policy: {{pull_policy}}
   tags:
-    gnocchi_storage_init: 10.233.44.194:5000/queens/ubuntu-binary-ceph-base:1.0
-    db_sync: 10.233.44.194:5000/queens/ubuntu-binary-gnocchi-base:1.0
-    gnocchi_api: 10.233.44.194:5000/queens/ubuntu-binary-gnocchi-base:1.0
-    gnocchi_statsd: 10.233.44.194:5000/queens/ubuntu-binary-gnocchi-base:1.0
-    gnocchi_metricd: 10.233.44.194:5000/queens/ubuntu-binary-gnocchi-base:1.0
-dependencies:
-  static:
-    db_sync:
-      jobs:
-        - gnocchi-storage-init
-        - gnocchi-db-init
-      services:
-        - endpoint: internal
-          service: oslo_db
-    metricd:
-      services:
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
-    statsd:
-      services:
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
-    tests:
-      services:
-        - endpoint: internal
-          service: identity
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
+{% for image, params in images.gnocchi.iteritems() %}
+{% if params.link is defined %}
+{% set params = images['gnocchi'][params.link] %}
+{% endif %}
+    {{image}}: {{params.repo|default(local_docker_registry+"/"+os_release)}}/{{params.image}}:{{params.tag|default(osh_tag)}}
+{% endfor %}
+
 pod:
   replicas:
     api: 2
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        metricd:
+          enabled: false
+          min_ready_seconds: 0
+          max_unavailable: 1
+        statsd:
+          enabled: false
+          min_ready_seconds: 0
+          max_unavailable: 1
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
 conf:
   gnocchi:
     DEFAULT:
       debug: false
     metricd:
-      workers: 1
+      workers: {{gnocchi.workers.metricd}}
     indexer:
       driver: sqlalchemy
       gnocchi?charset: utf8
   apache: |
+{%- raw %}
     Listen 0.0.0.0:{{ tuple "metric" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
     SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
     CustomLog /dev/stdout combined env=!forwarded
@@ -67,6 +66,7 @@ conf:
             Require all granted
         </Directory>
     </VirtualHost>
+{% endraw %}
   paste:
     composite:gnocchi+basic:
       use: egg:Paste#urlmap
@@ -138,6 +138,36 @@ conf:
     list metric: 'rule:admin_or_creator or rule:metric_owner'
     get measures:  'rule:admin_or_creator or rule:metric_owner'
     post measures:  'rule:admin_or_creator'
+
+dependencies:
+  static:
+    db_sync:
+      jobs:
+        - gnocchi-storage-init
+        - gnocchi-db-init
+      services:
+        - endpoint: internal
+          service: oslo_db
+    metricd:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric
+    statsd:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric
+    tests:
+      services:
+        - endpoint: internal
+          service: identity
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric
 
 manifests:
   job_db_init_indexer: false

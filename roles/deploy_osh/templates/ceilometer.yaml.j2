@@ -2,74 +2,37 @@ pod:
   replicas:
     central: 2
     notification: 2
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        compute:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 600
   resources:
     enabled: false
-manifests:
-  deployment_api: false
-  deployment_collector: false
-  ingress_api: false
-  job_db_init: false
-  job_ks_endpoints: false
-  job_ks_service: false
-  pdb_api: false
-  secret_db: false
-  service_api: false
-  service_ingress_api: false
-  job_db_init_mongodb: false
-dependencies:
-  static:
-    central:
-      jobs:
-        - ceilometer-db-sync
-        - ceilometer-rabbit-init
-        - ceilometer-ks-user
-      services:
-        - endpoint: internal
-          service: identity
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
-    compute:
-      jobs:
-        - ceilometer-db-sync
-        - ceilometer-rabbit-init
-        - ceilometer-ks-user
-      services:
-        - endpoint: internal
-          service: identity
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
-    db_sync:
-      jobs:
-        - ceilometer-ks-user
-      services:
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
-    notification:
-      jobs:
-        - ceilometer-db-sync
-        - ceilometer-rabbit-init
-        - ceilometer-ks-user
-      services:
-        - endpoint: internal
-          service: identity
-        - endpoint: internal
-          service: oslo_db
-        - endpoint: internal
-          service: metric
+
 conf:
   ceilometer:
     DEFAULT:
-      debug: 'true'
-      event_dispatchers: null
-      meter_dispatchers: null
+      debug: 'false'
     api:
-     aodh_is_enabled: "False"
+      aodh_is_enabled: "False"
+    notification:
+      pipelines: meter
   polling:
     sources:
       - name: all_pollsters
@@ -486,3 +449,62 @@ conf:
         attributes:
           controller: resource_metadata.controller
           switch: resource_metadata.switch
+
+manifests:
+  deployment_api: false
+  deployment_collector: false
+  ingress_api: false
+  job_db_init: false
+  job_ks_endpoints: false
+  job_ks_service: false
+  pdb_api: false
+  secret_db: false
+  service_api: false
+  service_ingress_api: false
+  job_db_init_mongodb: false
+dependencies:
+  static:
+    central:
+      jobs:
+        - ceilometer-db-sync
+        - ceilometer-rabbit-init
+        - ceilometer-ks-user
+      services:
+        - endpoint: internal
+          service: identity
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric
+    compute:
+      jobs:
+        - ceilometer-db-sync
+        - ceilometer-rabbit-init
+        - ceilometer-ks-user
+      services:
+        - endpoint: internal
+          service: identity
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric
+    db_sync:
+      jobs:
+        - ceilometer-ks-user
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric
+    notification:
+      jobs:
+        - ceilometer-db-sync
+        - ceilometer-rabbit-init
+        - ceilometer-ks-user
+      services:
+        - endpoint: internal
+          service: identity
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: metric

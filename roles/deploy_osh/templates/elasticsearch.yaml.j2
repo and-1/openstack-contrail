@@ -1,0 +1,44 @@
+pod:
+  replicas:
+    master: 3
+    data: 3
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    termination_grace_period:
+      master:
+        timeout: 600
+      data:
+        timeout: 600
+      client:
+        timeout: 600
+      prometheus_elasticsearch_exporter:
+        timeout: 600
+conf:
+  elasticsearch:
+    config:
+      bootstrap:
+        memory_lock: true
+      cluster:
+        name: elasticsearch
+      discovery:
+        zen:
+          minimum_master_nodes: 2
+      node:
+        max_local_storage_nodes: 3
+    snapshots:
+      enabled: true
+    env:
+      java_opts: {{elastic.java_opt}}
+storage:
+  requests:
+    storage: {{elastic.storage}}
+
+manifests:
+  deployment_client: false
+

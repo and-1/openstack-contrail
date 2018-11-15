@@ -1,0 +1,48 @@
+pod:
+  replicas:
+    api: 3
+    cfn: 2
+    cloudwatch: 3
+    engine: 3
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+      cfn:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+      cfn:
+        timeout: 30
+      cloudwatch:
+        timeout: 30
+      engine:
+        timeout: 30
+jobs:
+  engine_cleaner:
+    cron: "*/5 * * * *"
+    history:
+      success: 3
+      failed: 1
+conf:
+  heat:
+    DEFAULT:
+      num_engine_workers: {{heat.workers.num_engine_workers}}
+      plugin_dirs: /opt/plugin/site-packages/vnc_api/gen/heat/resources,/opt/plugin/site-packages/contrail_heat/resources
+    database:
+      db_max_retries: -1
+    heat_api:
+      workers: {{heat.workers.heat_api}}
+    heat_api_cfn:
+      workers: {{heat.workers.heat_api_cfn}}
+    clients_contrail:
+      api_base_url: /
+      api_server: config-api-server.contrail

@@ -4,8 +4,8 @@ infra:
 glance:
   pool_name: cloud.glance
   workers:
-    api: 2
-    registry: 2
+    api: 1
+    registry: 1
 cinder:
   pool_name: cloud.cinder
   backup_pool_name: cloud.cinder.backup
@@ -13,20 +13,20 @@ cinder:
 # suffix wil be added to end
   volume_backend_name: cinder-rbd
   workers:
-    osapi_volume: 2
+    osapi_volume: 1
 neutron:
   workers:
-    api: 4
-    rpc: 4
+    api: 1
+    rpc: 1
 nova:
   ephimeral_pool_name: cloud.nova.ephimeral
 # available values: kvm, lxc, qemu, uml, xen, parallels
   virt_type: qemu
   cpu_mode: host-model
   workers:
-    osapi_compute: 4
-    metadata: 4
-    conductor: 4
+    osapi_compute: 1
+    metadata: 1
+    conductor: 1
   bootstrap:
     flavors:
       enabled: true
@@ -59,9 +59,23 @@ nova:
           name: "c8m16384"
           id: "auto"
           ram: 16384
-          disk: 160
+          disk: 0
           vcpus: 8
+heat:
+  workers: 
+    num_engine_workers: 1
+    heat_api: 1
+    heat_api_cloudwatch: 1
+    heat_api_cfn: 1
+gnocchi:
+  workers:
+    metricd: 1
+
+elastic:
+  storage: 5Gi
+  java_opt: "-Xms256m -Xmx256m"
+
 contrail:
   cassandra:
-    Xmx: 3G
-    Xmn: 500M
+    Xmx: 2G
+    Xmn: 256M
