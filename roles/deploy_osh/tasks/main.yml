@@ -27,7 +27,7 @@
   set_fact: 
     helm_bin: "{{inventory_dir}}/artifacts/helm.sh"
 - name: Init helm
-  shell: "{{helm_bin}} init --client-only --history-max 5"
+  shell: "{{helm_bin}} init --history-max 5 --upgrade"
   args:
     creates: "~/.helm"
 - name: Generate info
