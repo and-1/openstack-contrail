@@ -8,9 +8,6 @@
   # Credentials for rabbitmq
 oslo_messaging:
   auth:
-    user:
-      username: rabbitmq
-      password: password
     admin: # Must be the same as in "user" key
       username: rabbitmq
       password: password
@@ -35,6 +32,8 @@ oslo_messaging:
     ceilometer:
       username: ceilometer
       password: password
+    user:
+      link: oslo_messaging.admin
     
 # Credentials for mysql
 oslo_db:
@@ -72,13 +71,11 @@ oslo_db:
 oslo_db_api:
   auth:
     nova:
-      username: nova
-      password: password
+      link: oslo_db.nova
 oslo_db_cell0:
   auth:
     nova:
-      username: nova
-      password: password
+      link: oslo_db.nova
 # Credentials fro OS users
 identity:
   auth:
@@ -205,8 +202,21 @@ ceph_object_store:
       username: elasticsearch
       access_key: "elastic_access_key"
       secret_key: "elastic_secret_key"
+# not working now
 contrail_endpoints:
   auth:
     rabbitmq:
       username: guest
       password: guest
+ldap:
+  auth:
+    admin:
+      username: admin
+      bind: "cn=admin,dc=cluster,dc=local"
+      password: password
+
+monitoring:
+  auth:
+    admin:
+      username: admin
+      password: changeme

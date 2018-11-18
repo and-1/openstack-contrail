@@ -28,16 +28,23 @@
     helm_bin: "{{inventory_dir}}/artifacts/helm.sh"
 - name: Init helm
   shell: "{{helm_bin}} init --history-max 5 --upgrade"
-  args:
-    creates: "~/.helm"
 - name: Generate info
   include: generate_main.yaml
   tags:
   - gen_values
+- name: Deploy INFRA essensial
+  include: osh-infra.yaml
+  tags:
+  - osh_infra
+- name: Deploy MONITORING
+  include: monitoring.yaml
+  tags:
+  - osh_mon
+  when: "monitoring"
 - name: Deploy OSH essensial
   include: osh-core.yaml
   tags:
-  - deploy_core
+  - osh_core
 - name: Deploy CONTRAIL components
   include: contrail.yaml
   tags:
@@ -45,4 +52,4 @@
 - name: Deploy OS SUPPLEMENTARY components
   include: os-suppl.yaml
   tags:
-  - os-suppl
+  - os_suppl

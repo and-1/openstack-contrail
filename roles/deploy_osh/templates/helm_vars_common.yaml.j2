@@ -58,6 +58,9 @@ endpoints:
     auth:
 {% for user, params in users.auth.iteritems() %}
       {{user}}:
+{% if params.link is defined %}
+{% set params = endpoints[params.link.split('.')[0]].auth[params.link.split('.')[1]] %}
+{% endif %}
 {% for param, value in params.iteritems() %}
 {% if param == 'password' %}
         password: {{lookup('vars', endpoint+'_'+user+'_pwd')}}

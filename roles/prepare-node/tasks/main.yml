@@ -5,3 +5,6 @@
 - name: Prepare node (local execution)
   include: post-k8s.yaml
   when: "stage == 'post-k8s'"
+- name: Prepare node (no local execution)
+  include: post-suppl-k8s.yaml
+  when: "stage == 'post-k8s-suppl'"

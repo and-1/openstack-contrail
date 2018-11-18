@@ -1,0 +1,17 @@
+---
+- name: Add dns names to hosts for ceph services (when split ceph net)
+  lineinfile:
+    line: "{{hostvars[item]['ansible_'+ceph_iface]['ipv4']['address']}} {{hostvars[item]['ansible_hostname']}}"
+    path: /etc/hosts
+    state: present
+  with_items:
+  - "{{ groups['k8s-cluster'] }}"
+- name: Add endpoints to hosts for rbd provision
+  lineinfile:
+    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
+    path: /etc/hosts
+    state: present
+  with_nested:
+  - "{{ groups['control-plane'] }}"
+  - "{{ endpoints }}"
+  when: "endpoints | length != 0"

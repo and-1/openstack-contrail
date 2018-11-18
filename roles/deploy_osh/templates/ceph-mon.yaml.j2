@@ -47,40 +47,16 @@ conf:
       fsid: "{{ceph_fs_id}}"
       bluestore_block_db_size: "{{bluestore_block_db_size}}"
       bluestore_block_wal_size: "{{bluestore_block_wal_size}}"
-      mon osd full ratio: "{{mon_osd_full_ratio}}"
-      mon osd nearfull ratio: "{{mon_osd_nearfull_ratio}}"
-      objecter_inflight_op_bytes: "1073741824"
-      objecter_inflight_ops: 10240
-      debug_ms: "0/0"
-    osd:
-      osd_mkfs_type: xfs
-      osd_mkfs_options_xfs: -f -i size=2048
-      osd_max_object_name_len: 256
-      ms_bind_port_min: 6800
-      ms_bind_port_max: 7100
-      osd_snap_trim_priority: 1
-      osd_snap_trim_sleep: 0.1
-      osd_pg_max_concurrent_snap_trims: 1
-      filestore_merge_threshold: -10
-      filestore_split_multiple: 12
-      osd_scrub_begin_hour: 22
-      osd_scrub_end_hour: 4
-      osd_scrub_during_recovery: false
-      osd_scrub_sleep: 0.1
-      osd_scrub_chunk_min: 1
-      osd_scrub_chunk_max: 4
-      osd_deep_scrub_stride: "1048576"
-      osd_scrub_priority: 1
-      osd_recovery_op_priority: 1
-      osd_recovery_max_active: 1
-      osd_mount_options_xfs: "rw,noatime,largeio,inode64,swalloc,logbufs=8,logbsize=256k,allocsize=4M"
+      mon_osd_full_ratio: "{{mon_osd_full_ratio}}"
+      mon_osd_nearfull_ratio: "{{mon_osd_nearfull_ratio}}"
+      mon_max_pg_per_osd: {{mon_max_pg_per_osd}}
   rgw_ks:
     enabled: true
   pool:
     crush:
       tunables: {{tunables}}
     target:
-      osd: 12
+      osd: {{target_osds}}
       pg_per_osd: {{pg_per_osd}}
     spec:
       # RBD pool
@@ -211,11 +187,13 @@ conf:
                    type: block-bluestore
                    location: /dev/{{params[1]}}
 {% endfor %}
+
 ceph_mgr_enabled_modules:
   - restful
   - status
   - prometheus
   - balancer
+
 # Manager default port conflict with cassandra(TungstenFabric)
 ceph_mgr_modules_config:
   dashboard:
@@ -225,9 +203,13 @@ endpoints:
     port:
       mgr:
         default: 7001
+
 group_by_class: 
   enabled: {{join_areas.enabled}}
   areas:
 {% for area in join_areas.areas %}
   - name: {{area.name}}
 {% endfor %}
+
+manifests:
+  cronjob_checkPGs: true

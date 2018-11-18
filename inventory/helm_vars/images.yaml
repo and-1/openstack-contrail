@@ -287,6 +287,13 @@ contrail:
     repo: quay.io
     tag: v0.2.1
 # Misc images
+ldap:
+  ldap:
+    repo: "docker.io"
+    image: "osixia/openldap"
+    tag: "1.2.0"
+  bootstrap:
+    link: ldap
 gnocchi:
   gnocchi_storage_init: 
     image: ubuntu-binary-ceph-base
@@ -298,3 +305,4 @@ gnocchi:
     link: gnocchi_api
   gnocchi_metricd:
     link: gnocchi_api
+

@@ -13,6 +13,7 @@
     state: link
   with_items:
   - "{{components.CONTRAIL}}"
+  when: "components.CONTRAIL is defined"
 - name: Deploy CONTRAIL
   shell: "{{helm_bin}} upgrade --install {{item['name']}} {{playbook_dir}}/{{item['path']}} \
          --namespace={{item['namespace']}} \

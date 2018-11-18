@@ -12,10 +12,12 @@ pull_policy: "IfNotPresent"
 tunables: "hammer"
 replication: 3 
 pg_per_osd: 100
+target_osds: 3
 bluestore_block_db_size: "1073741824"
 bluestore_block_wal_size: "2147483648"
 mon_osd_full_ratio: .90
 mon_osd_nearfull_ratio: .80
+mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 global_domain_suffix: "cloud.example.com"
 #--------------------------OpenStack---------#
@@ -36,7 +38,7 @@ cinder_backup_pool_percent: 5
 # [ AREA-osd-node ]
 # where 'AREA' is name in join_areas.areas
 join_areas: 
-  enabled: true
+  enabled: false
   areas:
   - name: "dev"
 # Percent of capacity for cinder pool
@@ -56,4 +58,4 @@ memcache_memory: 1024
 BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
-monitoring: false
+monitoring: true

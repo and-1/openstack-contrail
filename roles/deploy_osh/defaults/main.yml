@@ -75,6 +75,9 @@ elastic:
   storage: 5Gi
   java_opt: "-Xms256m -Xmx256m"
 
+ldap:
+  starage: 2Gi
+
 contrail:
   cassandra:
     Xmx: 2G

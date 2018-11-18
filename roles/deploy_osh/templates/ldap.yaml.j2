@@ -1,0 +1,91 @@
+images:
+  pull_policy: {{pull_policy}}
+  tags:
+{% for image, params in images.ldap.iteritems() %}
+{% if params.link is defined %}
+{% set params = images['ldap'][params.link] %}
+{% endif %}
+    {{image}}: {{params.repo|default(local_docker_registry+"/"+os_release)}}/{{params.image}}:{{params.tag|default(osh_tag)}}
+{% endfor %}
+
+pod:
+  replicas:
+    server: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+  resources:
+    enabled: true
+    server:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+secrets:
+  identity:
+    admin: {{endpoints.ldap.auth.admin.username}}
+
+storage:
+  pvc:
+    enabled: true
+    size: {{ldap.starage}}
+
+openldap:
+  domain: {{global_domain_suffix}}
+  password: {{ldap_admin_pwd}}
+
+data:
+  sample: |
+    dn: ou=People,dc=cluster,dc=local
+    objectclass: organizationalunit
+    ou: People
+    description: We the People
+    # NOTE: Password is "password" without quotes
+    dn: uid=sso,ou=People,dc=cluster,dc=local
+    objectClass: inetOrgPerson
+    objectClass: top
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    objectClass: person
+    sn: SSO
+    cn: sso
+    uid: sso
+    userPassword: {SSHA}+i3t/DLCgLDGaIOAmfeFJ2kDeJWmPUDH
+    description: SHA
+    gidNumber: 1000
+    uidNumber: 1493
+    homeDirectory: /home/sso
+    mail: sso@example.com
+    dn: ou=Groups,dc=cluster,dc=local
+    objectclass: organizationalunit
+    ou: Groups
+    description: We the People
+    dn: cn=admins,ou=Groups,dc=cluster,dc=local
+    objectclass: top
+    objectclass: posixGroup
+    gidNumber: 418
+    cn: admins
+    description: Administrators Team
+    memberUID: uid=sso,ou=People,dc=cluster,dc=local
