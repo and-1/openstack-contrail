@@ -1,25 +1,28 @@
 pod:
-  replicas:
-    prometheus: 2
   lifecycle:
     upgrades:
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        process_exporter:
+          enabled: true
+          min_ready_seconds: 0
       revision_history: 3
       pod_replacement_strategy: RollingUpdate
       rolling_update:
         max_unavailable: 1
         max_surge: 3
     termination_grace_period:
-      prometheus:
+      process_exporter:
         timeout: 30
   resources:
     enabled: {{pod_resources}}
-    prometheus:
+    process_exporter:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
       limits:
         memory: "1024Mi"
         cpu: "2000m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
     jobs:
       image_repo_sync:
         requests:
@@ -28,13 +31,6 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-      tests:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-storage:
-  requests:
-    storage: {{infra.prometheus.storage}}
+
+conf:
+  processes: dockerd,kubelet,kube-proxy,bgsagent,bgscollect,bgssd

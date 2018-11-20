@@ -1,6 +1,6 @@
 pod:
   replicas:
-    prometheus: 2
+    kube_state_metrics: 1
   lifecycle:
     upgrades:
       revision_history: 3
@@ -9,17 +9,17 @@ pod:
         max_unavailable: 1
         max_surge: 3
     termination_grace_period:
-      prometheus:
+      kube_state_metrics:
         timeout: 30
   resources:
     enabled: {{pod_resources}}
-    prometheus:
+    kube_state_metrics:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
       limits:
         memory: "1024Mi"
         cpu: "2000m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
     jobs:
       image_repo_sync:
         requests:
@@ -28,13 +28,3 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-      tests:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-storage:
-  requests:
-    storage: {{infra.prometheus.storage}}

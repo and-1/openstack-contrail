@@ -110,18 +110,56 @@ osh:
     image: 'ubuntu-binary-ceilometer-notification'
   elasticsearch:
     image: 'ubuntu-binary-elasticsearch'
+  prometheus_mysql_exporter: 
+    image: 'ubuntu-binary-prometheus-mysqld-exporter'
+  prometheus:
+    image: 'ubuntu-binary-prometheus-server'
+  alertmanager:
+    image: 'ubuntu-binary-prometheus-alertmanager'
+  node_exporter:
+    image: 'ubuntu-binary-prometheus-node-exporter'
+  grafana:
+    image: 'ubuntu-binary-grafana'
+  process_exporter:
+    image: 'process-exporter'
+    repo: 'docker.io/ncabatoff'
+    tag: '0.3.11'
+  kube_state_metrics:
+    image: 'kube-state-metrics'
+    repo: 'docker.io/bitnami'
+    tag: '1.3.1'
+  prometheus_openstack_exporter: 
+    repo: 'quay.io/attcomdev'
+    image: 'prometheus-openstack-exporter'
+    tag: '3231f14419f0c47547ce2551b7d884cd222104e6'
+  nagios: 
+    repo: 'quay.io/attcomdev'
+    image: 'nagios'
+    tag: 'c87ad2231e48a5f0a35e9089041cc9676e1e1a39'
   memcached:
     image: 'memcached'
-    tag: 1.5.5
+    tag: '1.5.5'
     repo: docker.io
   mariadb:
     image: 'mariadb'
-    repo: docker.io
-    tag: 10.2.13
+    repo: 'docker.io/openstackhelm'
+    tag: 10.2.18
   cinder_api:
-    image: 'openstackhelm/cinder'
-    repo: docker.io
+    image: 'cinder'
+    repo: 'docker.io/openstackhelm'
     tag: queens
+  dep_check: 
+    repo: 'quay.io/stackanetes'
+    image: 'kubernetes-entrypoint'
+    tag: 'v0.3.1'
+  image_repo_sync: 
+    repo: 'docker.io'
+    image: 'docker'
+    tag: '17.07.0'
+  prometheus_create_mysql_user: 
+    link: mariadb
+  prometheus_mysql_exporter_helm_tests: 
+    link: heat_engine
   barbican_db_sync:
     link: barbican_api
   bootstrap:
@@ -137,6 +175,8 @@ osh:
   db_drop:
     link: heat_engine
   db_init:
+    link: heat_engine
+  grafana_db_session_sync:
     link: heat_engine
   glance_bootstrap:
     link: heat_engine
@@ -283,8 +323,8 @@ contrail:
   node_init:
     image: "contrail-node-init"
   dep_check:
-    image: "stackanetes/kubernetes-entrypoint"
-    repo: quay.io
+    image: "kubernetes-entrypoint"
+    repo: 'quay.io/stackanetes'
     tag: v0.2.1
 # Misc images
 ldap:
@@ -296,9 +336,9 @@ ldap:
     link: ldap
 gnocchi:
   gnocchi_storage_init: 
-    image: ubuntu-binary-ceph-base
+    image: 'ubuntu-binary-ceph-base'
   gnocchi_api: 
-    image: ubuntu-binary-gnocchi-base
+    image: 'ubuntu-binary-gnocchi-base'
   db_sync:
     link: gnocchi_api
   gnocchi_statsd:

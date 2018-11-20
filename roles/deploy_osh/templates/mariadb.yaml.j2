@@ -20,9 +20,46 @@ pod:
     disruption_budget:
       mariadb:
         min_available: 0
-
+  resources:
+    enabled: {{pod_resources}}
+    prometheus_mysql_exporter:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+    server:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      tests:
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+      prometheus_create_mysql_user:
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
 volume:
-  size: {{mariadb_vol_size}}
+  size: {{infra.mariadb.storage}}
 
 monitoring:
   prometheus:

@@ -18,14 +18,9 @@
     src: "/tmp/linux-amd64/helm"
     dest: "{{inventory_dir}}/artifacts/"
     mode: 755
-- name: Create helpfull helm script
-  template:
-    src: helm.sh.j2
-    dest: "{{inventory_dir}}/artifacts/helm.sh"
-    mode: 0755
 - name: Set fact for convenient
   set_fact: 
-    helm_bin: "{{inventory_dir}}/artifacts/helm.sh"
+    helm_bin: "{{inventory_dir}}/artifacts/helm"
 - name: Init helm
   shell: "{{helm_bin}} init --history-max 5 --upgrade"
 - name: Generate info
@@ -41,6 +36,11 @@
   tags:
   - osh_mon
   when: "monitoring"
+- name: Deploy LOGGING
+  include: logging.yaml
+  tags:
+  - osh_log
+  when: "logging"
 - name: Deploy OSH essensial
   include: osh-core.yaml
   tags:

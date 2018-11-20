@@ -68,6 +68,12 @@ oslo_db:
     ceilometer:
       username: ceilometer
       password: password
+    exporter:
+      username: exporter
+      password: password
+    user:
+      username: grafana
+      password: password
 oslo_db_api:
   auth:
     nova:
@@ -76,6 +82,13 @@ oslo_db_cell0:
   auth:
     nova:
       link: oslo_db.nova
+oslo_db_session:
+  auth:
+    admin:
+      link: oslo_db.admin
+    user:
+      username: grafana_session
+      password: password
 # Credentials fro OS users
 identity:
   auth:
@@ -192,6 +205,15 @@ identity:
       project_name: service
       user_domain_name: "{{service_domain}}"
       project_domain_name: "{{service_domain}}"
+    user:
+      role: admin
+      region_name: "{{region}}"
+      username: prometheus-openstack-exporter
+      password: password
+      project_name: service
+      user_domain_name: "{{service_domain}}"
+      project_domain_name: "{{service_domain}}"
+
 ceph_object_store:
   auth:
     admin:
@@ -215,7 +237,29 @@ ldap:
       bind: "cn=admin,dc=cluster,dc=local"
       password: password
 
+prometheus_mysql_exporter:
+  auth:
+    user:
+      username: exporter
+      password: password
+
+# From prometheus
 monitoring:
+  auth:
+    admin:
+      username: admin
+      password: changeme
+grafana:
+  auth:
+    admin:
+      username: admin
+      password: password
+nagios:
+  auth:
+    admin:
+      username: nagiosadmin
+      password: password
+elasticsearch:
   auth:
     admin:
       username: admin

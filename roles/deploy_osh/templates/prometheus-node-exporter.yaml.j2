@@ -1,25 +1,28 @@
 pod:
-  replicas:
-    prometheus: 2
   lifecycle:
     upgrades:
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        node_exporter:
+          enabled: true
+          min_ready_seconds: 0
       revision_history: 3
       pod_replacement_strategy: RollingUpdate
       rolling_update:
         max_unavailable: 1
         max_surge: 3
     termination_grace_period:
-      prometheus:
+      node_exporter:
         timeout: 30
   resources:
     enabled: {{pod_resources}}
-    prometheus:
+    node_exporter:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
       limits:
         memory: "1024Mi"
         cpu: "2000m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
     jobs:
       image_repo_sync:
         requests:
@@ -28,13 +31,16 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-      tests:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-storage:
-  requests:
-    storage: {{infra.prometheus.storage}}
+  tolerations:
+    node_exporter:
+      enabled: true
+
+conf:
+  ntp_server_ip: {{ntp_srv| default('127.0.0.1')}}
+  collectors:
+    enable:
+      - ntp
+      - meminfo_numa
+      - bonding
+      - mountstats
+    disable:

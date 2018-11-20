@@ -3,7 +3,7 @@ conf:
     max_connections: 8192
     # NOTE(pordirect): this should match the value in
     #     # `pod.resources.memcached.memory`
-    memory: {{memcache_memory}}
+    memory: {{infra.memcache.memory}}
 pod:
   lifecycle:
     upgrades:

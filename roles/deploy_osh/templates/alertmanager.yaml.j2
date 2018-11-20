@@ -1,0 +1,49 @@
+pod:
+  replicas:
+    alertmanager: 3
+  lifecycle:
+    upgrades:
+      revision_history: 3
+      pod_replacement_strategy: RollingUpdate
+      rolling_update:
+        max_unavailable: 1
+        max_surge: 3
+    termination_grace_period:
+      alertmanager:
+        timeout: 30
+  resources:
+    enabled: {{pod_resources}}
+    alertmanager:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+    jobs:
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+storage:
+  requests:
+    storage: {{infra.alertmanager.storage}}
+
+conf:
+  alertmanager:
+    global:
+      # The smarthost and SMTP sender used for mail notifications.
+      smtp_smarthost: '{{alertmanager.smtp_smarthost}}'
+      smtp_from: '{{alertmanager.smtp_from}}'
+      smtp_auth_username: '{{alertmanager.smtp_auth_username}}'
+      smtp_auth_password: '{{alertmanager.smtp_auth_password}}'
+    route:
+      receiver: admin-mails
+      routes: null
+    receivers:
+      - name: 'admin-mails'
+        email_configs:
+          - to: 'admins@example.com'

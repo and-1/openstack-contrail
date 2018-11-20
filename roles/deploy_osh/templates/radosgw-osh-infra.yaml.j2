@@ -1,0 +1,22 @@
+pod:
+  replicas:
+    rgw: 2
+endpoints:
+  ceph_object_store:
+    namespace: osh-infra
+  ceph_mon:
+    namespace: ceph
+deployment:
+  storage_secrets: false
+  ceph: true
+  rbd_provisioner: false
+  cephfs_provisioner: false
+  client_secrets: false
+  rgw_keystone_user_and_endpoints: true
+bootstrap:
+  enabled: false
+conf:
+  rgw_ks:
+    enabled: false
+  rgw_s3:
+    enabled: true

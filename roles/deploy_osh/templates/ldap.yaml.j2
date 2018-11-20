@@ -20,7 +20,7 @@ pod:
           max_unavailable: 1
           max_surge: 3
   resources:
-    enabled: true
+    enabled: {{pod_resources}}
     server:
       requests:
         memory: "128Mi"
@@ -50,7 +50,7 @@ secrets:
 storage:
   pvc:
     enabled: true
-    size: {{ldap.starage}}
+    size: {{infra.ldap.storage}}
 
 openldap:
   domain: {{global_domain_suffix}}

@@ -3,6 +3,8 @@ ceph_net: "192.168.1.0/24"
 k8s_net: "192.168.0.0/24"
 vrouter_net: "10.233.44.0/24"
 default_gw: "10.233.44.194"
+# TODO
+#ntp_srv:
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.194:5000"
 contrail_tag: "queens-master-317"
@@ -20,6 +22,25 @@ mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 global_domain_suffix: "cloud.example.com"
+pod_resources: true
+#--------------------------Infra-------------#
+infra:
+  pool_name: 'cloud.infra'
+  mariadb:
+    storage: "5G"
+  rabbitmq:
+    storage: "256Mi"
+  memcache:
+    memory: 1024
+  elastic:
+    storage: '5Gi'
+    java_opt: "-Xms256m -Xmx256m"
+  ldap:
+    storage: '2Gi'
+  prometheus:
+    storage: '5Gi'
+  alertmanager:
+    storage: '5Gi'
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
 os_release: "queens"
@@ -41,7 +62,6 @@ join_areas:
   enabled: false
   areas:
   - name: "dev"
-# Percent of capacity for cinder pool
     cinder_pool_percent: 25
     cinder_backup_pool_percent: 5
   - name: "prod"
@@ -51,11 +71,15 @@ infra_pool_percent: 10
 glance_pool_percent: 5
 rgw_pool_percent: 15.7
 nova_ephimeral_pool_percent: 5
-mariadb_vol_size: "5G"
-rabbitmq_vol_size: "256Mi"
-memcache_memory: 1024
 #--------------------------Contrail----------#
 BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
 monitoring: true
+alertmanager:
+  smtp_smarthost: '192.168.0.194:25'
+  smtp_from: 'alertmanager@example.com'
+  smtp_auth_username: 'alertmanager'
+  smtp_auth_password: 'password'
+  default_mail: 'admins@example.com'
+logging: true

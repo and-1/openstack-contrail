@@ -1,17 +1,31 @@
 ---
 infra:
-  pool_name: cloud.infra
+  pool_name: 'cloud.infra'
+  mariadb:
+    storage: "5G"
+  rabbitmq:
+    storage: "256Mi"
+  memcache:
+    memory: 1024
+  elastic:
+    storage: '5Gi'
+    java_opt: "-Xms256m -Xmx256m"
+  ldap:
+    storage: '2Gi'
+  prometheus:
+    storage: '5Gi'
+  
 glance:
-  pool_name: cloud.glance
+  pool_name: 'cloud.glance'
   workers:
     api: 1
     registry: 1
 cinder:
-  pool_name: cloud.cinder
-  backup_pool_name: cloud.cinder.backup
+  pool_name: 'cloud.cinder'
+  backup_pool_name: 'cloud.cinder.backup'
 # Base name cinder backend name. If join_areas.enabled=true
 # suffix wil be added to end
-  volume_backend_name: cinder-rbd
+  volume_backend_name: 'cinder-rbd'
   workers:
     osapi_volume: 1
 neutron:
@@ -19,7 +33,7 @@ neutron:
     api: 1
     rpc: 1
 nova:
-  ephimeral_pool_name: cloud.nova.ephimeral
+  ephimeral_pool_name: 'cloud.nova.ephimeral'
 # available values: kvm, lxc, qemu, uml, xen, parallels
   virt_type: qemu
   cpu_mode: host-model
@@ -71,14 +85,7 @@ gnocchi:
   workers:
     metricd: 1
 
-elastic:
-  storage: 5Gi
-  java_opt: "-Xms256m -Xmx256m"
-
-ldap:
-  starage: 2Gi
-
 contrail:
   cassandra:
-    Xmx: 2G
-    Xmn: 256M
+    Xmx: '2G'
+    Xmn: '256M'

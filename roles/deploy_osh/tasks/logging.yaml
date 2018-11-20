@@ -1,0 +1,17 @@
+- name: Link helm-toolkit package to LOGGING charts
+  file: 
+    src: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
+    dest: "{{playbook_dir}}/{{item.path}}/charts"
+    state: link
+  with_items:
+  - "{{components.LOGGING}}"
+  when: "components.LOGGING is defined"
+- name: Deploy LOGGING
+  shell: "{{helm_bin}} upgrade --install {{item['item']['name']}} {{playbook_dir}}/{{item['item']['path']}} \
+         --namespace={{item['item']['namespace']}} \
+         --values={{inventory_dir}}/artifacts/helm_vars_common.yaml \
+         --values={{inventory_dir}}/artifacts/helm_vars_{{item['item']['name']}}.yaml \
+         && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['item']['namespace']}}"
+  with_items:
+  - "{{helm_LOGGING_gen_res.results}}"
+  when: "(helm_LOGGING_gen_res.results is defined) and (helm_vars_common_gen_res.changed or item.changed)"

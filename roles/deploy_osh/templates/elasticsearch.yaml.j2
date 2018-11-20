@@ -34,10 +34,10 @@ conf:
     snapshots:
       enabled: true
     env:
-      java_opts: {{elastic.java_opt}}
+      java_opts: {{infra.elastic.java_opt}}
 storage:
   requests:
-    storage: {{elastic.storage}}
+    storage: {{infra.elastic.storage}}
 
 manifests:
   deployment_client: false

@@ -26,3 +26,5 @@
 - hosts: master
   roles:
   - { role: deploy_osh, tags: [osh]}
+  environment:
+    KUBECONFIG: "{{inventory_dir}}/artifacts/admin.conf"

@@ -1,6 +1,4 @@
 pod:
-  replicas:
-    prometheus: 2
   lifecycle:
     upgrades:
       revision_history: 3
@@ -9,32 +7,31 @@ pod:
         max_unavailable: 1
         max_surge: 3
     termination_grace_period:
-      prometheus:
+      nagios:
         timeout: 30
+  replicas:
+    nagios: 3
   resources:
     enabled: {{pod_resources}}
-    prometheus:
+    nagios:
       limits:
         memory: "1024Mi"
         cpu: "2000m"
       requests:
         memory: "128Mi"
-        cpu: "500m"
+        cpu: "100m"
+    apache_proxy:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
     jobs:
       image_repo_sync:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-      tests:
         requests:
           memory: "128Mi"
           cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-storage:
-  requests:
-    storage: {{infra.prometheus.storage}}

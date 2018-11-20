@@ -22,3 +22,30 @@ conf:
       debug_ms: "0/0"
   rgw_ks:
     enabled: true
+pod:
+  replicas:
+    rbd_provisioner: 2
+  resources:
+    enabled: {{pod_resources}}
+    rbd_provisioner:
+      requests:
+        memory: "5Mi"
+        cpu: "250m"
+      limits:
+        memory: "50Mi"
+        cpu: "500m"
+    jobs:
+      bootstrap:
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+        requests:
+          memory: "128Mi"
+          cpu: "500m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"

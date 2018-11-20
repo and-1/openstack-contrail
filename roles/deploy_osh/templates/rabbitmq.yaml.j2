@@ -22,7 +22,7 @@ endpoints:
     auth:
       erlang_cookie: {{rabbitmq_osh_cookie}}
 volume:
-  size: {{rabbitmq_vol_size}}
+  size: {{infra.rabbitmq.storage}}
 
 conf:
   enabled_plugins:

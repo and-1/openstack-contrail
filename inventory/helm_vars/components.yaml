@@ -27,26 +27,51 @@ INFRA_CORE:
 - name: ldap
   path: openstack-helm-infra/ldap
   namespace: osh-infra
-#MONITORING:
-#- name: prometheus
-#  path: openstack-helm-infra/prometheus
-#  namespace: osh-infra
+- name: ingress-openstack
+  path: openstack-helm-infra/ingress
+  namespace: openstack
+- name: ingress-contrail
+  path: openstack-helm-infra/ingress
+  namespace: contrail
+- name: ceph-openstack-config
+  path: openstack-helm-infra/ceph-provisioners
+  namespace: openstack
+- name: mariadb
+  path: openstack-helm-infra/mariadb
+  namespace: openstack
+MONITORING:
+- name: prometheus
+  path: openstack-helm-infra/prometheus
+  namespace: osh-infra
+- name: alertmanager
+  path: openstack-helm-infra/prometheus-alertmanager
+  namespace: osh-infra
+- name: prometheus-kube-state-metrics
+  path: openstack-helm-infra/prometheus-kube-state-metrics
+  namespace: kube-system
+- name: prometheus-node-exporter
+  path: openstack-helm-infra/prometheus-node-exporter
+  namespace: kube-system
+- name: prometheus-process-exporter
+  path: openstack-helm-infra/prometheus-process-exporter
+  namespace: kube-system
+- name: prometheus-openstack-exporter
+  path: openstack-helm-infra/prometheus-openstack-exporter
+  namespace: openstack
+- name: grafana
+  path: openstack-helm-infra/grafana
+  namespace: osh-infra
+- name: nagios
+  path: openstack-helm-infra/nagios
+  namespace: osh-infra
+LOGGING:
+- name: radosgw-osh-infra
+  path: openstack-helm-infra/ceph-rgw
+  namespace: osh-infra
 #- name: elasticsearch
 #  path: openstack-helm-infra/elasticsearch
 #  namespace: openstack
 #OSH_CORE:
-#- name: ingress-openstack
-#  path: openstack-helm-infra/ingress
-#  namespace: openstack
-#- name: ingress-contrail
-#  path: openstack-helm-infra/ingress
-#  namespace: contrail
-#- name: ceph-openstack-config
-#  path: openstack-helm-infra/ceph-provisioners
-#  namespace: openstack
-#- name: mariadb
-#  path: openstack-helm-infra/mariadb
-#  namespace: openstack
 #- name: rabbitmq
 #  path: openstack-helm-infra/rabbitmq
 #  namespace: openstack

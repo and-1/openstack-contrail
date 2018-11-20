@@ -47,7 +47,15 @@
   with_items:
   - "{{components.MONITORING}}"
   register: helm_MONITORING_gen_res
-  when: "components.MONITORING is defined"
+  when: "components.MONITORING is defined and monitoring"
+- name: Generate LOGGING helm override values
+  template:
+    src: "{{item.name}}.yaml.j2"
+    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
+  with_items:
+  - "{{components.LOGGING}}"
+  register: helm_LOGGING_gen_res
+  when: "components.LOGGING is defined and logging"
 - name: Generate OSH CORE helm override values
   template:
     src: "{{item.name}}.yaml.j2"
