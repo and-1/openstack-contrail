@@ -135,7 +135,7 @@ vault_deployment_type: docker
 helm_deployment_type: host
 
 # K8s image pull policy (imagePullPolicy)
-k8s_image_pull_policy: IfNotPresent
+k8s_image_pull_policy: "{{pull_policy}}"
 
 # audit log for kubernetes
 kubernetes_audit: false

@@ -1,25 +1,16 @@
 pod:
   lifecycle:
     upgrades:
-      revision_history: 3
-      pod_replacement_strategy: RollingUpdate
-      rolling_update:
-        max_unavailable: 1
-        max_surge: 3
-    termination_grace_period:
-      nagios:
-        timeout: 30
+      deployments:
+        pod_replacement_strategy: RollingUpdate
+        revision_history: 3
+        rolling_update:
+          max_surge: 3
+          max_unavailable: 1
   replicas:
-    nagios: 3
+    kibana: 2
   resources:
     enabled: {{pod_resources}}
-    nagios:
-      limits:
-        memory: "1024Mi"
-        cpu: "2000m"
-      requests:
-        memory: "128Mi"
-        cpu: "100m"
     apache_proxy:
       limits:
         memory: "1024Mi"
@@ -27,14 +18,21 @@ pod:
       requests:
         memory: "128Mi"
         cpu: "100m"
+    kibana:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
     jobs:
       image_repo_sync:
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
         requests:
           memory: "128Mi"
           cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
 endpoints:
   ldap:
     path:

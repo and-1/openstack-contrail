@@ -26,21 +26,21 @@ pod_resources: true
 #--------------------------Infra-------------#
 infra:
   pool_name: 'cloud.infra'
-  mariadb:
-    storage: "5G"
-  rabbitmq:
-    storage: "256Mi"
-  memcache:
-    memory: 1024
-  elastic:
-    storage: '5Gi'
-    java_opt: "-Xms256m -Xmx256m"
-  ldap:
-    storage: '2Gi'
-  prometheus:
-    storage: '5Gi'
-  alertmanager:
-    storage: '5Gi'
+mariadb:
+  storage: "5G"
+rabbitmq:
+  storage: "256Mi"
+memcache:
+  memory: 1024
+elastic:
+  storage: '5Gi'
+  java_opt: "-Xms256m -Xmx256m"
+ldap:
+  storage: '2Gi'
+prometheus:
+  storage: '5Gi'
+alertmanager:
+  storage: '5Gi'
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
 os_release: "queens"
@@ -76,7 +76,7 @@ BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
 monitoring: true
-alertmanager:
+alertmanager_notif:
   smtp_smarthost: '192.168.0.194:25'
   smtp_from: 'alertmanager@example.com'
   smtp_auth_username: 'alertmanager'

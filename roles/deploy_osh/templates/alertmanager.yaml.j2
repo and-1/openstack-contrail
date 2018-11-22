@@ -30,16 +30,16 @@ pod:
           cpu: "2000m"
 storage:
   requests:
-    storage: {{infra.alertmanager.storage}}
+    storage: {{alertmanager.storage}}
 
 conf:
   alertmanager:
     global:
       # The smarthost and SMTP sender used for mail notifications.
-      smtp_smarthost: '{{alertmanager.smtp_smarthost}}'
-      smtp_from: '{{alertmanager.smtp_from}}'
-      smtp_auth_username: '{{alertmanager.smtp_auth_username}}'
-      smtp_auth_password: '{{alertmanager.smtp_auth_password}}'
+      smtp_smarthost: '{{alertmanager_notif.smtp_smarthost}}'
+      smtp_from: '{{alertmanager_notif.smtp_from}}'
+      smtp_auth_username: '{{alertmanager_notif.smtp_auth_username}}'
+      smtp_auth_password: '{{alertmanager_notif.smtp_auth_password}}'
     route:
       receiver: admin-mails
       routes: null

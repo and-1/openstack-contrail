@@ -2,6 +2,7 @@ pod:
   replicas:
     master: 3
     data: 3
+    client: 3
   lifecycle:
     upgrades:
       deployments:
@@ -19,6 +20,93 @@ pod:
         timeout: 600
       prometheus_elasticsearch_exporter:
         timeout: 600
+  resources:
+    enabled: {{pod_resources}}
+    apache_proxy:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+    client:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    master:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    data:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    prometheus_elasticsearch_exporter:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      curator:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      snapshot_repository:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      storage_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      s3_bucket:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      s3_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
 conf:
   elasticsearch:
     config:
@@ -34,11 +122,14 @@ conf:
     snapshots:
       enabled: true
     env:
-      java_opts: {{infra.elastic.java_opt}}
+      java_opts: {{elastic.java_opt}}
 storage:
   requests:
-    storage: {{infra.elastic.storage}}
-
-manifests:
-  deployment_client: false
-
+    storage: {{elastic.storage}}
+endpoints:
+  ldap:
+    path:
+      default: "/ou=People,dc={{global_domain_suffix.split('.')|join(',dc=')}}"
+monitoring:
+  prometheus:
+    enabled: {{monitoring}}

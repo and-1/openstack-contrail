@@ -1,3 +1,4 @@
+{%- set domain = global_domain_suffix.split('.')|join(',dc=') %}
 images:
   pull_policy: {{pull_policy}}
   tags:
@@ -50,20 +51,24 @@ secrets:
 storage:
   pvc:
     enabled: true
-    size: {{infra.ldap.storage}}
+    size: {{ldap.storage}}
 
 openldap:
   domain: {{global_domain_suffix}}
   password: {{ldap_admin_pwd}}
 
+bootstrap:
+  enabled: true
+
 data:
   sample: |
-    dn: ou=People,dc=cluster,dc=local
+    dn: ou=People,dc={{domain}}
     objectclass: organizationalunit
     ou: People
     description: We the People
+
     # NOTE: Password is "password" without quotes
-    dn: uid=sso,ou=People,dc=cluster,dc=local
+    dn: uid=sso,ou=People,dc={{domain}}
     objectClass: inetOrgPerson
     objectClass: top
     objectClass: posixAccount
@@ -78,14 +83,16 @@ data:
     uidNumber: 1493
     homeDirectory: /home/sso
     mail: sso@example.com
-    dn: ou=Groups,dc=cluster,dc=local
+
+    dn: ou=Groups,dc={{domain}}
     objectclass: organizationalunit
     ou: Groups
     description: We the People
-    dn: cn=admins,ou=Groups,dc=cluster,dc=local
+
+    dn: cn=admins,ou=Groups,dc={{domain}}
     objectclass: top
     objectclass: posixGroup
     gidNumber: 418
     cn: admins
     description: Administrators Team
-    memberUID: uid=sso,ou=People,dc=cluster,dc=local
+    memberUID: uid=sso,ou=People,dc={{domain}}

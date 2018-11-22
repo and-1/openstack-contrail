@@ -1,19 +1,22 @@
 ---
 infra:
   pool_name: 'cloud.infra'
-  mariadb:
-    storage: "5G"
-  rabbitmq:
-    storage: "256Mi"
-  memcache:
-    memory: 1024
-  elastic:
-    storage: '5Gi'
-    java_opt: "-Xms256m -Xmx256m"
-  ldap:
-    storage: '2Gi'
-  prometheus:
-    storage: '5Gi'
+
+mariadb:
+  storage: "5G"
+rabbitmq:
+  storage: "256Mi"
+memcache:
+  memory: 1024
+elastic:
+  storage: '5Gi'
+  java_opt: "-Xms256m -Xmx256m"
+ldap:
+  storage: '2Gi'
+prometheus:
+  storage: '5Gi'
+alertmanager:
+  storage: '5Gi'
   
 glance:
   pool_name: 'cloud.glance'

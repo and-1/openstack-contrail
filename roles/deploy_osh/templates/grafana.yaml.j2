@@ -1,3 +1,4 @@
+{%- set domain = global_domain_suffix.split('.')|join(',dc=') %}
 pod:
   replicas:
     grafana: 2
@@ -64,9 +65,52 @@ pod:
       limits:
         memory: "1024Mi"
         cpu: "2000m"
-
 endpoints:
   oslo_db:
     namespace: openstack
   oslo_db_session:
     namespace: openstack
+  ldap:
+    path:
+      default: "ou=People,dc={{domain}}"
+conf:
+  ldap:
+    config:
+      base_dns:
+        search: "dc={{domain}}"
+        group_search: "ou=Groups,dc={{domain}}"
+        admin_group: "cn=admins,ou=Groups,dc={{domain}}"
+      filters:
+        search: "(uid=%s)"
+        group_search: "(&(objectclass=posixGroup)(memberUID=uid=%s,ou=People,dc={{domain}}))"
+    template: |
+{%- raw %}
+      verbose_logging = true
+      [[servers]]
+      host = "{{ tuple "ldap" "internal" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" }}"
+      port = {{ tuple "ldap" "internal" "ldap" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+      use_ssl = false
+      start_tls = false
+      ssl_skip_verify = false
+      bind_dn = "{{ .Values.endpoints.ldap.auth.admin.bind }}"
+      bind_password = '{{ .Values.endpoints.ldap.auth.admin.password }}'
+      search_filter = "{{ .Values.conf.ldap.config.filters.search }}"
+      search_base_dns = ["{{ .Values.conf.ldap.config.base_dns.search }}"]
+      group_search_filter = "{{ .Values.conf.ldap.config.filters.group_search }}"
+      group_search_base_dns = ["{{ .Values.conf.ldap.config.base_dns.group_search }}"]
+      [servers.attributes]
+      username = "uid"
+      surname = "sn"
+      member_of = "cn"
+      email = "mail"
+      [[servers.group_mappings]]
+      group_dn = "{{.Values.endpoints.ldap.auth.admin.bind }}"
+      org_role = "Admin"
+      grafana_admin = true
+      [[servers.group_mappings]]
+      group_dn = "{{.Values.conf.ldap.config.base_dns.admin_group}}"
+      org_role = "Admin"
+      [[servers.group_mappings]]
+      group_dn = "*"
+      org_role = "Viewer"
+{%- endraw %}

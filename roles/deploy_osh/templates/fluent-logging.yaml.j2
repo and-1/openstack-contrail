@@ -1,0 +1,67 @@
+pod:
+  lifecycle:
+    upgrades:
+      daemonsets:
+        pod_replacement_strategy: RollingUpdate
+        fluentbit:
+          enabled: true
+          min_ready_seconds: 0
+          max_unavailable: 1
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    termination_grace_period:
+      fluentd:
+        timeout: 30
+      prometheus_fluentd_exporter:
+        timeout: 30
+  replicas:
+    fluentd: 3
+    prometheus_fluentd_exporter: 1
+  resources:
+    enabled: false
+    fluentbit:
+      limits:
+        memory: '400Mi'
+        cpu: '400m'
+      requests:
+        memory: '100Mi'
+        cpu: '100m'
+    fluentd:
+      limits:
+        memory: '1024Mi'
+        cpu: '2000m'
+      requests:
+        memory: '128Mi'
+        cpu: '500m'
+    prometheus_fluentd_exporter:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+    jobs:
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: '128Mi'
+          cpu: '100m'
+        limits:
+          memory: '1024Mi'
+          cpu: '2000m'
+  tolerations:
+    fluentbit:
+      enabled: true
+monitoring:
+  prometheus:
+    enabled: {{monitoring}}

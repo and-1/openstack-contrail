@@ -68,9 +68,15 @@ LOGGING:
 - name: radosgw-osh-infra
   path: openstack-helm-infra/ceph-rgw
   namespace: osh-infra
-#- name: elasticsearch
-#  path: openstack-helm-infra/elasticsearch
-#  namespace: openstack
+- name: elasticsearch
+  path: openstack-helm-infra/elasticsearch
+  namespace: osh-infra
+- name: fluent-logging
+  path: openstack-helm-infra/fluent-logging
+  namespace: osh-infra
+- name: kibana
+  path: openstack-helm-infra/kibana
+  namespace: osh-infra
 #OSH_CORE:
 #- name: rabbitmq
 #  path: openstack-helm-infra/rabbitmq

@@ -120,6 +120,30 @@ osh:
     image: 'ubuntu-binary-prometheus-node-exporter'
   grafana:
     image: 'ubuntu-binary-grafana'
+  fluentbit: 
+    repo: 'docker.io/fluent'
+    image: 'fluent-bit'
+    tag: '0.14.2'
+  fluentd: 
+    repo: 'docker.io/fluent'
+    image: 'fluentd-kubernetes-daemonset'
+    tag: 'v1.2-debian-elasticsearch'
+  prometheus_fluentd_exporter:
+    repo: 'docker.io/srwilkers'
+    image: 'fluentd_exporter'
+    tag: 'v0.1'
+  curator:  
+    repo: 'docker.io/bobrik'
+    image: 'curator'
+    tag: '5.2.0'
+  prometheus_elasticsearch_exporter: 
+    repo: 'docker.io/justwatch'
+    image: 'elasticsearch_exporter'
+    tag: '1.0.1'
+  ceph_config_helper: 
+    repo: 'docker.io/port'
+    image: 'ceph-config-helper'
+    tag: 'v1.10.3'
   process_exporter:
     image: 'process-exporter'
     repo: 'docker.io/ncabatoff'
@@ -156,6 +180,28 @@ osh:
     repo: 'docker.io'
     image: 'docker'
     tag: '17.07.0'
+  ceph_key_placement:
+    link: ceph_config_helper
+  ceph_mon_check:
+    link: ceph_config_helper
+  ceph_rbd_pool:
+    link: ceph_config_helper
+  cinder_backup_storage_init:
+    link: ceph_config_helper
+  cinder_storage_init:
+    link: ceph_config_helper
+  glance_storage_init:
+    link: ceph_config_helper
+  gnocchi_storage_init:
+    link: ceph_config_helper
+  nova_service_cleaner:
+    link: ceph_config_helper
+  rgw_s3_admin:
+    link: ceph_config_helper
+  s3_bucket:
+    link: ceph_config_helper
+  s3_user:
+    link: ceph_config_helper
   prometheus_create_mysql_user: 
     link: mariadb
   prometheus_mysql_exporter_helm_tests: 
@@ -163,6 +209,8 @@ osh:
   barbican_db_sync:
     link: barbican_api
   bootstrap:
+    link: heat_engine
+  elasticsearch_template:
     link: heat_engine
   cinder_volume_usage_audit:
     link: cinder_volume

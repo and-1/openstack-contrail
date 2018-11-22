@@ -37,4 +37,9 @@ pod:
           cpu: "2000m"
 storage:
   requests:
-    storage: {{infra.prometheus.storage}}
+    storage: {{prometheus.storage}}
+endpoints:
+  ldap:
+    path:
+      default: "/ou=People,dc={{global_domain_suffix.split('.')|join(',dc=')}}"
+
