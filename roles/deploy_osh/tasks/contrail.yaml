@@ -16,7 +16,7 @@
   when: "components.CONTRAIL is defined"
 - name: Deploy CONTRAIL
   shell: "{{helm_bin}} upgrade --install {{item['name']}} {{playbook_dir}}/{{item['path']}} \
-         --namespace={{item['namespace']}} \
+         --namespace={{item['namespace']}} {% if force %}--force {%endif%}\
          --values={{inventory_dir}}/artifacts/helm_vars_contrail_common.yaml \
          {% if item['name'] not in ['contrail-thirdparty'] %}
          && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['namespace']}}

@@ -8,7 +8,7 @@
   when: "components.LOGGING is defined"
 - name: Deploy LOGGING
   shell: "{{helm_bin}} upgrade --install {{item['item']['name']}} {{playbook_dir}}/{{item['item']['path']}} \
-         --namespace={{item['item']['namespace']}} \
+         --namespace={{item['item']['namespace']}} {% if force %}--force {%endif%}\
          --values={{inventory_dir}}/artifacts/helm_vars_common.yaml \
          --values={{inventory_dir}}/artifacts/helm_vars_{{item['item']['name']}}.yaml \
          && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['item']['namespace']}}"

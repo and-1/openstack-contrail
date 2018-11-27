@@ -7,7 +7,7 @@ default_gw: "10.233.44.194"
 #ntp_srv:
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.194:5000"
-contrail_tag: "queens-master-317"
+contrail_tag: "queens-master-411"
 osh_tag: 1.0
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#
