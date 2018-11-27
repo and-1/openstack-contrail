@@ -5,6 +5,12 @@
   - "{{packages}}"
   register: packages
 # Separate kubelet, docker logs from other
+- name: Force store journald logs on disk
+  lineinfile:
+    regexp: ^#?Storage=.*
+    line: Storage=persistent
+    state: present
+    path: /etc/systemd/journald.conf
 - name: Adjust rsyslog
   copy:
     dest: /etc/rsyslog.d/30-k8s.conf
