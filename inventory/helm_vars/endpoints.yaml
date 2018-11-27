@@ -249,6 +249,8 @@ monitoring:
     admin:
       username: admin
       password: changeme
+    user:
+      link: monitoring.admin
 grafana:
   auth:
     admin:

@@ -1,4 +1,5 @@
 ---
+redeploy_all: false
 infra:
   pool_name: 'cloud.infra'
 

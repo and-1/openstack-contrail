@@ -1,0 +1,17 @@
+endpoints:
+  calico_exporter:
+    hosts:
+      default: calico-exporter
+    port:
+      metrics:
+        default: 9091
+monitoring:
+  prometheus:
+    enabled: true
+    calico_exporter:
+      scrape: true
+      port: 9091
+manifests:
+  monitoring:
+    prometheus:
+      service_exporter: true

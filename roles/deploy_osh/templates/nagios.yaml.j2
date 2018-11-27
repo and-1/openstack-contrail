@@ -36,6 +36,8 @@ pod:
           memory: "128Mi"
           cpu: "100m"
 endpoints:
+  ceph_mgr:
+    namespace: ceph
   ldap:
     path:
       default: "/ou=People,dc={{global_domain_suffix.split('.')|join(',dc=')}}"

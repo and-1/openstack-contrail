@@ -24,4 +24,4 @@
          {% endif %}"
   with_items:
   - "{{helm_OSH_CORE_gen_res.results}}"
-  when: "helm_OSH_CORE_gen_res.results is defined and (helm_vars_common_gen_res.changed or item.changed)"
+  when: "helm_OSH_CORE_gen_res.results is defined and (redeploy_all or item.changed)"

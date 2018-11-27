@@ -19,6 +19,7 @@ global_as_num: "64546"
 # defaults. The value should be a number, not a string.
 # calico_mtu: 1500
 calico_felix_prometheusmetricsenabled: "true"
+calico_felix_prometheusmetricsport: "9091"
 
 # IPIP tunel enable
 ipip: "false"

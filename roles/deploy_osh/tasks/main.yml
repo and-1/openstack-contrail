@@ -9,7 +9,7 @@
   - components
 - name: Download helm binary
   unarchive:
-    src: https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz
+    src: "https://storage.googleapis.com/kubernetes-helm/helm-{{helm_version}}-linux-amd64.tar.gz"
     dest: "/tmp"
     remote_src: true
     creates: "/tmp/linux-amd64"

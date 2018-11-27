@@ -14,4 +14,4 @@
          && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['item']['namespace']}}"
   with_items:
   - "{{helm_MONITORING_gen_res.results}}"
-  when: "(helm_MONITORING_gen_res.results is defined) and (helm_vars_common_gen_res.changed or item.changed)"
+  when: "(helm_MONITORING_gen_res.results is defined) and (redeploy_all or item.changed)"

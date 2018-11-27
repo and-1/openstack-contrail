@@ -77,3 +77,5 @@ kube_read_only_port: 10255
 
 ## Set true to download and cache container
 #download_container: true
+
+helm_version: "v2.11.0"

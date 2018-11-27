@@ -26,3 +26,9 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
+monitoring:
+  prometheus:
+    enabled: true
+    ingress_exporter:
+      scrape: true
+      port: '10254'

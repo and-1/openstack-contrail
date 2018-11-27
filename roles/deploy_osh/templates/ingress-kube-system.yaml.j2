@@ -7,3 +7,10 @@ deployment:
   type: DaemonSet
 network:
   host_namespace: true
+monitoring:
+  prometheus:
+    enabled: true
+    ingress_exporter:
+      scrape: true
+      port: '10254'
+
