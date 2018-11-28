@@ -1,3 +1,4 @@
+- debug: msg="{{endpoints|dictsort}}"
 - name: Gen password
   include: gen_password.yaml
   with_dict:

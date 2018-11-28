@@ -16,7 +16,7 @@
   when: "components.OSH_CORE is defined"
 - name: Deploy OSH CORE
   shell: "{{helm_bin}} upgrade --install {{item['item']['name']}} {{playbook_dir}}/{{item['item']['path']}} \
-         --namespace={{item['item']['namespace']}} {% if force %}--force {%endif%}\
+         --namespace={{item['item']['namespace']}} {% if force|default(false) %}--force {%endif%}\
          --values={{inventory_dir}}/artifacts/helm_vars_common.yaml \
          --values={{inventory_dir}}/artifacts/helm_vars_{{item['item']['name']}}.yaml \
          {% if item['item']['name'] not in ['nova'] %}
