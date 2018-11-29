@@ -100,10 +100,10 @@ OSH_CORE:
   path: openstack-helm-infra/libvirt
   namespace: openstack
 - name: nova
-  path: openstack-helm/nova_contrail
+  path: openstack-helm/nova
   namespace: openstack
 - name: neutron
-  path: openstack-helm/neutron_contrail
+  path: openstack-helm/neutron
   namespace: openstack
 - name: horizon
   path: openstack-helm/horizon

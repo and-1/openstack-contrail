@@ -14,3 +14,6 @@
 	path = kolla
 	url = https://github.com/and-1/kolla.git
 	branch = stable/queens
+[submodule "contrail-container-builder"]
+	path = contrail-container-builder
+	url = https://github.com/and-1/contrail-container-builder.git

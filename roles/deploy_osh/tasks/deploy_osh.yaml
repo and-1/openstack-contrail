@@ -1,0 +1,20 @@
+- name: "{{GROUP}}: {{item.name}}: Link helm-toolkit package to charts"
+  file:
+    src: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
+    dest: "{{playbook_dir}}/{{item.path}}/charts"
+    state: link
+- name: "{{GROUP}}: {{item.name}}: Generate helm override values"
+  template:
+    src: "{{item.name}}.yaml.j2"
+    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
+  register: "{{item.name}}_change"
+- name: "{{GROUP}}: {{item.name}}: Deploy"
+  shell: "{{helm_bin}} upgrade --install {{item['name']}} {{playbook_dir}}/{{item['path']}} \
+         --namespace={{item['namespace']}} {% if force|default(false) %}--force {%endif%}\
+         --values={{inventory_dir}}/artifacts/helm_vars_common.yaml \
+         --values={{inventory_dir}}/artifacts/helm_vars_{{item['name']}}.yaml \
+         {% if item['name'] not in ['nova'] %}
+         && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['namespace']}}
+         {% endif %}"
+  when: "redeploy_all or lookup('vars', item.name +'_change').changed"
+

@@ -1,0 +1,33 @@
+- name: Download helm binary
+  unarchive:
+    src: "https://storage.googleapis.com/kubernetes-helm/helm-{{helm_version}}-linux-amd64.tar.gz"
+    dest: "/tmp"
+    remote_src: true
+    creates: "/tmp/linux-amd64"
+- name: Copy helm binary to artifacts dir
+  copy:
+    src: "/tmp/linux-amd64/helm"
+    dest: "{{inventory_dir}}/artifacts/"
+    mode: 755
+- name: Set fact for convenient
+  set_fact:
+    helm_bin: "{{inventory_dir}}/artifacts/helm"
+- name: Init helm
+  shell: "{{helm_bin}} init --history-max 5 --upgrade"
+- name: create folder for helm-toolkit charts
+  file:
+    state: directory
+    path: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
+- name: Build helm-toolkit
+  shell: "{{helm_bin}} package -d {{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts openstack-helm-infra/helm-toolkit"
+  args:
+    creates: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts/helm-toolkit-0.1.0.tgz"
+- name: create folder for helm-toolkit-contrail charts
+  file:
+    state: directory
+    path: "{{playbook_dir}}/contrail-helm-deployer/helm-toolkit-contrail/charts"
+- name: Build helm-toolkit-contrail
+  shell: "{{helm_bin}} package -d {{playbook_dir}}/contrail-helm-deployer/helm-toolkit-contrail/charts contrail-helm-deployer/helm-toolkit-contrail"
+  args:
+    creates: "{{playbook_dir}}/contrail-helm-deployer/helm-toolkit-contrail/charts/helm-toolkit-contrail-0.1.0.tgz"
+

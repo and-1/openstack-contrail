@@ -13,7 +13,7 @@ global:
      ENCAP_PRIORITY: "VXLAN,MPLSoUDP,MPLSoGRE"
      RABBITMQ_USER: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
      RABBITMQ_PASSWORD: "{{contrail_endpoints_rabbitmq_pwd}}"
-     RABBITMQ_ERLANG_COOKIE: {{rabbitmq_contrail_cookie}}
+     RABBITMQ_ERLANG_COOKIE: "{{rabbitmq_contrail_cookie}}"
      MAX_HEAP_SIZE: "{{contrail.cassandra.Xmx}}"
      HEAP_NEWSIZE: "{{contrail.cassandra.Xmn}}"
      METADATA_PROXY_SECRET: "{{metadata_secret_key}}"
@@ -46,8 +46,6 @@ endpoints:
   rabbitmq:
     auth:
       username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
-      password: "guest"
-# Will be commented out when will be resolved issue https://github.com/Juniper/contrail-helm-deployer/issues/22
-#      password: "{{contrail_endpoints_rabbitmq_pwd}}"
+      password: "{{contrail_endpoints_rabbitmq_pwd}}"
     hosts:
       default: "{{nodes | join(',')}}"

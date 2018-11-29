@@ -1,4 +1,3 @@
-- debug: msg="{{endpoints|dictsort}}"
 - name: Gen password
   include: gen_password.yaml
   with_dict:
@@ -33,38 +32,6 @@
 - name: Generate nova metadata sercet key
   set_fact:
     metadata_secret_key: "{{identity_neutron_pwd|hash('md5')}}"
-- name: Generate OSH INFRA helm override values
-  template:
-    src: "{{item.name}}.yaml.j2"
-    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
-  with_items:
-  - "{{components.INFRA_CORE}}"
-  register: helm_INFRA_CORE_gen_res
-  when: "components.INFRA_CORE is defined"
-- name: Generate MONITORING helm override values
-  template:
-    src: "{{item.name}}.yaml.j2"
-    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
-  with_items:
-  - "{{components.MONITORING}}"
-  register: helm_MONITORING_gen_res
-  when: "components.MONITORING is defined and monitoring"
-- name: Generate LOGGING helm override values
-  template:
-    src: "{{item.name}}.yaml.j2"
-    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
-  with_items:
-  - "{{components.LOGGING}}"
-  register: helm_LOGGING_gen_res
-  when: "components.LOGGING is defined and logging"
-- name: Generate OSH CORE helm override values
-  template:
-    src: "{{item.name}}.yaml.j2"
-    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
-  with_items:
-  - "{{components.OSH_CORE}}"
-  register: helm_OSH_CORE_gen_res
-  when: "components.OSH_CORE is defined"
 - name:  Generate CONTRAIL common override values
   template:
     src: helm_vars_contrail_common.yaml.j2
@@ -72,11 +39,3 @@
     dest: "{{inventory_dir}}/artifacts/helm_vars_contrail_common.yaml"
   register: helm_vars_contrail_common_gen_res
   when: "components.CONTRAIL is defined"
-- name:  Generate OS SUPPLEMENTARY common override values
-  template:
-    src: "{{item.name}}.yaml.j2"
-    dest: "{{inventory_dir}}/artifacts/helm_vars_{{item.name}}.yaml"
-  with_items:
-  - "{{components.OS_SUPPL}}"
-  register: helm_OS_SUPPL_gen_res
-  when: "components.OS_SUPPL is defined"
