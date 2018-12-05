@@ -1,0 +1,18 @@
+---
+MAAS_REGION_IMG: "{{local_docker_registry}}/maas-region-controller:1.0"
+MAAS_RACK_IMG: "{{local_docker_registry}}/maas-rack-controller:1.0"
+MAAS_DB_USER: maas
+MAAS_DB_PASS: password
+MAAS_DB_NAME: maas
+MAAS_UI_USER: admin
+MAAS_UI_PASS: password
+MAAS_UI_USER_MAIL: admin@example.com
+MAAS_UI_PORT: 8088
+MAAS_NAME: MAIN
+MAAS_ENDPOINT: "http://10.233.44.77:{{MAAS_UI_PORT}}/MAAS"
+MAAS_DEFAULT_OS: ubuntu
+MAAS_NTP_SERVERS: []
+MAAS_DNS_SERVERS:
+ - 8.8.8.8
+MAAS_DEFAULT_DISTRO: bionic
+MAAS_DEFAULT_KERNEL: 'ga-18.04'

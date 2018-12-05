@@ -1,0 +1,43 @@
+- name: "RACK_CONTROLLER: get region secrets"
+  set_fact:
+    "{{item.0}}_{{item.1}}": "{{lookup('file', inventory_dir+'/../share_creds/'+item.0+'.'+item.1+'.creds')}}"
+  with_nested:
+  - ['maas']
+  - ['apikey', 'secret']
+  delegate_to: localhost
+- name: "RACK_CONTROLLER: create bin scripts"
+  template:
+    src: "{{item}}.j2"
+    dest: "/opt/maas/bin/{{item}}"
+    mode: 0775
+  with_items:
+  - start.sh
+  - register-rack-controller.sh
+  - config-rack.sh
+- name: "RACK_CONTROLLER: run maas rack container"
+  docker_container:
+    name: maas-rack-controller
+    image: "{{MAAS_RACK_IMG}}"
+    state: started
+    network_mode: host
+    privileged: true
+    tty: true
+    env:
+      MAAS_ENDPOINT: "{{MAAS_ENDPOINT}}"
+      MAAS_REGION_SECRET: "{{maas_secret}}"
+      MAAS_API_KEY: "{{maas_apikey}}"
+    volumes:
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    - /opt/maas/bin/register-rack-controller.sh:/usr/local/bin/register-rack-controller.sh
+    - /opt/maas/bin/start.sh:/tmp/start.sh
+    - /opt/maas/bin/config-rack.sh:/tmp/config-rack.sh
+    command: /tmp/start.sh
+- name: "RACK_CONTROLLER: post config"
+  shell: "docker exec -t \
+          -e JOB_TIMEOUT=900
+          -e ADMIN_USERNAME={{MAAS_UI_USER}}
+          -e RETRY_TIMER=10
+          -e TRY_LIMIT=1
+          -e REGION={{region}}
+          maas-rack-controller bash -c /tmp/config-rack.sh"
+

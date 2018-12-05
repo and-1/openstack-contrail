@@ -1,0 +1,46 @@
+---
+- debug: msg="{{region}}"
+- name: "MAIN: install pip packages"
+  pip:
+    state: present
+    name: "{{item}}"
+  with_items:
+  - docker
+- name: "MAIN: create working dir"
+  file:
+    path: /opt/maas/{{item}}
+    state: directory
+  with_items:
+  - pg_data
+  - conf
+  - bin
+- name: "MAIN: deploy region component"
+  include_tasks: deploy_region.yaml
+  when: "region_ctl is defined and region_ctl"
+- name: "MAIN: deploy rack component"
+  include_tasks: deploy_rack.yaml
+  when: "rack_ctl is defined and rack_ctl"
+- name: "MAIN: config maas"
+  shell: "docker exec -t \
+          -e MAAS_NAME={{MAAS_NAME}}
+          -e USE_IMAGE_CACHE=false
+          -e JOB_TIMEOUT=900
+          -e ADMIN_USERNAME={{MAAS_UI_USER}}
+          -e RETRY_TIMER=10
+          -e TRY_LIMIT=1
+          -e MAAS_ENDPOINT='http://localhost:5240/MAAS/'
+          -e MAAS_PROXY_ENABLED=false
+          -e MAAS_PEER_PROXY_ENABLED=false
+          -e MAAS_PROXY_SERVER=''
+          -e MAAS_INTERNAL_PROXY_PORT=''
+          -e MAAS_HTTP_BOOT='true'
+          -e MAAS_NTP_SERVERS={{MAAS_NTP_SERVERS | join(',')}}
+          -e MAAS_NTP_EXTERNAL_ONLY='false'
+          -e MAAS_DNS_DNSSEC_REQUIRED='no'
+          -e MAAS_DNS_SERVERS={{MAAS_DNS_SERVERS | join(',')}}
+          -e MAAS_DEFAULT_OS={{MAAS_DEFAULT_OS}}
+          -e MAAS_DEFAULT_DISTRO={{MAAS_DEFAULT_DISTRO}}
+          -e MAAS_DEFAULT_KERNEL={{MAAS_DEFAULT_KERNEL}}
+          -e MAAS_SSH_PUBLIC='{{maas_ssh_pub}}'
+          maas-region bash -c /tmp/import-boot-resources.sh"
+

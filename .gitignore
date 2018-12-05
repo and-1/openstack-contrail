@@ -4,3 +4,4 @@ test.yaml
 *.swp
 TODO
 *.creds
+*.ssh.key*

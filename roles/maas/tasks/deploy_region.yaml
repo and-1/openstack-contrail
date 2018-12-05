@@ -1,0 +1,90 @@
+- name: "REGION: generate passwords for"
+  set_fact:
+    "{{item.0}}_{{item.1}}": "{{lookup('password', inventory_dir+'/credentials/'+item.0+'.'+item.1+'.creds chars=ascii_letters length=15')}}"
+  with_nested:
+  - "maas"
+  - ['db','ui']
+- name: "REGION: create bin scripts"
+  template:
+    src: "{{item}}.j2"
+    dest: "/opt/maas/bin/{{item}}"
+    mode: 0775
+  with_items:
+  - db-init.sh
+  - db-sync.sh
+  - ui-user-init.sh
+  - import-boot-resources.sh
+- name: "REGION: create configs"
+  template:
+    src: "{{item}}.j2"
+    dest: "/opt/maas/conf/{{item}}"
+    mode: 0775
+  with_items:
+  - regiond.conf
+  - 000-default.conf
+  - maas-http.conf
+  - ports.conf
+- name: "REGION: start postgres contrainer"
+  docker_container:
+    name: postgresql
+    image: postgres:9.6
+    state: started
+    detach: true
+    env:
+      USER_DB_PASS: "{{maas_db}}"
+    network_mode: host
+    volumes:
+    - /opt/maas/pg_data:/var/lib/postgresql/data
+    - /opt/maas/bin/db-init.sh:/tmp/db-init.sh
+- name: "REGION: create db for maas"
+  shell: docker exec -t postgresql /tmp/db-init.sh
+- name: "REGION: start db sync job"
+  shell: docker run --rm -t --name maas-db-sync-job --network host -v /opt/maas/conf/regiond.conf:/etc/maas/regiond.conf -v /opt/maas/bin/db-sync.sh:/tmp/db-sync.sh --entrypoint /tmp/db-sync.sh "{{MAAS_REGION_IMG}}"
+- name: "REGION: run maas region contrainer"
+  docker_container:
+    name: maas-region
+    image: "{{MAAS_REGION_IMG}}"
+    state: started
+    network_mode: host
+    privileged: true
+    tty: true
+    volumes:
+    - /opt/maas/conf/regiond.conf:/etc/maas/regiond.conf
+    - /opt/maas/bin/ui-user-init.sh:/tmp/ui-user-init.sh
+    - /opt/maas/conf/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    - /opt/maas/conf/maas-http.conf:/etc/apache2/conf-enabled/maas-http.conf
+    - /opt/maas/bin/import-boot-resources.sh:/tmp/import-boot-resources.sh
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    - /opt/maas/conf/ports.conf:/etc/apache2/ports.conf
+- name: "REGION: create admin user"
+  shell: "docker exec -t \
+          -e ADMIN_USERNAME={{MAAS_UI_USER}} \
+          -e ADMIN_PASSWORD={{maas_ui}} \
+          -e ADMIN_EMAIL={{MAAS_UI_USER_MAIL}} \
+          maas-region bash -c /tmp/ui-user-init.sh"
+- name: "REGION: get information for rack initialization"
+  shell: docker exec -t maas-region {{item}}
+  with_items:
+  - "maas-region apikey --username={{MAAS_UI_USER}}"
+  - "cat /var/lib/maas/secret"
+  register: maas_secrets
+- name: "REGION: generate admin ssh key"
+  command : ssh-keygen -q -t rsa -f "{{inventory_dir}}/../share_creds/maas.ssh.key" -C "" -N ""
+  args:
+    creates: "{{inventory_dir}}/../share_creds/maas.ssh.key"
+  delegate_to: localhost
+- name: "REGION: get ssh key"
+  set_fact:
+    "maas_ssh_{{item.0}}": "{{lookup('file', inventory_dir+'/../share_creds/maas.ssh.'+item.1)}}"
+  with_together:
+  - ['pub','priv']
+  - ['key.pub','key']
+  delegate_to: localhost
+- name: "REGION: save secrets to file"
+  copy: 
+    dest: "{{inventory_dir}}/../share_creds/{{item.1}}.creds"
+    content: "{{item.0.stdout}}"
+  delegate_to: localhost
+  with_together:
+  - "{{maas_secrets.results}}"
+  - ['maas.apikey', 'maas.secret']

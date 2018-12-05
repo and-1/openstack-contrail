@@ -1,0 +1,11 @@
+clouds:
+  RegionOne:
+    region_name: RegionOne
+    identity_api_version: 3
+    auth:
+      username: admin
+      project_name: admin
+      project_domain_name: default
+      user_domain_name: default
+      password: mwcWAaoVSUlCYbg
+      auth_url: 'http://keystone.openstack.svc.cloud.example.com/v3'
