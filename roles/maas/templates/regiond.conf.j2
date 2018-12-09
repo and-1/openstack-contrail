@@ -16,4 +16,4 @@ database_host: 127.0.0.1
 database_name: {{ MAAS_DB_NAME }}
 database_pass: {{ MAAS_DB_PASS }}
 database_user: {{ MAAS_DB_USER }}
-maas_url: "http://{{ansible_default_ipv4.address}}:{{MAAS_UI_PORT}}/MAAS"
+maas_url: "{{maas_endpoint}}"

@@ -1,0 +1,13 @@
+- name: Check requirements
+  debug: msg="ERROR: check {{item['name']}} fail"
+  failed_when: "item['cond'] < item['res']"
+  with_items:
+  - name: control-plane count
+    cond: "{{groups['control-plane']| length}}"
+    res: "3"
+  - name: compute-plane count
+    cond: "{{groups['osd-nodes']| length}}"
+    res: "3"
+  - name: kube-master count
+    cond: "{{groups['kube-master']| length}}"
+    res: "3"

@@ -1,10 +1,13 @@
 ---
+# deploy for test or not
+rollout_mode: real
 # Endpoints, which will be added to hosts on all nodes of cluster. Target is control-plane
 endpoints:
  - "ceph-mon.ceph.svc.{{cluster_name}}"
 # Packages are required on nodes
 packages:
  - ceph-common
+ - bridge-utils
 # k8s node labels
 compute_plane_labels:
  - openstack-compute-node

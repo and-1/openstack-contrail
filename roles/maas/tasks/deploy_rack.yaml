@@ -1,3 +1,7 @@
+- name: "REGION: get region endpint"
+  set_fact:
+    maas_endpoint: "{{lookup('file', {{inventory_dir}}/../share_creds/maas.region.endpoint)}}"
+  when: "maas_endpoint is not defined"
 - name: "RACK_CONTROLLER: get region secrets"
   set_fact:
     "{{item.0}}_{{item.1}}": "{{lookup('file', inventory_dir+'/../share_creds/'+item.0+'.'+item.1+'.creds')}}"
@@ -23,7 +27,7 @@
     privileged: true
     tty: true
     env:
-      MAAS_ENDPOINT: "{{MAAS_ENDPOINT}}"
+      MAAS_ENDPOINT: "{{maas_endpoint}}"
       MAAS_REGION_SECRET: "{{maas_secret}}"
       MAAS_API_KEY: "{{maas_apikey}}"
     volumes:
@@ -31,6 +35,7 @@
     - /opt/maas/bin/register-rack-controller.sh:/usr/local/bin/register-rack-controller.sh
     - /opt/maas/bin/start.sh:/tmp/start.sh
     - /opt/maas/bin/config-rack.sh:/tmp/config-rack.sh
+    - /opt/maas/rack_data:/var/lib/maas/boot-resources
     command: /tmp/start.sh
 - name: "RACK_CONTROLLER: post config"
   shell: "docker exec -t \

@@ -9,7 +9,7 @@
 {%- endif %}
 {%- endfor %}
 {%- endif %}
-{%- set disks = hostvars[host]['ansible_local']['osd_disks']|difference([host_osd_jour]) %}
+{%- set disks = hostvars[host]['ansible_local']['osd_disks'] %}
 {%- for disk in disks %}
 {%- do osd_pairs.append(disk+"-"+host_osd_jour+"-"+class.area) %}
 {%- endfor %}

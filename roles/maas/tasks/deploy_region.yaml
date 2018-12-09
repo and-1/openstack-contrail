@@ -1,9 +1,17 @@
 - name: "REGION: generate passwords for"
   set_fact:
-    "{{item.0}}_{{item.1}}": "{{lookup('password', inventory_dir+'/credentials/'+item.0+'.'+item.1+'.creds chars=ascii_letters length=15')}}"
-  with_nested:
-  - "maas"
-  - ['db','ui']
+    "maas_{{item}}": "{{lookup('password', inventory_dir+'/credentials/maas.'+item+'.creds chars=ascii_letters length=15')}}"
+  with_items:
+  - 'db'
+  - 'ui'
+- name: "REGION: save region endpoint"
+  copy:
+    dest: "{{inventory_dir}}/../share_creds/maas.region.endpoint"
+    content: "{{MAAS_ENDPOINT}}"
+  delegate_to: localhost
+- name: "REGION: get region endpoint"
+  set_fact:
+    maas_endpoint: "{{lookup('file', inventory_dir + '/../share_creds/maas.region.endpoint')}}"
 - name: "REGION: create bin scripts"
   template:
     src: "{{item}}.j2"

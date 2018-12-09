@@ -1,5 +1,4 @@
 ---
-- debug: msg="{{region}}"
 - name: "MAIN: install pip packages"
   pip:
     state: present
@@ -29,10 +28,10 @@
           -e RETRY_TIMER=10
           -e TRY_LIMIT=1
           -e MAAS_ENDPOINT='http://localhost:5240/MAAS/'
-          -e MAAS_PROXY_ENABLED=false
+          -e MAAS_PROXY_ENABLED={{MAAS_PROXY_EN}}
           -e MAAS_PEER_PROXY_ENABLED=false
           -e MAAS_PROXY_SERVER=''
-          -e MAAS_INTERNAL_PROXY_PORT=''
+          -e MAAS_INTERNAL_PROXY_PORT={{MAAS_PROXY_PORT}}
           -e MAAS_HTTP_BOOT='true'
           -e MAAS_NTP_SERVERS={{MAAS_NTP_SERVERS | join(',')}}
           -e MAAS_NTP_EXTERNAL_ONLY='false'
