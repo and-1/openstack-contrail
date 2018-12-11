@@ -34,6 +34,9 @@ class Config:
   maas_api_url_file = "../share_creds/maas.region.endpoint"
   maas_api_key_file = "../share_creds/maas.apikey.creds"
   maas_region = "RegionOne"
+  min_osd_nodes = 3
+  min_compute_nodes = 3
+  min_control_nodes = 3
 
 class Inventory:
     """Provide several convenience methods to retrieve information from MAAS API."""
@@ -61,6 +64,7 @@ class Inventory:
         self.cli_handler()
 
         if self.args.list:
+            self.checker()
             print json.dumps(self.inventory(), sort_keys=True, indent=2)
         elif self.args.host:
             print json.dumps(self.host(), sort_keys=True, indent=2)
@@ -121,6 +125,38 @@ class Inventory:
         url = "{}/tags/{}/?op=machines".format(self.maas.rstrip(), self.args.tag)
         request = requests.get(url, headers=headers)
         return json.loads(request.text)
+ 
+    def checker(self):
+        """Check some segnificant parameters"""
+        res = {'counts':{'control-plane':0,'compute-plane':0,'osd-nodes':0}}
+        for tag in res['counts'].keys():
+            headers = self.auth()
+            url = "{}/tags/{}/?op=nodes".format(self.maas.rstrip(), tag)
+            request = requests.get(url, headers=headers)
+            node_list = json.loads(request.text)
+            for server in node_list:
+              if server['zone']['name'] == Config.maas_region:
+                if (server['node_type_name'] == 'Machine' and server['status_name'] == 'Deployed') or server['node_type'] in [2,4]:
+                  res['counts'][tag] += 1
+                  if tag == 'osd-nodes':
+                    journal = False
+                    for disk in server['physicalblockdevice_set']:
+                      if 'journal' in disk['tags']:
+                        journal = True
+                        break
+                    if not journal:
+                      print("Journal is absent on server {}. Verify tag 'journal' on disk in maas".format(server['hostname']))
+                      sys.exit(1)
+        if res['counts']['control-plane'] < Config.min_control_nodes:
+          print("Not enouth control nodes in inventory. Verify tag 'control-plane' on servers in maas")
+          sys.exit(1)
+        if res['counts']['compute-plane'] < Config.min_compute_nodes:
+          print("Not enouth compute nodes in inventory. Verify tag 'compute-plane' on servers in maas")
+          sys.exit(1)
+        if res['counts']['osd-nodes'] < Config.min_osd_nodes:
+          print("Not enouth osd nodes in inventory. Verify tag 'osd-nodes' on servers in maas")
+          sys.exit(1)
+          
 
     def inventory(self):
         """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
@@ -177,7 +213,7 @@ class Inventory:
                  'ansible_host': iface['links'][0]['ip_address'],
                  }
              nodes_meta['_meta']['hostvars'][node['hostname']]['docker_iptables_enabled'] = True
-           elif node['node_type_name'] == 'Machine':
+           elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
              if not node['tag_names']:
                pass
              else:
@@ -186,16 +222,14 @@ class Inventory:
                }
                if 'osd-nodes' in node['tag_names']:
                  disks = []
-                 journal_dev = ""
+                 journal_disk = ""
                  for disk in node['physicalblockdevice_set']:
                    disks.append(disk['name'])
                    if 'journal' in disk['tags']:
-                     journal_dev = disk['name']
+                     journal_disk = disk['name']
                      nodes_meta['_meta']['hostvars'][node['hostname']]['osd_jour'] = disk['name']
-                 if not journal_dev:
-                   print("Journal is absent on server {}".format(node['hostname']))
-                   sys.exit(1)
-                 nodes_meta['_meta']['hostvars'][node['hostname']]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_dev]))
+                 if journal_disk:
+                   nodes_meta['_meta']['hostvars'][node['hostname']]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
 
         # Add some static groups
         ansible['ungrouped'] = {}

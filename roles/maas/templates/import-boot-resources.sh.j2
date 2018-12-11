@@ -175,6 +175,12 @@ function configure_boot_sources {
   fi
 }
 
+function configure_tags {
+  for tag in compute-plane control-plane osd-nodes;do
+  maas ${ADMIN_USERNAME} tags create name=${tag}
+  done
+}
+
 KEY=$(maas-region apikey --username=${ADMIN_USERNAME})
 maas login ${ADMIN_USERNAME} ${MAAS_ENDPOINT} $KEY
 
@@ -183,6 +189,7 @@ configure_admin_ssh_key
 configure_proxy
 configure_ntp
 configure_dns
+configure_tags
 
 # make call to import images
 configure_boot_sources

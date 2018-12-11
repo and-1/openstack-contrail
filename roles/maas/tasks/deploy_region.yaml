@@ -78,7 +78,7 @@
     hostname: maas-region-controller
     ports:
     - "{{ansible_default_ipv4.address}}:{{MAAS_UI_PORT}}:80"
-#    - "{{ansible_default_ipv4.address}}:69:69/udp"
+    - "{{ansible_default_ipv4.address}}:{{MAAS_PROXY_PORT}}:{{MAAS_PROXY_PORT}}"
     - "{{ansible_default_ipv4.address}}:53:53"
     - "{{ansible_default_ipv4.address}}:5240:5240"
     tty: true

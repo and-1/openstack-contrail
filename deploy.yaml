@@ -1,4 +1,10 @@
 ---
+- hosts: master
+  tasks:
+  - name: Checking...
+    debug: msg="Check region in maas and in config"
+    failed_when: "maas_region != region"
+
 - hosts: k8s-cluster
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   gather_facts: true

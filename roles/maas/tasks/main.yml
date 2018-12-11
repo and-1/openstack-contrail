@@ -36,7 +36,7 @@
           -e MAAS_NTP_UPSTREAM={{MAAS_NTP_SERVERS | join(',')}}
           -e MAAS_NTP_EXTERNAL_ONLY='false'
           -e MAAS_DNS_DNSSEC_REQUIRED='no'
-          -e MAAS_DNS_SERVERS={{MAAS_DNS_SERVERS | join(',')}}
+          -e MAAS_DNS_SERVERS={{MAAS_DNS_UPSTREAM | join(',')}}
           -e MAAS_DEFAULT_OS={{MAAS_DEFAULT_OS}}
           -e MAAS_DEFAULT_DISTRO={{MAAS_DEFAULT_DISTRO}}
           -e MAAS_DEFAULT_KERNEL={{MAAS_DEFAULT_KERNEL}}
