@@ -41,14 +41,41 @@ function set_zone {
     maas ${ADMIN_USERNAME} zones create name=${REGION}
   fi
 # Get rack id
-  rack_id=$(maas admin rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .system_id else "" end')
+  export rack_id=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .system_id else "" end')
 # Check current zone
-  cur_zone=$(maas admin rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .zone.name else "" end')
+  cur_zone=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .zone.name else "" end')
   if [ "x$cur_zone" != "x${REGION}" ];then
     maas admin rack-controllers set-zone zone=${REGION} nodes=${rack_id}
   fi
+  if ! $(maas ${ADMIN_USERNAME} spaces read | jq -r ' .[] | .name' | grep -q "${REGION}");then
+    maas ${ADMIN_USERNAME} spaces create name=${REGION}
+  fi
 }
+
+function config_pxe_net {
+{% for iface in ansible_interfaces %}
+{% if hostvars[ansible_hostname]['ansible_'+iface]['ipv4'] is defined and hostvars[ansible_hostname]['ansible_'+iface]['ipv4']['address'] == ansible_host %}
+{% set iface_dict = hostvars[ansible_hostname]['ansible_'+iface]['ipv4'] %}
+  subnet="{{(iface_dict['network']+'/'+iface_dict['netmask'])| ipaddr('net')}}"
+  start_ip="{{(iface_dict['network'] | ipaddr('int') + MAAS_DHCP_RANGE.start) | ipaddr('address')}}"
+  end_ip="{{(iface_dict['network'] | ipaddr('int') + MAAS_DHCP_RANGE.end) | ipaddr('address')}}"
+{% endif %}
+{% endfor %}
+  while ! $(maas ${ADMIN_USERNAME} subnets read | jq -r ' .[] | .name' | grep -q "$subnet");do
+    sleep 5
+  done
+  subnet_id=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .id else "" end' | tr -d '[:space:]')
+  vid=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .vlan.vid else "" end' | tr -d '[:space:]')
+  fabric=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .vlan.fabric else "" end' | tr -d '[:space:]')
+  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "'$fabric'" then .id else "" end')
+  maas ${ADMIN_USERNAME} ipranges create type=dynamic start_ip=${start_ip} end_ip=${end_ip}
+  maas ${ADMIN_USERNAME} vlan update $fabric_id $vid dhcp_on=true space=${REGION} primary_rack=${rack_id}
+  maas ${ADMIN_USERNAME} fabric update $fabric_id name="DEFAULT"
+  maas ${ADMIN_USERNAME} subnet update $subnet_id dns_servers={{MAAS_DNS_NODE | join(',')}}
+}
+
 
 maas login ${ADMIN_USERNAME} ${MAAS_ENDPOINT} $MAAS_API_KEY
 wait_rack
 set_zone
+config_pxe_net

@@ -1,6 +1,6 @@
 - name: "REGION: generate passwords for"
   set_fact:
-    "maas_{{item}}": "{{lookup('password', inventory_dir+'/credentials/maas.'+item+'.creds chars=ascii_letters length=15')}}"
+    "maas_{{item}}_pwd": "{{lookup('password', inventory_dir+'/credentials/maas.'+item+'.creds chars=ascii_letters length=15')}}"
   with_items:
   - 'db'
   - 'ui'
@@ -32,6 +32,16 @@
   - 000-default.conf
   - maas-http.conf
   - ports.conf
+- name: "REGION: create network for region controller"
+  docker_network:
+    name: maas
+    driver: bridge
+    driver_options:
+      com.docker.network.bridge.name: maas
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+    ipam_options:
+      subnet: '10.10.10.0/24'
+    state: present
 - name: "REGION: start postgres contrainer"
   docker_container:
     name: postgresql
@@ -39,22 +49,38 @@
     state: started
     detach: true
     env:
-      USER_DB_PASS: "{{maas_db}}"
-    network_mode: host
+      USER_DB_PASS: "{{maas_db_pwd}}"
+    networks:
+    - name: maas
+    purge_networks: yes
     volumes:
     - /opt/maas/pg_data:/var/lib/postgresql/data
     - /opt/maas/bin/db-init.sh:/tmp/db-init.sh
 - name: "REGION: create db for maas"
   shell: docker exec -t postgresql /tmp/db-init.sh
 - name: "REGION: start db sync job"
-  shell: docker run --rm -t --name maas-db-sync-job --network host -v /opt/maas/conf/regiond.conf:/etc/maas/regiond.conf -v /opt/maas/bin/db-sync.sh:/tmp/db-sync.sh --entrypoint /tmp/db-sync.sh "{{MAAS_REGION_IMG}}"
+  shell: "docker run --rm -t --name maas-db-sync-job \
+         --network maas \
+         -v /opt/maas/conf/regiond.conf:/etc/maas/regiond.conf \
+         -v /opt/maas/bin/db-sync.sh:/tmp/db-sync.sh \
+         --entrypoint /tmp/db-sync.sh \
+         {{MAAS_REGION_IMG}}"
 - name: "REGION: run maas region contrainer"
   docker_container:
-    name: maas-region
+    name: maas-region-controller
     image: "{{MAAS_REGION_IMG}}"
     state: started
-    network_mode: host
+    networks:
+    - name: maas
+    purge_networks: yes
     privileged: true
+    dns_servers: "{{MAAS_DNS_UPSTREAM}}"
+    hostname: maas-region-controller
+    ports:
+    - "{{ansible_default_ipv4.address}}:{{MAAS_UI_PORT}}:80"
+#    - "{{ansible_default_ipv4.address}}:69:69/udp"
+    - "{{ansible_default_ipv4.address}}:53:53"
+    - "{{ansible_default_ipv4.address}}:5240:5240"
     tty: true
     volumes:
     - /opt/maas/conf/regiond.conf:/etc/maas/regiond.conf
@@ -67,11 +93,11 @@
 - name: "REGION: create admin user"
   shell: "docker exec -t \
           -e ADMIN_USERNAME={{MAAS_UI_USER}} \
-          -e ADMIN_PASSWORD={{maas_ui}} \
+          -e ADMIN_PASSWORD={{maas_ui_pwd}} \
           -e ADMIN_EMAIL={{MAAS_UI_USER_MAIL}} \
-          maas-region bash -c /tmp/ui-user-init.sh"
+          maas-region-controller bash -c /tmp/ui-user-init.sh"
 - name: "REGION: get information for rack initialization"
-  shell: docker exec -t maas-region {{item}}
+  shell: docker exec -t maas-region-controller {{item}}
   with_items:
   - "maas-region apikey --username={{MAAS_UI_USER}}"
   - "cat /var/lib/maas/secret"

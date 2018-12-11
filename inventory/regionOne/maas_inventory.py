@@ -154,7 +154,7 @@ class Inventory:
         ansible['all'] = {
            "hosts": hosts,       
            "vars": {
-              'maas_region': zone,
+              'maas_region': Config.maas_region,
               'ansible_python_interpreter': '/usr/bin/python3',
               'ansible_ssh_private_key_file': '{{inventory_dir}}/../share_creds/maas.ssh.key',
               'ansible_user': 'ubuntu',
@@ -171,7 +171,12 @@ class Inventory:
         
         for node in node_dump:
            if node['node_type'] in [2,4]:
-             pass
+             for iface in node['interface_set']:
+               if type(iface['vlan']) == dict and len(iface['links']) > 0 and iface['vlan']['dhcp_on']:
+                 nodes_meta['_meta']['hostvars'][node['hostname']] = {
+                 'ansible_host': iface['links'][0]['ip_address'],
+                 }
+             nodes_meta['_meta']['hostvars'][node['hostname']]['docker_iptables_enabled'] = True
            elif node['node_type_name'] == 'Machine':
              if not node['tag_names']:
                pass

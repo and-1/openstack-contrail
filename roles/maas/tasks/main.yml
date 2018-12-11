@@ -33,7 +33,7 @@
           -e MAAS_PROXY_SERVER=''
           -e MAAS_INTERNAL_PROXY_PORT={{MAAS_PROXY_PORT}}
           -e MAAS_HTTP_BOOT='true'
-          -e MAAS_NTP_SERVERS={{MAAS_NTP_SERVERS | join(',')}}
+          -e MAAS_NTP_UPSTREAM={{MAAS_NTP_SERVERS | join(',')}}
           -e MAAS_NTP_EXTERNAL_ONLY='false'
           -e MAAS_DNS_DNSSEC_REQUIRED='no'
           -e MAAS_DNS_SERVERS={{MAAS_DNS_SERVERS | join(',')}}
@@ -41,5 +41,4 @@
           -e MAAS_DEFAULT_DISTRO={{MAAS_DEFAULT_DISTRO}}
           -e MAAS_DEFAULT_KERNEL={{MAAS_DEFAULT_KERNEL}}
           -e MAAS_SSH_PUBLIC='{{maas_ssh_pub}}'
-          maas-region bash -c /tmp/import-boot-resources.sh"
-
+          maas-region-controller bash -c /tmp/import-boot-resources.sh"

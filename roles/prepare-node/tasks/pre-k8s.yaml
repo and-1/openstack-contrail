@@ -3,15 +3,15 @@
   template:
     src: vlan_real.conf.j2
     dest: /etc/netplan/60-osh-iface.yaml
-  when: "rollout_mode == real"
+  when: "rollout_mode == 'real'"
 - name: Config network
   shell: "{{item}} || exit 0"
   with_items:
   - "ip l add {{k8s_iface}} link bond0 type macvlan mode bridge && ip l set {{k8s_iface}} up"
   - "ip l add {{ceph_iface}} link bond0 type macvlan mode bridge && ip l set {{ceph_iface}} up"
-  - "ip a a $(echo {{k8s_net}} | awk '{print substr($0,1,10)}')$(echo {{ansible_default_ipv4.address}}| awk -F\. '{print $NF}')/24 dev {{k8s_iface}}"
-  - "ip a a $(echo {{ceph_net}} | awk '{print substr($0,1,10)}')$(echo {{ansible_default_ipv4.address}}| awk -F\. '{print $NF}')/24 dev {{ceph_iface}}"
-  when: "rollout_mode == test"
+  - "ip a a $(echo {{k8s_net}} | awk '{print substr($0,1,10)}')$(echo {{ansible_default_ipv4.address}}| awk -F\\. '{print $NF}')/24 dev {{k8s_iface}}"
+  - "ip a a $(echo {{ceph_net}} | awk '{print substr($0,1,10)}')$(echo {{ansible_default_ipv4.address}}| awk -F\\. '{print $NF}')/24 dev {{ceph_iface}}"
+  when: "rollout_mode == 'test'"
 - name: Install required packages
   apt: name="{{item}}" state=present
   with_items:

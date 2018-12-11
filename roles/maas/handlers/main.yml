@@ -1,2 +1,5 @@
 ---
-# handlers file for maas
+- name: restart resolved
+  systemd:
+    name: systemd-resolved
+    state: restarted

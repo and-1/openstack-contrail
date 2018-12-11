@@ -1,14 +1,9 @@
-- name: "REGION: get region endpint"
+- name: "RACK_CONTROLLER: get shared information"
   set_fact:
-    maas_endpoint: "{{lookup('file', {{inventory_dir}}/../share_creds/maas.region.endpoint)}}"
-  when: "maas_endpoint is not defined"
-- name: "RACK_CONTROLLER: get region secrets"
-  set_fact:
-    "{{item.0}}_{{item.1}}": "{{lookup('file', inventory_dir+'/../share_creds/'+item.0+'.'+item.1+'.creds')}}"
-  with_nested:
-  - ['maas']
-  - ['apikey', 'secret']
-  delegate_to: localhost
+    "maas_{{item.0}}": "{{lookup('file', inventory_dir+'/../share_creds/maas.'+item.1)}}"
+  with_together:
+  - ['apikey', 'secret', 'ssh_key', 'endpoint']
+  - ['apikey.creds', 'secret.creds', 'ssh.key.pub', 'region.endpoint']
 - name: "RACK_CONTROLLER: create bin scripts"
   template:
     src: "{{item}}.j2"
@@ -24,6 +19,7 @@
     image: "{{MAAS_RACK_IMG}}"
     state: started
     network_mode: host
+    purge_networks: true
     privileged: true
     tty: true
     env:
@@ -45,4 +41,36 @@
           -e TRY_LIMIT=1
           -e REGION={{region}}
           maas-rack-controller bash -c /tmp/config-rack.sh"
-
+- name: "RACK_CONTROLLER: ensure group sudo exist"
+  group:
+    name: sudo
+    state: present
+- name: "RACK_CONTROLLER: ensure user ubuntu exist"
+  user:
+    name: ubuntu
+    home: /home/ubuntu
+    append: true
+    groups:
+    - sudo
+    shell: /bin/bash
+    state: present
+    create_home: true
+- name: "RACK_CONTROLLER: ensure sudo group is admin"
+  lineinfile:
+    regexp: "^%sudo.*"
+    line: "%sudo   ALL=(ALL:ALL) ALL"
+    state: present
+    path: /etc/sudoers
+- name: "RACK_CONTROLLER: set ssh key for ubuntu user"
+  lineinfile:
+    line: "{{maas_ssh_key}}"
+    path: /home/ubuntu/.ssh/authorized_keys
+    state: present
+    create: true
+- name: "RACK_CONTROLLER: set dns"
+  lineinfile:
+    line: "DNS={{MAAS_DNS_NODE | join(',')}}"
+    regexp: "^#?DNS.*$"
+    state: present
+    path: /etc/systemd/resolved.conf
+  notify: restart resolved
