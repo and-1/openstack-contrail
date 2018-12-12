@@ -5,8 +5,6 @@ ceph_iface: "ceph"
 k8s_net: "192.168.1.0/24"
 k8s_vlan: 1501
 k8s_iface: "k8s"
-vm_net: "192.168.0.0/24"
-vm_iface: "vm_net"
 default_gw: "192.168.0.194"
 # TODO
 ntp_srv:

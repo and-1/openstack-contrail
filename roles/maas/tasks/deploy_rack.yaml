@@ -67,10 +67,3 @@
     path: /home/ubuntu/.ssh/authorized_keys
     state: present
     create: true
-- name: "RACK_CONTROLLER: set dns"
-  lineinfile:
-    line: "DNS={{MAAS_DNS_NODE | join(',')}}"
-    regexp: "^#?DNS.*$"
-    state: present
-    path: /etc/systemd/resolved.conf
-  notify: restart resolved

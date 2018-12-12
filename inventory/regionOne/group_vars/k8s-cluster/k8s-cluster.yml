@@ -198,5 +198,3 @@ kubelet_status_update_frequency: 4s
 kube_controller_node_monitor_grace_period: 16s
 kube_controller_node_monitor_period: 2s
 kube_controller_pod_eviction_timeout: 30s
-
-#ip: "{{ hostvars[inventory_hostname]['ansible_' + k8s_iface]['ipv4']['address']}}"

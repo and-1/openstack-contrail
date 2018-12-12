@@ -29,14 +29,18 @@ import pickle
 
 import oauth.oauth as oauth
 import requests
+import ipaddress
+import yaml
 
 class Config:
   maas_api_url_file = "../share_creds/maas.region.endpoint"
   maas_api_key_file = "../share_creds/maas.apikey.creds"
-  maas_region = "RegionOne"
+  osh_ansible_env = "group_vars/all/osh.yml"
   min_osd_nodes = 3
   min_compute_nodes = 3
   min_control_nodes = 3
+  with open(os.path.join(os.path.dirname(__file__), osh_ansible_env),'r') as file:
+    osh_config = yaml.safe_load(file)
 
 class Inventory:
     """Provide several convenience methods to retrieve information from MAAS API."""
@@ -135,7 +139,7 @@ class Inventory:
             request = requests.get(url, headers=headers)
             node_list = json.loads(request.text)
             for server in node_list:
-              if server['zone']['name'] == Config.maas_region:
+              if server['zone']['name'] == Config.osh_config['region']:
                 if (server['node_type_name'] == 'Machine' and server['status_name'] == 'Deployed') or server['node_type'] in [2,4]:
                   res['counts'][tag] += 1
                   if tag == 'osd-nodes':
@@ -170,7 +174,7 @@ class Inventory:
             group_name = tag
             hosts = []
             for server in response:
-              if server['zone']['name'] == Config.maas_region:
+              if server['zone']['name'] == Config.osh_config['region']:
                 if (server['node_type_name'] == 'Machine' and server['status_name'] == 'Deployed') or server['node_type'] in [2,4]:
                     hosts.append(server['hostname'])
                     ansible[group_name] = {
@@ -182,7 +186,7 @@ class Inventory:
         hosts = []
         for node in nodes:
            zone = node['zone']['name']
-           if zone == Config.maas_region:
+           if zone == Config.osh_config['region']:
              if (node['node_type_name'] == 'Machine' and node['status_name'] != 'Deployed') and node['node_type'] not in [2,4]:
                continue
              hosts.append(node['hostname'])
@@ -190,7 +194,6 @@ class Inventory:
         ansible['all'] = {
            "hosts": hosts,       
            "vars": {
-              'maas_region': Config.maas_region,
               'ansible_python_interpreter': '/usr/bin/python3',
               'ansible_ssh_private_key_file': '{{inventory_dir}}/../share_creds/maas.ssh.key',
               'ansible_user': 'ubuntu',
@@ -211,6 +214,7 @@ class Inventory:
                if type(iface['vlan']) == dict and len(iface['links']) > 0 and iface['vlan']['dhcp_on']:
                  nodes_meta['_meta']['hostvars'][node['hostname']] = {
                  'ansible_host': iface['links'][0]['ip_address'],
+                 'ip': self.getip(iface['links'][0]['ip_address']),
                  }
              nodes_meta['_meta']['hostvars'][node['hostname']]['docker_iptables_enabled'] = True
            elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
@@ -219,6 +223,7 @@ class Inventory:
              else:
                nodes_meta['_meta']['hostvars'][node['hostname']] = {
                  'ansible_host': node['ip_addresses'][0],
+                 'ip': self.getip(node['ip_addresses'][0]),
                }
                if 'osd-nodes' in node['tag_names']:
                  disks = []
@@ -264,6 +269,15 @@ class Inventory:
         result = ansible.copy()
         result.update(nodes_meta)
         return result
+
+    def getip(self, src_ip):
+        dest_net = ipaddress.ip_network(Config.osh_config['k8s_net'].decode('utf-8'))
+        prefix = dest_net.prefixlen
+        src_ip_mask = ipaddress.IPv4Interface("{}/{}".format(src_ip,prefix).decode('utf-8'))
+        src_net = ipaddress.ip_network(str(src_ip_mask.network).decode('utf-8'))
+        host_ip = int(ipaddress.ip_address(src_ip)) - int(src_net.network_address)
+        ip = ipaddress.ip_address(int(dest_net.network_address) + host_ip)
+        return str(ip)
 
     def nodes(self):
         """Return a list of nodes from the MAAS API."""

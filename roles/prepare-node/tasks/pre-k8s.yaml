@@ -4,6 +4,7 @@
     src: vlan_real.conf.j2
     dest: /etc/netplan/60-osh-iface.yaml
   when: "rollout_mode == 'real'"
+  notify: netplan_apply
 - name: Config network
   shell: "{{item}} || exit 0"
   with_items:
