@@ -1,0 +1,38 @@
+network:
+    version: 2
+    ethernets:
+        ens3:
+            match:
+                macaddress: fa:16:3e:f9:61:6f
+            mtu: 1500
+            set-name: ens3
+        ens4:
+            match:
+                macaddress: fa:16:3e:c1:9c:79
+            mtu: 1500
+            set-name: ens4
+    bonds:
+        bond0:
+            interfaces:
+            - ens3
+            - ens4
+            macaddress: fa:16:3e:f9:61:6f
+            mtu: 1500
+            parameters:
+                down-delay: 0
+                gratuitious-arp: 1
+                mii-monitor-interval: 100
+                lacp-rate: fast
+                mode: 802.3ad
+                transmit-hash-policy: layer2+3
+                up-delay: 0
+    vlans:
+        bond0.10:
+            id: 10
+            link: bond0
+            addresses:
+            - 192.168.1.2/24
+            gateway4: 192.168.1.2
+            nameservers:
+                addresses: 
+                - 8.8.8.8 

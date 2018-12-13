@@ -237,7 +237,7 @@ class Inventory:
                    nodes_meta['_meta']['hostvars'][node['hostname']]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
 
         # Add some static groups
-        ansible['ungrouped'] = {}
+#        ansible['ungrouped'] = {}
         ansible['kube-master'] = {
           'hosts': [],
           'vars': {},

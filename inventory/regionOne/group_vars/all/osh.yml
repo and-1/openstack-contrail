@@ -1,16 +1,16 @@
 #---------------------------Networks---------#
 ceph_net: "192.168.2.0/24"
 ceph_vlan: 1500
-ceph_iface: "ceph"
+ceph_iface: "ens5"
 k8s_net: "192.168.1.0/24"
 k8s_vlan: 1501
-k8s_iface: "k8s"
+k8s_iface: "ens4"
 default_gw: "192.168.0.194"
 # TODO
 ntp_srv:
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.194:5000"
-contrail_tag: "queens-master-411"
+contrail_tag: "queens-master-418"
 osh_tag: 1.0
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#

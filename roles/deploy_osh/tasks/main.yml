@@ -25,7 +25,7 @@
   include: deploy_common.yaml GROUP="MONITORING"
   with_items:
   - "{{components.MONITORING}}"
-  when: "components.INFRA_MONITORING is defined and monitoring"
+  when: "components.MONITORING is defined and monitoring"
 - name: Deploy LOGGING
   include: deploy_common.yaml GROUP="LOGGING"
   with_items:

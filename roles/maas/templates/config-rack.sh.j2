@@ -67,7 +67,7 @@ function config_pxe_net {
   subnet_id=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .id else "" end' | tr -d '[:space:]')
   vid=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .vlan.vid else "" end' | tr -d '[:space:]')
   fabric=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .vlan.fabric else "" end' | tr -d '[:space:]')
-  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "'$fabric'" then .id else "" end')
+  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "'$fabric'" then .id else "" end' | tr -d '[:space:]')
   maas ${ADMIN_USERNAME} ipranges create type=dynamic start_ip=${start_ip} end_ip=${end_ip}
   maas ${ADMIN_USERNAME} vlan update $fabric_id $vid dhcp_on=true space=${REGION} primary_rack=${rack_id}
   maas ${ADMIN_USERNAME} fabric update $fabric_id name="DEFAULT"

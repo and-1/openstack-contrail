@@ -1,5 +1,5 @@
 *.retry
-*/artifacts/
+*/**/artifacts/
 test.yaml
 *.swp
 TODO
