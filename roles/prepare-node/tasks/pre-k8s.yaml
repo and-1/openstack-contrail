@@ -36,7 +36,7 @@
   with_items: "{{ groups['k8s-cluster'] }}"
 - name: Add dns names to hosts
   lineinfile:
-    line: "{{hostvars[item.1]['ansible_'+lookup('vars', item.0)]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}.{{global_domain_suffix}}"
+    line: "{{hostvars[item.1]['ansible_'+lookup('vars', item.0)]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}{%if fqdn_hostnames %}.{{global_domain_suffix}}{%endif%}"
     path: /etc/hosts
     state: present
   with_nested:

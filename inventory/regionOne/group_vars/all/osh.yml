@@ -25,6 +25,7 @@ mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 global_domain_suffix: "region1.cloud.local"
+fqdn_hostnames: true
 pod_resources: true
 #--------------------------Infra-------------#
 infra:
