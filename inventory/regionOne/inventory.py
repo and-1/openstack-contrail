@@ -152,19 +152,23 @@ class Inventory:
                       print("Journal is absent on server {}. Verify tag 'journal' on disk in maas".format(server['hostname']))
                       sys.exit(1)
         if res['counts']['control-plane'] < Config.min_control_nodes:
-          print("Not enouth control nodes in inventory. Verify tag 'control-plane' on servers in maas")
+          print("Not enouth control nodes in inventory in region {}. Verify tag 'control-plane' on servers in maas".format(Config.osh_config['region']))
           sys.exit(1)
         if res['counts']['compute-plane'] < Config.min_compute_nodes:
-          print("Not enouth compute nodes in inventory. Verify tag 'compute-plane' on servers in maas")
+          print("Not enouth compute nodes in inventory in region {}. Verify tag 'compute-plane' on servers in maas".format(Config.osh_config['region']))
           sys.exit(1)
         if res['counts']['osd-nodes'] < Config.min_osd_nodes:
-          print("Not enouth osd nodes in inventory. Verify tag 'osd-nodes' on servers in maas")
+          print("Not enouth osd nodes in inventory in region {}. Verify tag 'osd-nodes' on servers in maas".format(Config.osh_config['region']))
           sys.exit(1)
           
 
     def inventory(self):
         """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
         tags = self.tags()
+        if Config.osh_config['fqdn_hostnames']:
+          domain = "."+Config.osh_config['global_domain_suffix']
+        else:
+          domain = ""
         ansible = {}
         for tag in tags:
             headers = self.auth()
@@ -176,7 +180,7 @@ class Inventory:
             for server in response:
               if server['zone']['name'] == Config.osh_config['region']:
                 if (server['node_type_name'] == 'Machine' and server['status_name'] == 'Deployed') or server['node_type'] in [2,4]:
-                    hosts.append(server['hostname'])
+                    hosts.append(server['hostname']+domain)
                     ansible[group_name] = {
                         "hosts": hosts,
                         "vars": {}
@@ -189,7 +193,7 @@ class Inventory:
            if zone == Config.osh_config['region']:
              if (node['node_type_name'] == 'Machine' and node['status_name'] != 'Deployed') and node['node_type'] not in [2,4]:
                continue
-             hosts.append(node['hostname'])
+             hosts.append(node['hostname']+domain)
 
         ansible['all'] = {
            "hosts": hosts,       
@@ -211,17 +215,21 @@ class Inventory:
         for node in node_dump:
            if node['node_type'] in [2,4]:
              for iface in node['interface_set']:
-               if type(iface['vlan']) == dict and len(iface['links']) > 0 and iface['vlan']['dhcp_on']:
-                 nodes_meta['_meta']['hostvars'][node['hostname']] = {
-                 'ansible_host': iface['links'][0]['ip_address'],
-                 'ip': self.getip(iface['links'][0]['ip_address']),
-                 }
-             nodes_meta['_meta']['hostvars'][node['hostname']]['docker_iptables_enabled'] = True
+               try:
+                 dhcp = iface['links'][0]['subnet']['vlan']['dhcp_on']
+                 if dhcp:
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                   'ansible_host': iface['links'][0]['ip_address'],
+                   'ip': self.getip(iface['links'][0]['ip_address']),
+                   }
+               except:
+                 continue
+             nodes_meta['_meta']['hostvars'][node['hostname']+domain]['docker_iptables_enabled'] = True
            elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
              if not node['tag_names']:
                pass
              else:
-               nodes_meta['_meta']['hostvars'][node['hostname']] = {
+               nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                  'ansible_host': node['ip_addresses'][0],
                  'ip': self.getip(node['ip_addresses'][0]),
                }
@@ -232,9 +240,9 @@ class Inventory:
                    disks.append(disk['name'])
                    if 'journal' in disk['tags']:
                      journal_disk = disk['name']
-                     nodes_meta['_meta']['hostvars'][node['hostname']]['osd_jour'] = disk['name']
+                     nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_jour'] = disk['name']
                  if journal_disk:
-                   nodes_meta['_meta']['hostvars'][node['hostname']]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
 
         # Add some static groups
 #        ansible['ungrouped'] = {}
