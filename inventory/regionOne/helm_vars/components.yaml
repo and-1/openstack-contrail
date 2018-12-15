@@ -39,6 +39,12 @@ INFRA_CORE:
 - name: mariadb
   path: openstack-helm-infra/mariadb
   namespace: openstack
+- name: rabbitmq
+  path: openstack-helm-infra/rabbitmq
+  namespace: openstack
+- name: memcached
+  path: openstack-helm-infra/memcached
+  namespace: openstack
 MONITORING:
 - name: prometheus
   path: openstack-helm-infra/prometheus
@@ -78,12 +84,6 @@ LOGGING:
   path: openstack-helm-infra/kibana
   namespace: osh-infra
 OSH_CORE:
-- name: rabbitmq
-  path: openstack-helm-infra/rabbitmq
-  namespace: openstack
-- name: memcached
-  path: openstack-helm-infra/memcached
-  namespace: openstack
 - name: keystone
   path: openstack-helm/keystone
   namespace: openstack
@@ -118,9 +118,9 @@ CONTRAIL:
 - name: contrail-analytics
   namespace: contrail
   path: contrail-helm-deployer/contrail-analytics
-#- name: contrail-vrouter
-#  namespace: contrail
-#  path: contrail-helm-deployer/contrail-vrouter
+- name: contrail-vrouter
+  namespace: contrail
+  path: contrail-helm-deployer/contrail-vrouter
 OS_SUPPL:
 - name: heat
   path: openstack-helm/heat

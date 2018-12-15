@@ -3,7 +3,10 @@
   template:
     src: "vlan_{{rollout_mode}}.conf.j2"
     dest: /etc/netplan/60-osh-iface.yaml
-  notify: netplan_apply
+  register: netplan_config
+- name: "Apply new network configuration"
+  shell: netplan apply
+  when: netplan_config.changed
 - name: Install required packages
   apt: name="{{item}}" state=present
   with_items:
@@ -25,3 +28,26 @@
       :programname,isequal,"dockerd" /var/log/dockerd.log
       & stop
   notify: restart rsyslog
+- name: Gather facts from ALL hosts (regardless of limit or tags)
+  setup:
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  when: hostvars[item]['ansible_'+k8s_iface]['ipv4'] is not defined
+  with_items: "{{ groups['k8s-cluster'] }}"
+- name: Add dns names to hosts
+  lineinfile:
+    line: "{{hostvars[item.1]['ansible_'+lookup('vars', item.0)]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}.{{global_domain_suffix}}"
+    path: /etc/hosts
+    state: present
+  with_nested:
+  - ['k8s_iface','ceph_iface']
+  - "{{ groups['k8s-cluster'] }}"
+- name: Add endpoints to hosts for rbd provision
+  lineinfile:
+    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
+    path: /etc/hosts
+    state: present
+  with_nested:
+  - "{{ groups['control-plane'] }}"
+  - "{{ endpoints }}"
+  when: "endpoints | length != 0 and 'maas' not in group_names"

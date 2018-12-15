@@ -17,12 +17,6 @@
   roles:
    - { role: prepare-node, stage: post-k8s, tags: [init, post-k8s]}
 
-- hosts: k8s-cluster
-  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
-  gather_facts: false
-  roles:
-   - { role: prepare-node, stage: post-k8s-suppl, tags: [init, post-k8s]}
-
 - hosts: master
   roles:
   - { role: deploy_osh, tags: [osh]}

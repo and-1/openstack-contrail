@@ -17,6 +17,12 @@ global:
      MAX_HEAP_SIZE: "{{contrail.cassandra.Xmx}}"
      HEAP_NEWSIZE: "{{contrail.cassandra.Xmn}}"
      METADATA_PROXY_SECRET: "{{metadata_secret_key}}"
+     LOG_LEVEL: SYS_DEBUG
+     CLOUD_ORCHESTRATOR: openstack
+     AAA_MODE: cloud-admin
+     CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "5"
+     DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "5"
+
 #     VROUTER_AGENT__DEFAULT__gateway_mode: server
 
    images:

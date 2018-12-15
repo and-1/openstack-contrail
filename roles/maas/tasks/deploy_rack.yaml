@@ -20,6 +20,7 @@
     state: started
     network_mode: host
     purge_networks: true
+    restart_policy: always
     privileged: true
     tty: true
     env:

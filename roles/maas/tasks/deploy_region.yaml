@@ -53,6 +53,7 @@
     networks:
     - name: maas
     purge_networks: yes
+    restart_policy: always
     volumes:
     - /opt/maas/pg_data:/var/lib/postgresql/data
     - /opt/maas/bin/db-init.sh:/tmp/db-init.sh
@@ -73,6 +74,7 @@
     networks:
     - name: maas
     purge_networks: yes
+    restart_policy: always
     privileged: true
     dns_servers: "{{MAAS_DNS_UPSTREAM}}"
     hostname: maas-region-controller
