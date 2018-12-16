@@ -25,7 +25,7 @@ mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 global_domain_suffix: "region1.cloud.local"
-fqdn_hostnames: true
+fqdn_hostnames: false
 pod_resources: true
 #--------------------------Infra-------------#
 infra:
@@ -79,8 +79,8 @@ nova_ephimeral_pool_percent: 5
 BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
-monitoring: true
-logging: true
+monitoring: false
+logging: false
 alertmanager_notif:
   smtp_smarthost: '192.168.0.194:25'
   smtp_from: 'alertmanager@example.com'

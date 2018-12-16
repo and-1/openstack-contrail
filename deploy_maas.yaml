@@ -1,3 +1,13 @@
+- hosts: master
+  gather_facts: false
+  tasks:
+  - name: Delete all cached facts
+    file:
+      dest: "/tmp/{{item}}"
+      state: absent
+    with_items:
+    - "{{groups['k8s-cluster']}}"
+
 - hosts: maas
   roles:
   - { role: prepare-node, stage: pre-k8s}

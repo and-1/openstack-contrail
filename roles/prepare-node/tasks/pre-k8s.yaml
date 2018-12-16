@@ -28,12 +28,13 @@
       :programname,isequal,"dockerd" /var/log/dockerd.log
       & stop
   notify: restart rsyslog
-- name: Gather facts from ALL hosts (regardless of limit or tags)
+- name: Gather facts from servers
   setup:
   delegate_to: "{{ item }}"
   delegate_facts: True
   when: hostvars[item]['ansible_'+k8s_iface]['ipv4'] is not defined
   with_items: "{{ groups['k8s-cluster'] }}"
+  run_once: true
 - name: Add dns names to hosts
   lineinfile:
     line: "{{hostvars[item.1]['ansible_'+lookup('vars', item.0)]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}{%if fqdn_hostnames %}.{{global_domain_suffix}}{%endif%}"
