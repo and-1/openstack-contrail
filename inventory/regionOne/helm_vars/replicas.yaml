@@ -19,7 +19,7 @@ cinder:
 elasticsearch:
   master: 3
   data: 3
-  client: 3
+  client: 2
 fluent-logging:
   fluentd: 3
   prometheus_fluentd_exporter: 1
@@ -27,7 +27,7 @@ glance:
   api: 2
   registry: 2
 grafana:
-  grafana: 2
+  grafana: 1
 heat:
   api: 3
   cfn: 2
@@ -53,7 +53,7 @@ ingress-osh-infra:
 keystone:
   api: 3
 kibana:
-  kibana: 2
+  kibana: 1
 ldap:
   server: 1
 mariadb:
@@ -67,16 +67,16 @@ memcached:
 nagios:
   nagios: 3
 neutron:
-  server: 3
+  server: 2
 nova:
-  api_metadata: 2
+  api_metadata: 3
   compute_ironic: 2
   placement: 3
   osapi: 3
   conductor: 3
   consoleauth: 2
   scheduler: 3
-  novncproxy: 3
+  novncproxy: 1
   spiceproxy: 3
 prometheus-kube-state-metrics:
   kube_state_metrics: 1

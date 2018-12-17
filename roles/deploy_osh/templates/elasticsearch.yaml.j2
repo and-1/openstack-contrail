@@ -2,6 +2,7 @@ pod:
   replicas:
 {% for pod, rep in replicas[item.name].iteritems() %}
     {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+
 {% endfor %}
   lifecycle:
     upgrades:
@@ -116,7 +117,7 @@ conf:
         name: elasticsearch
       discovery:
         zen:
-          minimum_master_nodes: 2
+          minimum_master_nodes: {{ (groups['control-plane'] | length // 2) + 1 }}
       node:
         max_local_storage_nodes: 3
     snapshots:

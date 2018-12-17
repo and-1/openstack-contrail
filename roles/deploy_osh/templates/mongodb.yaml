@@ -2,6 +2,7 @@ pod:
   replicas:
 {% for pod, rep in replicas[item.name].iteritems() %}
     {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+
 {% endfor %}
 volume:
   size: 5Gi
