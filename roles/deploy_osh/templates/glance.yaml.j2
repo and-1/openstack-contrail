@@ -2,8 +2,9 @@
 storage: rbd
 pod:
   replicas:
-    api: 2
-    registry: 2
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

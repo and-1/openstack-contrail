@@ -25,7 +25,6 @@ mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 global_domain_suffix: "region1.cloud.local"
-fqdn_hostnames: false
 pod_resources: true
 #--------------------------Infra-------------#
 infra:
@@ -49,6 +48,9 @@ alertmanager:
 # OpenStack release. Now only queens supported
 os_release: "queens"
 region: "RegionOne"
+multyregion:
+  enable: true
+  main: true
 service_domain: "default"
 # Generate password and override static.
 # Don't disable it in production env
@@ -79,8 +81,8 @@ nova_ephimeral_pool_percent: 5
 BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
-monitoring: false
-logging: false
+monitoring: true
+logging: true
 alertmanager_notif:
   smtp_smarthost: '192.168.0.194:25'
   smtp_from: 'alertmanager@example.com'

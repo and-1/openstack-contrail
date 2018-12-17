@@ -81,15 +81,9 @@ conf:
 
 pod:
   replicas:
-    api_metadata: 2
-    compute_ironic: 2
-    placement: 3
-    osapi: 3
-    conductor: 3
-    consoleauth: 2
-    scheduler: 3
-    novncproxy: 3
-    spiceproxy: 3
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

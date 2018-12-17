@@ -24,7 +24,9 @@ modules:
   ENABLE_ZUN: 'no'
 pod:
   replicas:
-    server: 3
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

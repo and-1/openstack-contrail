@@ -7,11 +7,15 @@
   - images
   - endpoints
   - components
+  - replicas
 - name: Set component with not wait ready status
   set_fact:
     no_wait: 
     - 'nova'
     - 'prometheus-openstack-exporter'
+- name: Set control-plane mode
+  set_fact:
+    cp_mode: "{%if groups['control-plane']| length == 1 %}single{%elif groups['control-plane']| length > 1%}ha{%endif%}"
 - name: Prepare helm and tools
   include: prepare_helm.yaml
 - name: Generate info

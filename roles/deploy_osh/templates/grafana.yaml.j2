@@ -1,7 +1,9 @@
 {%- set domain = global_domain_suffix.split('.')|join(',dc=') %}
 pod:
   replicas:
-    grafana: 2
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

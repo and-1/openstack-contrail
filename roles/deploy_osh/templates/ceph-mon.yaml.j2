@@ -1,19 +1,3 @@
-{%- set osd_pairs = [] %}
-{%- for host in groups['osd-nodes'] %}
-{%- set host_osd_jour = hostvars[host]['osd_jour'] %}
-{%- set class = namespace(area="") %}
-{%- if join_areas.enabled %}
-{%- for area in join_areas.areas %}
-{%- if area.name+'-osd-node' in hostvars[host].group_names %}
-{%- set class.area = area.name %}
-{%- endif %}
-{%- endfor %}
-{%- endif %}
-{%- set disks = hostvars[host]['osd_disks'] %}
-{%- for disk in disks %}
-{%- do osd_pairs.append(disk+"-"+host_osd_jour+"-"+class.area) %}
-{%- endfor %}
-{%- endfor %}
 ---
 endpoints:
   identity:
@@ -38,6 +22,85 @@ storageclass:
     pool: cloud.infra
   cephfs:
     provision_storage_class: false
+
+pod:
+  replicas:
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
+  resources:
+    enabled: {{pod_resources}}
+    mgr:
+      requests:
+        memory: "50Mi"
+        cpu: "250m"
+      limits:
+        memory: "100Mi"
+        cpu: "500m"
+    checkdns:
+      requests:
+        memory: "5Mi"
+        cpu: "250m"
+      limits:
+        memory: "50Mi"
+        cpu: "500m"
+    mon:
+      requests:
+        memory: "50Mi"
+        cpu: "250m"
+      limits:
+        memory: "100Mi"
+        cpu: "500m"
+    mon_check:
+      requests:
+        memory: "5Mi"
+        cpu: "250m"
+      limits:
+        memory: "50Mi"
+        cpu: "500m"
+    tests:
+      requests:
+        memory: "10Mi"
+        cpu: "250m"
+      limits:
+        memory: "50Mi"
+        cpu: "500m"
+    jobs:
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      bootstrap:
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+        requests:
+          memory: "128Mi"
+          cpu: "500m"
+      secret_provisioning:
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+        requests:
+          memory: "128Mi"
+          cpu: "500m"
+      tests:
+        requests:
+          memory: "10Mi"
+          cpu: "250m"
+        limits:
+          memory: "50Mi"
+          cpu: "500m"
+    rbd_provisioner:
+      requests:
+        memory: "5Mi"
+        cpu: "250m"
+      limits:
+        memory: "50Mi"
+        cpu: "500m"
 
 conf:
   features:
@@ -163,30 +226,6 @@ conf:
   storage:
     mon:
       directory: /var/lib/ceph/mon
-  overrides:
-    ceph_osd:
-      labels:
-{% for osd in osd_pairs|unique %}
-{% set params = osd.split('-') %}
-       - label: 
-{% if join_areas.enabled %}
-           key: d{{params[0]}}-j{{params[1]}}-{{params[2]}}
-{% else %}
-           key: d{{params[0]}}-j{{params[1]}}
-{% endif %}
-           values: 
-           - "enabled"
-         #exclusive: false
-         conf:
-           storage:
-             osd:
-               - data:
-                   type: block-bluestore
-                   location: /dev/{{params[0]}}
-                 journal:
-                   type: block-bluestore
-                   location: /dev/{{params[1]}}
-{% endfor %}
 
 ceph_mgr_enabled_modules:
   - restful

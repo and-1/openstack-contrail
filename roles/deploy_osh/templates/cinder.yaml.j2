@@ -10,10 +10,9 @@
 storage: ceph
 pod:
   replicas:
-    api: 3
-    volume: 2
-    scheduler: 2
-    backup: 2
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

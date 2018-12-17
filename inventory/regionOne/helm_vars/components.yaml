@@ -110,17 +110,17 @@ OSH_CORE:
   namespace: openstack
 CONTRAIL:
 - name: contrail-thirdparty
-  namespace: contrail
   path: contrail-helm-deployer/contrail-thirdparty
+  namespace: contrail
 - name: contrail-controller
-  namespace: contrail
   path: contrail-helm-deployer/contrail-controller
+  namespace: contrail
 - name: contrail-analytics
-  namespace: contrail
   path: contrail-helm-deployer/contrail-analytics
-- name: contrail-vrouter
   namespace: contrail
+- name: contrail-vrouter
   path: contrail-helm-deployer/contrail-vrouter
+  namespace: contrail
 OS_SUPPL:
 - name: heat
   path: openstack-helm/heat

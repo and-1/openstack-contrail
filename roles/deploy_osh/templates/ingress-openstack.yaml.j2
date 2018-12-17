@@ -1,7 +1,8 @@
 pod:
   replicas:
-    ingress: 3
-    error_page: 3
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   resources:
     enabled: {{pod_resources}}
     ingress:

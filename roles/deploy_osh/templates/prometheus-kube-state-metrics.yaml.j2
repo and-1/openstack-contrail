@@ -1,6 +1,8 @@
 pod:
   replicas:
-    kube_state_metrics: 1
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       revision_history: 3

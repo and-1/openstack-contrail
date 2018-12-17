@@ -1,9 +1,8 @@
 pod:
   replicas:
-    server: 3
-    ingress: 3
-    error_page: 2
-    prometheus_mysql_exporter: 1
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

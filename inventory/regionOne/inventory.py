@@ -36,11 +36,12 @@ class Config:
   maas_api_url_file = "../share_creds/maas.region.endpoint"
   maas_api_key_file = "../share_creds/maas.apikey.creds"
   osh_ansible_env = "group_vars/all/osh.yml"
-  min_osd_nodes = 3
   min_compute_nodes = 3
   min_control_nodes = 3
   with open(os.path.join(os.path.dirname(__file__), osh_ansible_env),'r') as file:
     osh_config = yaml.safe_load(file)
+  min_osd_nodes = osh_config['replication']
+  
 
 class Inventory:
     """Provide several convenience methods to retrieve information from MAAS API."""
@@ -165,7 +166,7 @@ class Inventory:
     def inventory(self):
         """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
         tags = self.tags()
-        if Config.osh_config['fqdn_hostnames']:
+        if False: # Now always false, for future use
           domain = "."+Config.osh_config['global_domain_suffix']
         else:
           domain = ""

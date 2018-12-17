@@ -19,8 +19,9 @@ pod:
       prometheus_memcached_exporter:
         timeout: 30
   replicas:
-    server: 1
-    prometheus_memcached_exporter: 1
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
 
 monitoring:
   prometheus:

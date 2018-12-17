@@ -1,6 +1,7 @@
 ---
 # deploy for test or not
 rollout_mode: real
+fqdn_hostnames: false
 # Endpoints, which will be added to hosts on all nodes of cluster. Target is control-plane
 endpoints:
  - "ceph-mon.ceph.svc.{{cluster_name}}"

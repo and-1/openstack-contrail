@@ -8,7 +8,9 @@ pod:
           max_surge: 3
           max_unavailable: 1
   replicas:
-    kibana: 2
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   resources:
     enabled: {{pod_resources}}
     apache_proxy:

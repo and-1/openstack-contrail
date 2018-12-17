@@ -1,7 +1,8 @@
 pod:
   replicas:
-    server: 3
-    prometheus_rabbitmq_exporter: 1
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   lifecycle:
     upgrades:
       deployments:

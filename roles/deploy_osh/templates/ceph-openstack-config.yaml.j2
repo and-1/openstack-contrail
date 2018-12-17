@@ -24,7 +24,9 @@ conf:
     enabled: true
 pod:
   replicas:
-    rbd_provisioner: 2
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   resources:
     enabled: {{pod_resources}}
     rbd_provisioner:

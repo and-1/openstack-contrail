@@ -19,8 +19,9 @@ pod:
       prometheus_fluentd_exporter:
         timeout: 30
   replicas:
-    fluentd: 3
-    prometheus_fluentd_exporter: 1
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
   resources:
     enabled: false
     fluentbit:

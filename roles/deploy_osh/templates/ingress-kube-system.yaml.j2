@@ -1,7 +1,8 @@
 pod:
   replicas:
-    ingress: 2
-    error_page: 2
+{% for pod, rep in replicas[item.name].iteritems() %}
+    {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
+{% endfor %}
 deployment:
   mode: cluster
   type: DaemonSet

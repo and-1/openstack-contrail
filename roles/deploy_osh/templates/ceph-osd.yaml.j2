@@ -1,1 +1,86 @@
-ceph-mon.yaml.j2
+{%- set osd_pairs = [] %}
+{%- for host in groups['osd-nodes'] %}
+{%- set host_osd_jour = hostvars[host]['osd_jour'] %}
+{%- set class = namespace(area="") %}
+{%- if join_areas.enabled %}
+{%- for area in join_areas.areas %}
+{%- if area.name+'-osd-node' in hostvars[host].group_names %}
+{%- set class.area = area.name %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- set disks = hostvars[host]['osd_disks'] %}
+{%- for disk in disks %}
+{%- do osd_pairs.append(disk+"-"+host_osd_jour+"-"+class.area) %}
+{%- endfor %}
+{%- endfor %}
+---
+bootstrap:
+  enabled: true
+
+pod:
+  resources:
+    enabled: {{pod_resources}}
+    osd:
+      requests:
+        memory: "2Gi"
+        cpu: "1000m"
+      limits:
+        memory: "5Gi"
+        cpu: "2000m"
+    tests:
+      requests:
+        memory: "10Mi"
+        cpu: "250m"
+      limits:
+        memory: "50Mi"
+        cpu: "500m"
+    jobs:
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+conf:
+  ceph:
+    global:
+      fsid: "{{ceph_fs_id}}"
+      bluestore_block_db_size: "{{bluestore_block_db_size}}"
+      bluestore_block_wal_size: "{{bluestore_block_wal_size}}"
+      mon_osd_full_ratio: "{{mon_osd_full_ratio}}"
+      mon_osd_nearfull_ratio: "{{mon_osd_nearfull_ratio}}"
+      mon_max_pg_per_osd: {{mon_max_pg_per_osd}}
+  overrides:
+    ceph_osd:
+      labels:
+{% for osd in osd_pairs|unique %}
+{% set params = osd.split('-') %}
+       - label: 
+{% if join_areas.enabled %}
+           key: d{{params[0]}}-j{{params[1]}}-{{params[2]}}
+{% else %}
+           key: d{{params[0]}}-j{{params[1]}}
+{% endif %}
+           values: 
+           - "enabled"
+         #exclusive: false
+         conf:
+           storage:
+             osd:
+               - data:
+                   type: block-bluestore
+                   location: /dev/{{params[0]}}
+                 journal:
+                   type: block-bluestore
+                   location: /dev/{{params[1]}}
+{% endfor %}
+
+group_by_class: 
+  enabled: {{join_areas.enabled}}
+  areas:
+{% for area in join_areas.areas %}
+  - name: {{area.name}}
+{% endfor %}
