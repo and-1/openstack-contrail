@@ -1,4 +1,4 @@
-{%- set domain = global_domain_suffix.split('.')|join(',dc=') %}
+{%- set domain = int_domain_suffix.split('.')|join(',dc=') %}
 pod:
   replicas:
 {% for pod, rep in replicas[item.name].iteritems() %}

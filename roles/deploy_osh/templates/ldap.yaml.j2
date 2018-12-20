@@ -1,4 +1,4 @@
-{%- set domain = global_domain_suffix.split('.')|join(',dc=') %}
+{%- set domain = int_domain_suffix.split('.')|join(',dc=') %}
 images:
   pull_policy: {{pull_policy}}
   tags:
@@ -57,7 +57,7 @@ storage:
     size: {{ldap.storage}}
 
 openldap:
-  domain: {{global_domain_suffix}}
+  domain: {{int_domain_suffix}}
   password: {{ldap_admin_pwd}}
 
 bootstrap:

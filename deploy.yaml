@@ -27,8 +27,8 @@
   roles:
    - { role: prepare-node, stage: post-k8s, tags: [init, post-k8s]}
 
-#- hosts: master
-#  roles:
-#  - { role: deploy_osh, tags: [osh]}
-#  environment:
-#    KUBECONFIG: "{{inventory_dir}}/artifacts/admin.conf"
+- hosts: master
+  roles:
+  - { role: deploy_osh, tags: [osh]}
+  environment:
+    KUBECONFIG: "{{inventory_dir}}/artifacts/admin.conf"

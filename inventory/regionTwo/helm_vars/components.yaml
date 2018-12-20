@@ -83,48 +83,48 @@ LOGGING:
 - name: kibana
   path: openstack-helm-infra/kibana
   namespace: osh-infra
-OSH_CORE:
-- name: keystone
-  path: openstack-helm/keystone
-  namespace: openstack
-- name: radosgw-openstack
-  path: openstack-helm-infra/ceph-rgw
-  namespace: openstack
-- name: glance 
-  path: openstack-helm/glance
-  namespace: openstack
-- name: cinder
-  path: openstack-helm/cinder
-  namespace: openstack
-- name: libvirt
-  path: openstack-helm-infra/libvirt
-  namespace: openstack
-- name: nova
-  path: openstack-helm/nova
-  namespace: openstack
-- name: neutron
-  path: openstack-helm/neutron
-  namespace: openstack
-- name: horizon
-  path: openstack-helm/horizon
-  namespace: openstack
-CONTRAIL:
-- name: contrail-thirdparty
-  path: contrail-helm-deployer/contrail-thirdparty
-  namespace: contrail
-- name: contrail-controller
-  path: contrail-helm-deployer/contrail-controller
-  namespace: contrail
-- name: contrail-analytics
-  path: contrail-helm-deployer/contrail-analytics
-  namespace: contrail
-- name: contrail-vrouter
-  path: contrail-helm-deployer/contrail-vrouter
-  namespace: contrail
-OS_SUPPL:
-- name: heat
-  path: openstack-helm/heat
-  namespace: openstack
+#OSH_CORE:
+#- name: keystone
+#  path: openstack-helm/keystone
+#  namespace: openstack
+#- name: radosgw-openstack
+#  path: openstack-helm-infra/ceph-rgw
+#  namespace: openstack
+#- name: glance 
+#  path: openstack-helm/glance
+#  namespace: openstack
+#- name: cinder
+#  path: openstack-helm/cinder
+#  namespace: openstack
+#- name: libvirt
+#  path: openstack-helm-infra/libvirt
+#  namespace: openstack
+#- name: nova
+#  path: openstack-helm/nova
+#  namespace: openstack
+#- name: neutron
+#  path: openstack-helm/neutron
+#  namespace: openstack
+#- name: horizon
+#  path: openstack-helm/horizon
+#  namespace: openstack
+#CONTRAIL:
+#- name: contrail-thirdparty
+#  path: contrail-helm-deployer/contrail-thirdparty
+#  namespace: contrail
+#- name: contrail-controller
+#  path: contrail-helm-deployer/contrail-controller
+#  namespace: contrail
+#- name: contrail-analytics
+#  path: contrail-helm-deployer/contrail-analytics
+#  namespace: contrail
+#- name: contrail-vrouter
+#  path: contrail-helm-deployer/contrail-vrouter
+#  namespace: contrail
+#OS_SUPPL:
+#- name: heat
+#  path: openstack-helm/heat
+#  namespace: openstack
 #- name: gnocchi
 #  path: openstack-helm-infra/gnocchi
 #  namespace: openstack

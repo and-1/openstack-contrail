@@ -44,7 +44,7 @@ storage:
 endpoints:
   ldap:
     path:
-      default: "/ou=People,dc={{global_domain_suffix.split('.')|join(',dc=')}}"
+      default: "/ou=People,dc={{int_domain_suffix.split('.')|join(',dc=')}}"
 {%- raw %}
 conf:
   prometheus:

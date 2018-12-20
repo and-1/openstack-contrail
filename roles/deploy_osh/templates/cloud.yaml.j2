@@ -10,4 +10,4 @@ clouds:
       user_domain_name: {{ep.user_domain_name}}
 {% endwith %}
       password: {{identity_admin_pwd}}
-      auth_url: 'http://keystone.openstack.svc.{{global_domain_suffix}}/v3'
+      auth_url: 'http://keystone.openstack.svc.{{int_domain_suffix}}/v3'

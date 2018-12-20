@@ -234,7 +234,7 @@ ldap:
   auth:
     admin:
       username: admin
-      bind: "cn=admin,dc={{global_domain_suffix.split('.')|join(',dc=')}}"
+      bind: "cn=admin,dc={{int_domain_suffix.split('.')|join(',dc=')}}"
       password: password
 
 prometheus_mysql_exporter:

@@ -22,6 +22,12 @@ bootstrap:
   enabled: true
   ks_user: admin
   script: |
+    #Provide admin user cloud-admin permissions
+    openstack role add \
+          --user="${OS_USERNAME}" \
+          --user-domain="${OS_USER_DOMAIN_NAME}" \
+          --domain="{{service_domain}}" \
+          "admin"
     openstack role create --or-show _member_
     openstack role add \
           --user="${OS_USERNAME}" \
@@ -37,6 +43,7 @@ bootstrap:
           --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
           --project="${OS_PROJECT_NAME}" \
           "heat_stack_owner"
+    
 jobs:
   fernet_rotate:
     # NOTE(rk760n): key rotation frequency, token expiration, active keys should statisfy the formula
@@ -66,7 +73,7 @@ conf:
         pattern: '^(?!amq\.).*'
   policy:
     admin_required: "role:admin"
-    cloud_admin: "role:admin and (is_admin_project:True or domain_id:default)"
+    cloud_admin: "role:admin and (is_admin_project:True or domain_id:{{service_domain}})"
     service_role: "role:service"
     service_or_admin: "rule:admin_required or rule:service_role"
     owner: "user_id:%(user_id)s or user_id:%(target.token.user_id)s"

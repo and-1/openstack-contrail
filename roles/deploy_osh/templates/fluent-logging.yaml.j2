@@ -148,7 +148,7 @@ conf:
         Match: "**.fluentd**"
     - kube_filter:
         header: filter
-        Kube_URL: https://kubernetes.default.svc.{{global_domain_suffix}}
+        Kube_URL: https://kubernetes.default.svc.{{int_domain_suffix}}
         Name: kubernetes
         Match: kube.*
         Merge_Log: On

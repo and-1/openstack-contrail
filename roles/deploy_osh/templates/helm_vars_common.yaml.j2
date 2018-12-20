@@ -54,7 +54,7 @@ pod:
       uid: 42416
 
 endpoints:
-  cluster_domain_suffix: {{global_domain_suffix}}
+  cluster_domain_suffix: {{int_domain_suffix}}
 {% for endpoint, users in endpoints.iteritems() %}
   {{endpoint}}:
     auth:

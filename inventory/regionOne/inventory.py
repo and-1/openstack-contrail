@@ -167,7 +167,7 @@ class Inventory:
         """Look up hosts by tag(s) and zone(s) and return a dict that Ansible will understand as an inventory."""
         tags = self.tags()
         if False: # Now always false, for future use
-          domain = "."+Config.osh_config['global_domain_suffix']
+          domain = "."+Config.osh_config['int_domain_suffix']
         else:
           domain = ""
         ansible = {}

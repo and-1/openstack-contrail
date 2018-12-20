@@ -24,7 +24,7 @@ mon_osd_full_ratio: .90
 mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
-global_domain_suffix: "region1.cloud.local"
+int_domain_suffix: "region1.cloud.local"
 pod_resources: true
 #--------------------------Infra-------------#
 infra:
