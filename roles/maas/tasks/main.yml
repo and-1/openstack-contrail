@@ -15,10 +15,10 @@
   - bin
 - name: "MAIN: deploy region component"
   include_tasks: deploy_region.yaml
-  when: "region_ctl is defined and region_ctl"
+  when: "region_ctl is defined and region_ctl|bool"
 - name: "MAIN: deploy rack component"
   include_tasks: deploy_rack.yaml
-  when: "rack_ctl is defined and rack_ctl"
+  when: "rack_ctl is defined and rack_ctl|bool"
 - name: "MAIN: config maas"
   shell: "docker exec -t \
           -e MAAS_NAME={{MAAS_NAME}}
@@ -42,3 +42,4 @@
           -e MAAS_DEFAULT_KERNEL={{MAAS_DEFAULT_KERNEL}}
           -e MAAS_SSH_PUBLIC='{{maas_ssh_pub}}'
           maas-region-controller bash -c /tmp/import-boot-resources.sh"
+  when: "region_ctl is defined and region_ctl|bool"

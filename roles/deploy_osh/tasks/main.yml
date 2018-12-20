@@ -16,6 +16,13 @@
 - name: Set control-plane mode
   set_fact:
     cp_mode: "{%if groups['control-plane']| length == 1 %}single{%elif groups['control-plane']| length > 1%}ha{%endif%}"
+- name: Disable os components in slave regions
+  set_fact:
+    OSH_CORE: "{{components['OSH_CORE'] | difference(components['OSH_CORE'] | selectattr('name', 'in', item.1)| list)}}"
+  with_together:
+  - ['master': true, 'master': false]
+  - [[''], [['keystone','horizon']]]
+  when: "components['OSH_CORE'] is defined and item.0['master'] == multi_region.master.master_role"
 - name: Prepare helm and tools
   include: prepare_helm.yaml
 - name: Generate info
@@ -38,8 +45,8 @@
 - name: Deploy OSH essensial
   include: deploy_common.yaml GROUP="OSH_CORE"
   with_items:
-  - "{{components.OSH_CORE}}"
-  when: "components.OSH_CORE is defined"
+  - "{{OSH_CORE}}"
+  when: "OSH_CORE is defined"
 - name: Deploy CONTRAIL components
   include: deploy_contrail.yaml GROUP="CONTRAIL"
   with_items:

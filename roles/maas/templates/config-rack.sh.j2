@@ -41,9 +41,9 @@ function set_zone {
     maas ${ADMIN_USERNAME} zones create name=${REGION}
   fi
 # Get rack id
-  export rack_id=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .system_id else "" end')
+  export rack_id=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .system_id else "" end' | tr -d '[:space:]')
 # Check current zone
-  cur_zone=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .zone.name else "" end')
+  cur_zone=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .zone.name else "" end' | tr -d '[:space:]')
   if [ "x$cur_zone" != "x${REGION}" ];then
     maas admin rack-controllers set-zone zone=${REGION} nodes=${rack_id}
   fi
@@ -70,7 +70,7 @@ function config_pxe_net {
   fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "'$fabric'" then .id else "" end' | tr -d '[:space:]')
   maas ${ADMIN_USERNAME} ipranges create type=dynamic start_ip=${start_ip} end_ip=${end_ip}
   maas ${ADMIN_USERNAME} vlan update $fabric_id $vid dhcp_on=true space=${REGION} primary_rack=${rack_id}
-  maas ${ADMIN_USERNAME} fabric update $fabric_id name="DEFAULT"
+  maas ${ADMIN_USERNAME} fabric update $fabric_id name="DEFAULT_${REGION}"
   maas ${ADMIN_USERNAME} subnet update $subnet_id dns_servers={{MAAS_DNS_NODE | join(',')}}
 }
 

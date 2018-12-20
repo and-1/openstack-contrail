@@ -18,6 +18,25 @@ pod:
     termination_grace_period:
       api:
         timeout: 30
+bootstrap:
+  enabled: true
+  ks_user: admin
+  script: |
+    openstack role create --or-show _member_
+    openstack role add \
+          --user="${OS_USERNAME}" \
+          --user-domain="${OS_USER_DOMAIN_NAME}" \
+          --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+          --project="${OS_PROJECT_NAME}" \
+          "_member_"
+    #NOTE(portdirect): required for all users who operate heat stacks
+    openstack role create --or-show heat_stack_owner
+    openstack role add \
+          --user="${OS_USERNAME}" \
+          --user-domain="${OS_USER_DOMAIN_NAME}" \
+          --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+          --project="${OS_PROJECT_NAME}" \
+          "heat_stack_owner"
 jobs:
   fernet_rotate:
     # NOTE(rk760n): key rotation frequency, token expiration, active keys should statisfy the formula
