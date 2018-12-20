@@ -214,36 +214,38 @@ class Inventory:
         }
         
         for node in node_dump:
-           if node['node_type'] in [2,4]:
-             for iface in node['interface_set']:
-               try:
-                 dhcp = iface['links'][0]['subnet']['vlan']['dhcp_on']
-                 if dhcp:
-                   nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
-                   'ansible_host': iface['links'][0]['ip_address'],
-                   'ip': self.getip(iface['links'][0]['ip_address']),
-                   }
-               except:
-                 continue
-             nodes_meta['_meta']['hostvars'][node['hostname']+domain]['docker_iptables_enabled'] = True
-           elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
-             if not node['tag_names']:
-               pass
-             else:
-               nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
-                 'ansible_host': node['ip_addresses'][0],
-                 'ip': self.getip(node['ip_addresses'][0]),
-               }
-               if 'osd-nodes' in node['tag_names']:
-                 disks = []
-                 journal_disk = ""
-                 for disk in node['physicalblockdevice_set']:
-                   disks.append(disk['name'])
-                   if 'journal' in disk['tags']:
-                     journal_disk = disk['name']
-                     nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_jour'] = disk['name']
-                 if journal_disk:
-                   nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
+           zone = node['zone']['name']
+           if zone == Config.osh_config['region']:
+             if node['node_type'] in [2,4]:
+               for iface in node['interface_set']:
+                 try:
+                   dhcp = iface['links'][0]['subnet']['vlan']['dhcp_on']
+                   if dhcp:
+                     nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                     'ansible_host': iface['links'][0]['ip_address'],
+                     'ip': self.getip(iface['links'][0]['ip_address']),
+                     }
+                 except:
+                   continue
+               nodes_meta['_meta']['hostvars'][node['hostname']+domain]['docker_iptables_enabled'] = True
+             elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
+               if not node['tag_names']:
+                 pass
+               else:
+                 nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                   'ansible_host': node['ip_addresses'][0],
+                   'ip': self.getip(node['ip_addresses'][0]),
+                 }
+                 if 'osd-nodes' in node['tag_names']:
+                   disks = []
+                   journal_disk = ""
+                   for disk in node['physicalblockdevice_set']:
+                     disks.append(disk['name'])
+                     if 'journal' in disk['tags']:
+                       journal_disk = disk['name']
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_jour'] = disk['name']
+                   if journal_disk:
+                     nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
 
         # Add some static groups
 #        ansible['ungrouped'] = {}
