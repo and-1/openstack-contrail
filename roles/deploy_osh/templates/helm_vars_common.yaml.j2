@@ -57,6 +57,7 @@ endpoints:
   cluster_domain_suffix: {{int_domain_suffix}}
 {% for endpoint, users in endpoints.iteritems() %}
   {{endpoint}}:
+{% if users.auth is defined %}
     auth:
 {% for user, params in users.auth.iteritems() %}
       {{user}}:
@@ -83,4 +84,9 @@ endpoints:
         {{param}}: "{{value}}"
 {% endfor %}
 {% endfor %}
+{% endif %}
+{% if users.host_fqdn_override is defined %}
+    host_fqdn_override:
+      {{users.host_fqdn_override | to_nice_yaml | indent(6)}}
+{% endif %}
 {% endfor %}
