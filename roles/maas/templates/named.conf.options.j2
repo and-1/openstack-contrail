@@ -1,0 +1,16 @@
+//
+// This file is managed by MAAS. Although MAAS attempts to preserve changes
+// made here, it is possible to create conflicts that MAAS can not resolve.
+//
+// DNS settings available in MAAS (for example, forwarders and
+// dnssec-validation) should be managed only in MAAS.
+//
+// The previous configuration file was backed up at:
+//     /etc/bind/named.conf.options.2018-11-30T08:25:27.089508
+//
+options { directory "/var/cache/bind";
+auth-nxdomain no;
+listen-on-v6 { any; };
+listen-on port {{MAAS_DNS_PORT}} { any; };
+include "/etc/bind/maas/named.conf.options.inside.maas"; };
+
