@@ -4,6 +4,66 @@ pod:
     {{pod}}: {%if cp_mode == "single" %}1{%else%}{{rep}}{%endif%}
 
 {% endfor %}
+  resources:
+    enabled: {{pod_resources}}
+    rgw:
+      requests:
+        memory: "50Mi"
+        cpu: "250m"
+      limits:
+        memory: "100Mi"
+        cpu: "500m"
+    jobs:
+      ceph-rgw-storage-init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks-endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      rgw_s3_admin:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
 endpoints:
   identity:
     namespace: openstack
@@ -24,3 +84,16 @@ bootstrap:
 conf:
   rgw_ks:
     enabled: true
+
+{% if not multi_region.master.master_role %}
+dependencies:
+  static:
+    rgw:
+      services: null
+    ks_endpoints:
+      services: null
+    ks_service:
+      services: null
+    ks_user:
+      services: null
+{% endif %}

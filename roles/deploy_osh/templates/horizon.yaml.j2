@@ -42,11 +42,50 @@ pod:
     termination_grace_period:
       horizon:
         timeout: 30
+  resources:
+    enabled: {{pod_resources}}
+    server:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
 # Bug in horizon. https://bugzilla.redhat.com/show_bug.cgi?id=1478042
 conf:
   horizon:
-{% raw %}
     apache: |
+{%- raw %}
       Listen 0.0.0.0:{{ tuple "dashboard" "internal" "web" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
       LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
       LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
@@ -54,8 +93,9 @@ conf:
       CustomLog /dev/stdout combined env=!forwarded
       CustomLog /dev/stdout proxy env=forwarded
       <VirtualHost *:{{ tuple "dashboard" "internal" "web" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}>
+{% endraw %}
           WSGIScriptReloading On
-          WSGIDaemonProcess horizon-http processes=5 threads=1 user=horizon group=horizon display-name=%{GROUP} python-path=/var/lib/kolla/venv/lib/python2.7/site-packages
+          WSGIDaemonProcess horizon-http processes={{horizon.processes}} threads={{horizon.threads}} user=horizon group=horizon display-name=%{GROUP} python-path=/var/lib/kolla/venv/lib/python2.7/site-packages
           WSGIProcessGroup horizon-http
           WSGIScriptAlias / /var/www/cgi-bin/horizon/django.wsgi
           WSGIPassAuthorization On
@@ -76,13 +116,13 @@ conf:
           CustomLog /dev/stdout combined env=!forwarded
           CustomLog /dev/stdout proxy env=forwarded
       </Virtualhost>
-{% endraw %}
     local_settings:
       config:
         secret_key: {{horizon_secret_key}}
         debug: "False"
         keystone_multidomain_support: "True"
         keystone_default_domain: Default
+        site_branding: "Logistic Cloud"
         openstack_cinder_features:
           enable_backup: "True"
         openstack_neutron_network:
@@ -95,13 +135,6 @@ conf:
           enable_firewall: "True"
           enable_vpn: "True"
           enable_fip_topology_check: "True"
-        multi_region:
-          enabled: {% if multi_region.master.region_names|length > 1 %}true{% else %}false{% endif %}
-
-          regions:
-{% for region in multi_region.master.region_names %}
-          - {{ region }}
-{% endfor %}
 {%- raw %}
       template: |
         import os
@@ -111,12 +144,17 @@ conf:
         TEMPLATE_DEBUG = DEBUG
         COMPRESS_OFFLINE = True
         COMPRESS_CSS_HASHING_METHOD = "hash"
+        SITE_BRANDING = "{{ .Values.conf.horizon.local_settings.config.site_branding }}"
         # WEBROOT is the location relative to Webserver root
         # should end with a slash.
         WEBROOT = '/'
         # LOGIN_URL = WEBROOT + 'auth/login/'
         # LOGOUT_URL = WEBROOT + 'auth/logout/'
         #
+        AVAILABLE_THEMES = [
+             ('default', 'Default', 'themes/default'),
+        ]
+        ENABLE_JUJU_PANEL = False
         # LOGIN_REDIRECT_URL can be used as an alternative for
         # HORIZON_CONFIG.user_home, if user_home is not set.
         # Do not set it to '/home/', as this will cause circular redirect loop
@@ -235,15 +273,8 @@ conf:
         #EMAIL_HOST_USER = 'djangomail'
         #EMAIL_HOST_PASSWORD = 'top-secret!'
         # For multiple regions uncomment this configuration, and add (endpoint, title).
-        {{- if .Values.conf.horizon.local_settings.config.multi_region.enabled }}
-        {{- $valAll := . }}
-        AVAILABLE_REGIONS = [
-        {{- range $region := .Values.conf.horizon.local_settings.config.multi_region.regions }}
-            ('{{ tuple "identity" "internal" "api" $valAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}', '{{$region}}'),
-        {{- end }}
-        ]
-        {{- end }}
-        OPENSTACK_KEYSTONE_URL = "{{ tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}"
+        #AVAILABLE_REGIONS = []
+        OPENSTACK_KEYSTONE_URL = "{{ tuple "identity" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}"
         OPENSTACK_KEYSTONE_DEFAULT_ROLE = "member"
         {{- if .Values.conf.horizon.local_settings.config.auth.sso.enabled }}
         # Enables keystone web single-sign-on if set to True.
@@ -378,7 +409,7 @@ conf:
         # OPENSTACK_ENDPOINT_TYPE specifies the endpoint type to use for the endpoints
         # in the Keystone service catalog. Use this setting when Horizon is running
         # external to the OpenStack environment. The default is 'publicURL'.
-        OPENSTACK_ENDPOINT_TYPE = "internalURL"
+        OPENSTACK_ENDPOINT_TYPE = "publicURL"
         # SECONDARY_ENDPOINT_TYPE specifies the fallback endpoint type to use in the
         # case that OPENSTACK_ENDPOINT_TYPE is not present in the endpoints
         # in the Keystone service catalog. Use this setting when Horizon is running

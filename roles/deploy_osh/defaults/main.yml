@@ -1,5 +1,6 @@
 ---
 redeploy_all: false
+
 infra:
   pool_name: 'cloud.infra'
 
@@ -79,6 +80,15 @@ nova:
           ram: 16384
           disk: 0
           vcpus: 8
+placement:
+  processes: 1
+  threads: 4
+keystone:
+  processes: 6
+  threads: 3
+horizon:
+  processes: 3
+  threads: 8
 heat:
   workers: 
     num_engine_workers: 1

@@ -32,6 +32,7 @@
   - 000-default.conf
   - maas-http.conf
   - ports.conf
+  - named.conf.options
 #- name: "REGION: create network for region controller"
 #  docker_network:
 #    name: maas
@@ -100,6 +101,7 @@
     - /opt/maas/bin/import-boot-resources.sh:/tmp/import-boot-resources.sh
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
     - /opt/maas/conf/ports.conf:/etc/apache2/ports.conf
+    - /opt/maas/conf/named.conf.options:/etc/bind/named.conf.options
 - name: "REGION: create admin user"
   shell: "docker exec -t \
           -e ADMIN_USERNAME={{MAAS_UI_USER}} \

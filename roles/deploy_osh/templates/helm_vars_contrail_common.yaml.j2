@@ -38,6 +38,8 @@ global:
        {{image}}: "{{params.repo|default(local_docker_registry)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}"
 {% endfor %}
 
+ingress:
+  webui_ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
 
 endpoints:
   cluster_domain_suffix: "{{int_domain_suffix}}"
@@ -49,6 +51,11 @@ endpoints:
       user_domain_name: "{{service_domain}}"
       project_domain_name: "{{service_domain}}"
       region_name: "{{region}}"
+{% if not multi_region.master.master_role %}
+    host_fqdn_override:
+       default:
+         host: {{multi_region.slaves.ks_endpoint}}
+{% endif %}
   rabbitmq:
     auth:
       username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"

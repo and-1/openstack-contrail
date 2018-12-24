@@ -25,7 +25,7 @@ mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 int_domain_suffix: "region1.cloud.local"
-ext_domain_suffix: "logistic.local"
+ext_domain_suffix: "logistic.lan"
 pod_resources: true
 #--------------------------Infra-------------#
 infra:
@@ -50,15 +50,10 @@ alertmanager:
 os_release: "queens"
 region: "RegionOne"
 multi_region:
-# Applied to master region only
   master:
     master_role: true
-    region_names:
-    - "{{region}}"
-    - RegionTwo
-# Applied to slave region only
   slaves:
-    ks_endpoint: 
+    ks_endpoint: "keystone.{{ext_domain_suffix}}"
 service_domain: "default"
 # Generate password and override static.
 # Don't disable it in production env

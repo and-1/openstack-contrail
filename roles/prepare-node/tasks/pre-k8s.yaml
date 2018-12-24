@@ -52,3 +52,8 @@
   - "{{ groups['control-plane'] }}"
   - "{{ endpoints }}"
   when: "endpoints | length != 0 and 'maas' not in group_names"
+- name: Disable swap
+  lineinfile:
+    regexp: 'swap'
+    state: absent
+    path: '/etc/fstab'

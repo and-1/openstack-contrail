@@ -25,6 +25,129 @@ pod:
     disruption_budget:
       api:
         min_available: 0
+  resources:
+    enabled: {{pod_resources}}
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    scheduler:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    volume:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      volume_usage_audit:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      rabbit_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      clean:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      backup_storage_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      storage_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
 conf:
   cinder:
     DEFAULT:
@@ -58,16 +181,6 @@ conf:
 
 {% endfor %}
 
-# Will be added in the future
-#backup:
-#  external_ceph_rbd:
-#    enabled: false
-#    admin_keyring: null
-#    conf:
-#      global:
-#        mon_host: null
-#      osd:
-
   rabbitmq:
     #NOTE(rk760n): adding rmq policy to mirror messages from notification queues and set expiration time for the ones
     policies:
@@ -82,6 +195,55 @@ conf:
         priority: 0
         apply-to: all
         pattern: '^(?!amq\.).*'
+
+# Will be added in the future
+#backup:
+#  external_ceph_rbd:
+#    enabled: false
+#    admin_keyring: null
+#    conf:
+#      global:
+#        mon_host: null
+#      osd:
+
+{% if not multi_region.master.master_role %}
+dependencies:
+  static:
+    api:
+      services:
+        - endpoint: internal
+          service: oslo_db
+    backup:
+      services:
+        - endpoint: internal
+          service: volume
+    bootstrap:
+      services:
+        - endpoint: internal
+          service: volume
+    ks_endpoints:
+      services: null
+    ks_service:
+      services: null
+    ks_user:
+      services: null
+    scheduler:
+      services:
+        - endpoint: internal
+          service: volume
+    tests:
+      services:
+        - endpoint: internal
+          service: volume
+    volume:
+      services:
+        - endpoint: internal
+          service: volume
+    volume_usage_audit:
+      services:
+        - endpoint: internal
+          service: volume
+{% endif %}
 
 AZ:
   enabled: {{join_areas.enabled}}

@@ -1,6 +1,9 @@
 network:
   backend:
     - opencontrail
+  novncproxy:
+    ingress:
+      public: false
 
 dependencies:
   dynamic:
@@ -8,7 +11,67 @@ dependencies:
       opencontrail:
         compute:
           daemonset: []
-
+{% if not multi_region.master.master_role %}
+  static:
+    api:
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: public
+          service: compute_metadata
+    bootstrap:
+      services:
+        - endpoint: internal
+          service: compute
+    cell_setup:
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: compute
+    service_cleaner:
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: compute
+    conductor:
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: compute
+    consoleauth:
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: compute
+    ks_endpoints:
+      services: null
+    ks_service:
+      services: null
+    ks_user:
+      services: null
+    scheduler:
+      services:
+        - endpoint: internal
+          service: oslo_messaging
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: compute
+{% endif %}
 bootstrap:
   enabled: true
   structured:
@@ -24,6 +87,12 @@ console:
     proxy:
       # IF blank, search default routing interface
       server_proxyclient_interface: {{k8s_iface}}
+
+manifests:
+  service_novncproxy: false
+  service_ingress_novncproxy: false
+  ingress_novncproxy: false
+
 conf:
   ceph:
     cinder:
@@ -78,6 +147,37 @@ conf:
 #  policy:
 #    az_by_role: "(not None:%(availability_zone)s and project_id:%(project_id)s and (( 'private':%(availability_zone)s and not role:dmz) or ('dmz':%(availability_zone)s and role:dmz))) or is_admin:True"
 #    os_compute_api:servers:create: rule:az_by_role
+  wsgi_placement: |
+{%- raw %}
+    Listen 0.0.0.0:{{ tuple "placement" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
+    SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+    CustomLog /dev/stdout combined env=!forwarded
+    CustomLog /dev/stdout proxy env=forwarded
+    <VirtualHost *:{{ tuple "placement" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}>
+{% endraw %}
+        WSGIDaemonProcess placement-api processes={{placement.processes}} threads={{placement.threads}} user=nova group=nova display-name=%{GROUP}
+        WSGIProcessGroup placement-api
+        WSGIScriptAlias / /var/www/cgi-bin/nova/nova-placement-api
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIPassAuthorization On
+        <IfVersion >= 2.4>
+          ErrorLogFormat "%{cu}t %M"
+        </IfVersion>
+        ErrorLog /dev/stdout
+        SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+        CustomLog /dev/stdout combined env=!forwarded
+        CustomLog /dev/stdout proxy env=forwarded
+    </VirtualHost>
+    Alias /placement /var/www/cgi-bin/nova/nova-placement-api
+    <Location /placement>
+        SetHandler wsgi-script
+        Options +ExecCGI
+        WSGIProcessGroup placement-api
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIPassAuthorization On
+    </Location>
 
 pod:
   replicas:
@@ -115,3 +215,165 @@ pod:
         timeout: 30
   resources:
     enabled: {{pod_resources}}
+    compute:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    compute_ironic:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    api_metadata:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    placement:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    conductor:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    consoleauth:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    scheduler:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    ssh:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    novncproxy:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    spiceproxy:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      rabbit_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      cell_setup:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      service_cleaner:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"

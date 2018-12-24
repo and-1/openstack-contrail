@@ -24,6 +24,24 @@ pod:
           min_ready_seconds: 0
           max_unavailable: 1
 
+  resources:
+    enabled: {{pod_resources}}
+    libvirt:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
 conf:
   qemu:
     cgroup_device_acl: 

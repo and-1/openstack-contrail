@@ -215,7 +215,7 @@ identity:
       project_domain_name: "{{service_domain}}"
   host_fqdn_override:
     public: 
-      host: "keystone-{{region|lower}}.{{ext_domain_suffix}}"
+      host: "keystone.{{ext_domain_suffix}}"
 
 
 ceph_object_store:
@@ -319,10 +319,10 @@ compute_novnc_proxy:
   host_fqdn_override:
     public:
       host: "novncproxy-{{region|lower}}.{{ext_domain_suffix}}"
-compute_spice_proxy:
+placement:
   host_fqdn_override:
     public:
-      host: "spiceproxy-{{region|lower}}.{{ext_domain_suffix}}"
+      host: "placement-{{region|lower}}.{{ext_domain_suffix}}"
 orchestration:
   host_fqdn_override:
     public:
@@ -330,7 +330,7 @@ orchestration:
 cloudformation:
   host_fqdn_override:
     public:
-      host: "cloudformation:-{{region|lower}}.{{ext_domain_suffix}}"
+      host: "cloudformation-{{region|lower}}.{{ext_domain_suffix}}"
 metric:
   host_fqdn_override:
     public:
@@ -338,4 +338,4 @@ metric:
 dashboard:
   host_fqdn_override:
     public:
-      host: "horizon-{{region|lower}}.{{ext_domain_suffix}}"
+      host: "horizon.{{ext_domain_suffix}}"
