@@ -105,6 +105,7 @@ pod:
 conf:
   neutron:
     DEFAULT:
+      debug: True
       core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
       service_plugins: neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2
       l3_ha: False
@@ -116,6 +117,9 @@ conf:
       quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
     agent:
       root_helper: sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf
+  logging:
+    logger_neutron:
+      level: INFO
   plugins:
     opencontrail:
       APISERVER:
@@ -150,7 +154,7 @@ dependencies:
       opencontrail:
         server:
           daemonset: []
-{% if not multi_region.master.master_role %}
+{% if not multi_region.master %}
   static:
     ks_endpoints:
       services: null

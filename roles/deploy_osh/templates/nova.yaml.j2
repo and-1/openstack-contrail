@@ -11,7 +11,7 @@ dependencies:
       opencontrail:
         compute:
           daemonset: []
-{% if not multi_region.master.master_role %}
+{% if not multi_region.master %}
   static:
     api:
       services:

@@ -99,11 +99,11 @@ OSH_CORE:
 - name: libvirt
   path: openstack-helm-infra/libvirt
   namespace: openstack
-- name: nova
-  path: openstack-helm/nova
-  namespace: openstack
 - name: neutron
   path: openstack-helm/neutron
+  namespace: openstack
+- name: nova
+  path: openstack-helm/nova
   namespace: openstack
 - name: horizon
   path: openstack-helm/horizon
@@ -121,10 +121,10 @@ CONTRAIL:
 - name: contrail-vrouter
   path: contrail-helm-deployer/contrail-vrouter
   namespace: contrail
-#OS_SUPPL:
-#- name: heat
-#  path: openstack-helm/heat
-#  namespace: openstack
+OS_SUPPL:
+- name: heat
+  path: openstack-helm/heat
+  namespace: openstack
 #- name: gnocchi
 #  path: openstack-helm-infra/gnocchi
 #  namespace: openstack

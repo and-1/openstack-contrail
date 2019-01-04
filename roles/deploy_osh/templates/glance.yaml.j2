@@ -149,7 +149,7 @@ endpoints:
   ceph_object_store:
     namespace: openstack
 
-{% if not multi_region.master.master_role %}
+{% if not multi_region.master %}
 dependencies:
   static:
     api:

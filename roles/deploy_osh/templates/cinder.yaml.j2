@@ -206,7 +206,7 @@ conf:
 #        mon_host: null
 #      osd:
 
-{% if not multi_region.master.master_role %}
+{% if not multi_region.master %}
 dependencies:
   static:
     api:

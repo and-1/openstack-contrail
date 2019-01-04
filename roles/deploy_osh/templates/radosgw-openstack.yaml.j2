@@ -85,7 +85,7 @@ conf:
   rgw_ks:
     enabled: true
 
-{% if not multi_region.master.master_role %}
+{% if not multi_region.master %}
 dependencies:
   static:
     rgw:

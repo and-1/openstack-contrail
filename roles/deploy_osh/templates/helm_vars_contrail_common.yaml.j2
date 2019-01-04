@@ -7,6 +7,7 @@ global:
    contrail_env:
      CONTROLLER_NODES: "{{nodes | join(',')}}"
      CONTROL_NODES: "{{nodes | join(',')}}"
+     CONFIG_DATABASE_NODES: "{{nodes | join(',')}}"
      VROUTER_GATEWAY: "{{default_gw}}"
      BGP_PORT: "{{BGP_port}}"
      BGP_ASN: "{{contrail_bgp_asn}}"
@@ -17,12 +18,13 @@ global:
      MAX_HEAP_SIZE: "{{contrail.cassandra.Xmx}}"
      HEAP_NEWSIZE: "{{contrail.cassandra.Xmn}}"
      METADATA_PROXY_SECRET: "{{metadata_secret_key}}"
-     LOG_LEVEL: SYS_INFO
+#     LOG_LEVEL: SYS_NOTICE
+     LOG_LEVEL: SYS_DEBUG
      CLOUD_ORCHESTRATOR: openstack
      AAA_MODE: cloud-admin
      CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "5"
      DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "5"
-
+#     SVC_MONITOR__DEFAULTS__region_name: {{region}}
 #     VROUTER_AGENT__DEFAULT__gateway_mode: server
 
    images:
@@ -38,8 +40,8 @@ global:
        {{image}}: "{{params.repo|default(local_docker_registry)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}"
 {% endfor %}
 
-ingress:
-  webui_ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
+#ingress:
+#  webui_ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
 
 endpoints:
   cluster_domain_suffix: "{{int_domain_suffix}}"
@@ -51,14 +53,13 @@ endpoints:
       user_domain_name: "{{service_domain}}"
       project_domain_name: "{{service_domain}}"
       region_name: "{{region}}"
-{% if not multi_region.master.master_role %}
+{% if not multi_region.master %}
     host_fqdn_override:
-       default:
-         host: {{multi_region.slaves.ks_endpoint}}
+       default: {{keystone_master}}
 {% endif %}
   rabbitmq:
-    auth:
-      username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
-      password: "{{contrail_endpoints_rabbitmq_pwd}}"
+#    auth:
+#      username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
+#      password: "{{contrail_endpoints_rabbitmq_pwd}}"
     hosts:
       default: "{{nodes | join(',')}}"

@@ -213,9 +213,9 @@ identity:
       project_name: service
       user_domain_name: "{{service_domain}}"
       project_domain_name: "{{service_domain}}"
-  host_fqdn_override:
-    public: 
-      host: "keystone.{{ext_domain_suffix}}"
+#  host_fqdn_override:
+#    public: 
+#      host: "keystone.{{ext_domain_suffix}}"
 
 
 ceph_object_store:
@@ -241,9 +241,9 @@ ldap:
       username: admin
       bind: "cn=admin,dc={{int_domain_suffix.split('.')|join(',dc=')}}"
       password: password
-  host_fqdn_override:
-    public:
-      host: "ldap-{{region|lower}}.{{ext_domain_suffix}}"
+#  host_fqdn_override:
+#    public:
+#      host: "ldap-{{region|lower}}.{{ext_domain_suffix}}"
 
 prometheus_mysql_exporter:
   auth:
@@ -259,83 +259,83 @@ monitoring:
       password: changeme
     user:
       link: monitoring.admin
-  host_fqdn_override:
-    public:
-      host: "prometheus-{{region|lower}}.{{ext_domain_suffix}}"
+#  host_fqdn_override:
+#    public:
+#      host: "prometheus-{{region|lower}}.{{ext_domain_suffix}}"
 grafana:
   auth:
     admin:
       username: admin
       password: password
-  host_fqdn_override:
-    public:
-      host: "grafana-{{region|lower}}.{{ext_domain_suffix}}"
+#  host_fqdn_override:
+#    public:
+#      host: "grafana-{{region|lower}}.{{ext_domain_suffix}}"
 nagios:
   auth:
     admin:
       username: nagiosadmin
       password: password
-  host_fqdn_override:
-    public:
-      host: "nagios-{{region|lower}}.{{ext_domain_suffix}}"
+#  host_fqdn_override:
+#    public:
+#      host: "nagios-{{region|lower}}.{{ext_domain_suffix}}"
 elasticsearch:
   auth:
     admin:
       username: admin
       password: changeme
-  host_fqdn_override:
-    public:
-      host: "elasticsearch-{{region|lower}}.{{ext_domain_suffix}}"
+#  host_fqdn_override:
+#    public:
+#      host: "elasticsearch-{{region|lower}}.{{ext_domain_suffix}}"
 
-object_store:
-  host_fqdn_override:
-    public:
-      host: "radosgw-{{region|lower}}.{{ext_domain_suffix}}"
-volume:
-  host_fqdn_override:
-    public:
-      host: "cinder-{{region|lower}}.{{ext_domain_suffix}}"
-volumev2:
-  host_fqdn_override:
-    public:
-      host: "cinder-{{region|lower}}.{{ext_domain_suffix}}"
-volumev3:
-  host_fqdn_override:
-    public:
-      host: "cinder-{{region|lower}}.{{ext_domain_suffix}}"
-image:
-  host_fqdn_override:
-    public:
-      host: "glance-{{region|lower}}.{{ext_domain_suffix}}"
-network:
-  host_fqdn_override:
-    public:
-      host: "neutron-{{region|lower}}.{{ext_domain_suffix}}"
-compute:
-  host_fqdn_override:
-    public:
-      host: "nova-{{region|lower}}.{{ext_domain_suffix}}"
-compute_novnc_proxy:
-  host_fqdn_override:
-    public:
-      host: "novncproxy-{{region|lower}}.{{ext_domain_suffix}}"
-placement:
-  host_fqdn_override:
-    public:
-      host: "placement-{{region|lower}}.{{ext_domain_suffix}}"
-orchestration:
-  host_fqdn_override:
-    public:
-      host: "heat-{{region|lower}}.{{ext_domain_suffix}}"
-cloudformation:
-  host_fqdn_override:
-    public:
-      host: "cloudformation-{{region|lower}}.{{ext_domain_suffix}}"
-metric:
-  host_fqdn_override:
-    public:
-      host: "gnocchi-{{region|lower}}.{{ext_domain_suffix}}"
-dashboard:
-  host_fqdn_override:
-    public:
-      host: "horizon.{{ext_domain_suffix}}"
+#object_store:
+#  host_fqdn_override:
+#    public:
+#      host: "radosgw-{{region|lower}}.{{ext_domain_suffix}}"
+#volume:
+#  host_fqdn_override:
+#    public:
+#      host: "cinder-{{region|lower}}.{{ext_domain_suffix}}"
+#volumev2:
+#  host_fqdn_override:
+#    public:
+#      host: "cinder-{{region|lower}}.{{ext_domain_suffix}}"
+#volumev3:
+#  host_fqdn_override:
+#    public:
+#      host: "cinder-{{region|lower}}.{{ext_domain_suffix}}"
+#image:
+#  host_fqdn_override:
+#    public:
+#      host: "glance-{{region|lower}}.{{ext_domain_suffix}}"
+#network:
+#  host_fqdn_override:
+#    public:
+#      host: "neutron-{{region|lower}}.{{ext_domain_suffix}}"
+#compute:
+#  host_fqdn_override:
+#    public:
+#      host: "nova-{{region|lower}}.{{ext_domain_suffix}}"
+#compute_novnc_proxy:
+#  host_fqdn_override:
+#    public:
+#      host: "novncproxy-{{region|lower}}.{{ext_domain_suffix}}"
+#placement:
+#  host_fqdn_override:
+#    public:
+#      host: "placement-{{region|lower}}.{{ext_domain_suffix}}"
+#orchestration:
+#  host_fqdn_override:
+#    public:
+#      host: "heat-{{region|lower}}.{{ext_domain_suffix}}"
+#cloudformation:
+#  host_fqdn_override:
+#    public:
+#      host: "cloudformation-{{region|lower}}.{{ext_domain_suffix}}"
+#metric:
+#  host_fqdn_override:
+#    public:
+#      host: "gnocchi-{{region|lower}}.{{ext_domain_suffix}}"
+#dashboard:
+#  host_fqdn_override:
+#    public:
+#      host: "horizon.{{ext_domain_suffix}}"

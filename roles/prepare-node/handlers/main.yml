@@ -1,3 +1,6 @@
 ---
 - name: restart rsyslog
   service: name=rsyslog state=restarted
+- name: restart kubelet
+  service: name=kubelet state=restarted
+

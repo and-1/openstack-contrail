@@ -1,17 +1,35 @@
 ---
-- name: "Config network interfaces ({{rollout_mode}})"
-  template:
-    src: "vlan_{{rollout_mode}}.conf.j2"
-    dest: /etc/netplan/60-osh-iface.yaml
-  register: netplan_config
-- name: "Apply new network configuration"
-  shell: netplan apply
-  when: netplan_config.changed
+#- block:
+#  - name: "Config network interfaces ({{rollout_mode}}) Ubuntu 18.04"
+#    template:
+#      src: "iface_18_{{rollout_mode}}.conf.j2"
+#      dest: /etc/netplan/60-osh-iface.yaml
+#    register: netplan_config
+#  - name: "Apply new network configuration"
+#    shell: netplan apply
+#  when: "ansible_distribution_version == '18.04'"
+#- block:
+#  - name: "Config network interfaces ({{rollout_mode}}) Ubuntu 16.04"
+#    template:
+#      src: "iface_16_{{rollout_mode}}.conf.j2"
+#      dest: /etc/network/interfaces.d/60-osh-iface.cfg
+#  - name: "Apply new network configuration"
+#    shell: systemctl restart networking && sleep 10
+#  when: "ansible_distribution_version == '16.04'"
+- name: Disable systemd-timesyncd
+  systemd:
+    name: systemd-timesyncd
+    state: stopped
+    masked: true
 - name: Install required packages
-  apt: name="{{item}}" state=present
+  apt: name="{{item}}" state=present update_cache=true
   with_items:
   - "{{packages}}"
   register: packages
+- name: Ensure ntp is started
+  systemd:
+    name: ntp
+    state: started
 # Separate kubelet, docker logs from other
 - name: Force store journald logs on disk
   lineinfile:

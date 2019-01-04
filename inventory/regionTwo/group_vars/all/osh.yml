@@ -50,10 +50,7 @@ alertmanager:
 os_release: "queens"
 region: "RegionTwo"
 multi_region:
-  master:
-    master_role: false
-  slaves:
-    ks_endpoint: "keystone.{{ext_domain_suffix}}"
+  master: true
 service_domain: "default"
 # Generate password and override static.
 # Don't disable it in production env

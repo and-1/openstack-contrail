@@ -1,4 +1,13 @@
 ---
+- name: Share keystone master region endpoint
+  copy:
+    content: "keystone.{{ext_domain_suffix}}"
+    dest: "{{inventory_dir}}/../share_creds/identity.endpoint"
+  when: "multi_region.master"
+- name: Get keystone master region endpoint
+  set_fact:
+    keystone_master: "{{lookup('file', inventory_dir+'/../share_creds/identity.endpoint')}}"
+  when: "not multi_region.master"
 - name: import helm variables
   include_vars:
     file: "{{inventory_dir}}/helm_vars/{{item}}.yaml"
@@ -8,10 +17,15 @@
   - endpoints
   - components
   - replicas
-- name: Set component with not wait ready status
+- name: Set components with not wait ready status
   set_fact:
     no_wait: 
-    - 'nova'
+#    - 'nova'
+    - 'mariadb'
+    - 'rabbitmq'
+    - 'glance'
+    - 'cinder'
+    - 'horizon'
     - 'prometheus-openstack-exporter'
 - name: Set control-plane mode
   set_fact:
@@ -22,7 +36,7 @@
   with_together:
   - ['master': true, 'master': false]
   - [[''], [['keystone','horizon']]]
-  when: "components['OSH_CORE'] is defined and item.0['master'] == multi_region.master.master_role"
+  when: "components['OSH_CORE'] is defined and item.0['master'] == multi_region.master"
 - name: Prepare helm and tools
   include: prepare_helm.yaml
 - name: Generate info

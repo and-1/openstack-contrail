@@ -87,10 +87,10 @@ endpoints:
 {% endif %}
 {% if users.host_fqdn_override is defined %}
     host_fqdn_override:
-{% if endpoint == 'identity' and not multi_region.master.master_role %}
-      default: {{multi_region.slaves.ks_endpoint}}
-      public: {{multi_region.slaves.ks_endpoint}}
-      internal: {{multi_region.slaves.ks_endpoint}}
+{% if endpoint == 'identity' and not multi_region.master %}
+      default: {{keystone_master}}
+      public: {{keystone_master}}
+      internal: {{keystone_master}}
     port:
       api:
         default: 80

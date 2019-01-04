@@ -1,4 +1,13 @@
 ---
+- name: Enable feature in kubeapi
+  lineinfile:
+    backrefs: yes
+    line: '\1True\2'
+    regexp: '(^.*feature-gates.*MountPropagation=)False(.*)'
+    state: present
+    path: /etc/kubernetes/manifests/kube-apiserver.manifest
+  when: "'control-plane' in group_names and kube_version is version('v1.11.3', '<=')"
+  notify: restart kubelet
 - name: Set k8s node labels (control)
   shell: "kubectl label node --overwrite {{ item.0 }} {{item.1}}=enabled"
   with_nested:

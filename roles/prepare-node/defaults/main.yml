@@ -8,7 +8,7 @@ endpoints:
 # Packages are required on nodes
 packages:
  - ceph-common
- - bridge-utils
+ - ntp
 # k8s node labels
 compute_plane_labels:
  - openstack-compute-node

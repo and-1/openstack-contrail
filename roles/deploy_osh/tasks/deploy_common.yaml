@@ -3,6 +3,10 @@
     src: "{{playbook_dir}}/openstack-helm-infra/helm-toolkit/charts"
     dest: "{{playbook_dir}}/{{item.path}}/charts"
     state: link
+- name: "{{GROUP}}: {{item.name}}: Check whether helm release exist"
+  shell: "{{helm_bin}} list -q | grep -q {{item.name}} && echo ok || echo nok"
+  register: helm_release
+  changed_when: false
 - name: "{{GROUP}}: {{item.name}}: Generate helm override values"
   template:
     src: "{{item.name}}.yaml.j2"
@@ -16,4 +20,4 @@
          {% if item['name'] not in no_wait %}
          && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['namespace']}}
          {% endif %}"
-  when: "redeploy_all or lookup('vars', item.name +'_change').changed"
+  when: "redeploy_all or lookup('vars', item.name +'_change').changed or helm_release.stdout == 'nok'"

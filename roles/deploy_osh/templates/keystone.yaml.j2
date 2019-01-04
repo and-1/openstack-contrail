@@ -123,13 +123,13 @@ bootstrap:
           --user-domain="${OS_USER_DOMAIN_NAME}" \
           --domain="{{service_domain}}" \
           "admin"
-    openstack role create --or-show _member_
+    openstack role create --or-show member
     openstack role add \
           --user="${OS_USERNAME}" \
           --user-domain="${OS_USER_DOMAIN_NAME}" \
           --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
           --project="${OS_PROJECT_NAME}" \
-          "_member_"
+          "member"
     #NOTE(portdirect): required for all users who operate heat stacks
     openstack role create --or-show heat_stack_owner
     openstack role add \
@@ -151,6 +151,9 @@ jobs:
     cron: "0 0 1 * *"
 conf:
   keystone:
+    DEFAULT:
+      insecure_debug: false
+      debug: false
     database:
       db_max_retries: -1
   rabbitmq:
@@ -166,6 +169,9 @@ conf:
         priority: 0
         apply-to: all
         pattern: '^(?!amq\.).*'
+  logging:
+    logger_keystone:
+      level: INFO
   policy:
     admin_required: "role:admin"
     cloud_admin: "role:admin and (is_admin_project:True or domain_id:{{service_domain}})"
