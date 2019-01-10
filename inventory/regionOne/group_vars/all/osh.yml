@@ -1,25 +1,19 @@
 #---------------------------Networks---------#
-#ceph_net: "192.168.2.0/24"
-ceph_net: "10.233.44.0/24"
+ceph_net: "192.168.2.0/24"
 ceph_vlan: 1500
-#ceph_iface: "ens5"
-ceph_iface: "ens3"
-#k8s_net: "192.168.1.0/24"
-k8s_net: "10.233.44.0/24"
+ceph_iface: "ens5"
+k8s_net: "192.168.1.0/24"
 k8s_vlan: 1501
-#k8s_iface: "ens4"
-k8s_iface: "ens3"
-#default_gw: "192.168.0.194"
-default_gw: "10.233.44.1"
-osd_disks:
-- vdb
-- vdc
-# TODO
-ntp_srv:
+k8s_iface: "ens4"
+default_gw: "192.168.0.194"
+vip_ip: "192.168.0.10"
+dns_srvs:
+- "192.168.0.194"
+ntp_srvs:
+- "194.190.168.1"
 #---------------------------Images-----------#
-#local_docker_registry: "192.168.0.194:5000"
-local_docker_registry: "10.233.44.194:5000"
-contrail_tag: "queens-master-317"
+local_docker_registry: "192.168.0.194:5000"
+contrail_tag: "queens-master-454"
 osh_tag: 1.0
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#
@@ -33,7 +27,7 @@ mon_osd_full_ratio: .90
 mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
-int_domain_suffix: "cluster.local"
+int_domain_suffix: "region1.local"
 ext_domain_suffix: "logistic.lan"
 pod_resources: false
 #--------------------------Infra-------------#
@@ -60,7 +54,6 @@ os_release: "queens"
 region: "RegionOne"
 multi_region:
   master: true
-service_domain: "default"
 # Generate password and override static.
 # Don't disable it in production env
 gen_passwd: true

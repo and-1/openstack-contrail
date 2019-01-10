@@ -94,6 +94,7 @@
 #    - "{{ansible_default_ipv4.address}}:5255:5255"
     tty: true
     volumes:
+    - /etc/ntp.conf:/etc/ntp.conf
     - /opt/maas/conf/regiond.conf:/etc/maas/regiond.conf
     - /opt/maas/bin/ui-user-init.sh:/tmp/ui-user-init.sh
     - /opt/maas/conf/000-default.conf:/etc/apache2/sites-available/000-default.conf

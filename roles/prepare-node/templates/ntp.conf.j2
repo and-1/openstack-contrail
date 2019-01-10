@@ -1,0 +1,5 @@
+driftfile /var/lib/ntp/ntp.drift
+
+{% for srv in ntp_srvs %}
+server {{srv}} iburst minpoll 3
+{% endfor %}

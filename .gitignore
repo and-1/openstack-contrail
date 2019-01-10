@@ -1,7 +1,9 @@
 *.retry
 */**/artifacts/
+*/share_creds/*
 test.yaml
 *.swp
 TODO
 *.creds
 *.ssh.key*
+dnsrecords.txt

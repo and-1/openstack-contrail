@@ -9,9 +9,20 @@ deployment:
   type: DaemonSet
 network:
   host_namespace: true
+  vip:
+    manage: true
+    # what type of vip manage machanism will be used
+    # possible options: routed, keepalived
+    mode: keepalived
+    interface: {{hostvars[groups['control-plane']|first]['ansible_default_ipv4']['interface']}}
+    addr: {{vip_ip}}/32
+conf:
+  ingress:
+    bind-address: 0.0.0.0
+
 monitoring:
   prometheus:
-    enabled: true
+    enabled: {{monitoring}}
     ingress_exporter:
       scrape: true
       port: '10254'

@@ -90,6 +90,8 @@ oslo_db_session:
       username: grafana_session
       password: password
 # Credentials fro OS users
+# If this vars used on slave region, 
+# ALL IDENTITY VARS MUST BE THE SAME AS IN MASTER REGION CONFIG (EXCEPT region_name)
 identity:
   auth:
     admin:
@@ -319,6 +321,10 @@ compute_novnc_proxy:
   host_fqdn_override:
     public:
       host: "novncproxy-{{region|lower}}.{{ext_domain_suffix}}"
+compute_spice_proxy:
+  host_fqdn_override:
+    public:
+      host: "placement-{{region|lower}}.{{ext_domain_suffix}}"
 placement:
   host_fqdn_override:
     public:

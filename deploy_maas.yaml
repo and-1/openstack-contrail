@@ -12,5 +12,5 @@
   roles:
   - { role: prepare-node, stage: pre-k8s}
   - bootstrap-os
-  - { role: container-engine, docker_iptables_enabled: true }
+  - container-engine
   - maas

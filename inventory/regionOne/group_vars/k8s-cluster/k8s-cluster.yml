@@ -73,9 +73,6 @@ kube_users:
 # Can also be set to 'cloud', which lets the cloud provider setup appropriate routing
 kube_network_plugin: calico
 
-# Enable kubernetes network policies
-enable_network_policy: false
-
 # Kubernetes internal network for services, unused block of space.
 kube_service_addresses: 172.16.0.0/18
 
@@ -110,11 +107,11 @@ kube_encrypt_secret_data: false
 
 # DNS configuration.
 # Kubernetes cluster name, also will be used as DNS domain
-cluster_name: "{{ int_domain_suffix }}"
+cluster_name: "{{int_domain_suffix}}"
 # Subdomains of DNS domain to be resolved via /etc/resolv.conf for hostnet pods
 ndots: 2
 # Can be dnsmasq_kubedns, kubedns, coredns, coredns_dual, manual or none
-dns_mode: coredns
+dns_mode: kubedns
 # Set manual server if using a custom cluster DNS server
 #manual_dns_server: 10.x.x.x
 
@@ -200,4 +197,5 @@ kube_controller_node_monitor_grace_period: 16s
 kube_controller_node_monitor_period: 2s
 kube_controller_pod_eviction_timeout: 30s
 
-#populate_inventory_to_hosts_file: false
+populate_inventory_to_hosts_file: false
+

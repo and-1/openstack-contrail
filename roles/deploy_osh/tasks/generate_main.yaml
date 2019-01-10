@@ -4,6 +4,26 @@
   - "{{endpoints}}"
   loop_control:
     loop_var: endpoint
+- name: Generate cloud credentials
+  template:
+    src: cloud.yaml.j2
+    dest: "{{inventory_dir}}/artifacts/cloud.yaml"
+- name: Share keystone master region endpoint
+  copy:
+    content: |
+      auth_url: "http://{{endpoints.identity.host_fqdn_override.public.host}}:80/v3"
+      password: "{{identity_admin_pwd}}"
+      project_domain_name: "{{endpoints.identity.auth.admin.project_domain_name}}"
+      project_name: "{{endpoints.identity.auth.admin.project_name}}"
+      user_domain_name: "{{endpoints.identity.auth.admin.user_domain_name}}"
+      username: "{{endpoints.identity.auth.admin.username}}"
+    dest: "{{inventory_dir}}/../share_creds/identity.endpoint"
+  when: "multi_region.master"
+- name: Get keystone master region endpoint
+  include_vars:
+    name: keystone_endpoint
+    file: "{{inventory_dir}}/../share_creds/identity.endpoint"
+  when: "not multi_region.master"
 - name: Generate helm common override values
   template:
     src: helm_vars_common.yaml.j2
@@ -12,17 +32,13 @@
   register: helm_vars_common_gen_res
 - name: Generate OSH rabbitmq cookie
   set_fact:
-    rabbitmq_osh_cookie: "{{oslo_messaging_admin_pwd|hash('md5')}}"
+    rabbitmq_osh_cookie: "{{oslo_messaging_admin_pwd+region|hash('md5')}}"
 - name: Generate CONTRAIL rabbitmq cookie
   set_fact:
     rabbitmq_contrail_cookie: "{{contrail_endpoints_rabbitmq_pwd|hash('md5')}}"
-- name: Generate cloud credentials
-  template:
-    src: cloud.yaml.j2
-    dest: "{{inventory_dir}}/artifacts/cloud.yaml"
 - name: Generate Ceph FS ID
   set_fact:
-    ceph_fs_id: "{{identity_admin_pwd|to_uuid}}"
+    ceph_fs_id: "{{identity_admin_pwd+region|to_uuid}}"
 - name: Generate libvirt sercet uuid
   set_fact:
     rbd_secret_uuid: "{{identity_cinder_pwd|to_uuid}}"
@@ -31,7 +47,7 @@
     horizon_secret_key: "{{oslo_db_horizon_pwd|hash('md5')}}"
 - name: Generate nova metadata sercet key
   set_fact:
-    metadata_secret_key: "{{identity_neutron_pwd|hash('md5')}}"
+    metadata_secret_key: "{{identity_neutron_pwd+region|hash('md5')}}"
 - name:  Generate CONTRAIL common override values
   template:
     src: helm_vars_contrail_common.yaml.j2

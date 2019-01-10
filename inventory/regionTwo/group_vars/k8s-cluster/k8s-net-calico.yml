@@ -18,10 +18,11 @@ global_as_num: "64546"
 # not be specified in calico CNI config, so Calico will use built-in
 # defaults. The value should be a number, not a string.
 # calico_mtu: 1500
-calico_felix_prometheusmetricsenabled: "true"
-calico_felix_prometheusmetricsport: "9091"
+#
+calico_felix_prometheusmetricsenabled: "{{monitoring}}"
+calico_felix_prometheusmetricsport: "19091"
 
 # IPIP tunel enable
-ipip: "false"
-#ipip_mode: CrossSubnet
+ipip: false
+# #ipip_mode: CrossSubnet
 calico_ip_auto_method: "interface={{k8s_iface}}"

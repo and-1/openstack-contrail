@@ -28,6 +28,7 @@
       MAAS_REGION_SECRET: "{{maas_secret}}"
       MAAS_API_KEY: "{{maas_apikey}}"
     volumes:
+    - /etc/ntp.conf:/etc/ntp.conf
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
     - /opt/maas/bin/register-rack-controller.sh:/usr/local/bin/register-rack-controller.sh
     - /opt/maas/bin/start.sh:/tmp/start.sh

@@ -46,3 +46,51 @@ conf:
     clients_contrail:
       api_base_url: /
       api_server: config-api-server.contrail
+
+{% if not multi_region.master %}
+dependencies:
+  static:
+    api:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: oslo_messaging
+    cfn:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: oslo_messaging
+    cloudwatch:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: oslo_messaging
+    engine:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: oslo_messaging
+    engine_cleaner:
+      services:
+        - endpoint: internal
+          service: oslo_db
+        - endpoint: internal
+          service: oslo_messaging
+    ks_endpoints:
+      services: null
+    ks_service:
+      services: null
+    ks_user:
+      services: null
+    trusts:
+      services: null
+    tests:
+      services:
+        - endpoint: internal
+          service: orchestration
+{% endif %}
+

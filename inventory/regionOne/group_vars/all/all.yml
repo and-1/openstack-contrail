@@ -23,7 +23,7 @@ loadbalancer_apiserver_localhost: true
 
 ## Local loadbalancer should use this port instead, if defined.
 ## Defaults to kube_apiserver_port (6443)
-nginx_kube_apiserver_port: 15808
+nginx_kube_apiserver_port: 18443
 
 ### OTHER OPTIONAL VARIABLES
 ## For some things, kubelet needs to load kernel modules.  For example, dynamic kernel services are needed
@@ -35,7 +35,11 @@ kubelet_load_modules: true
 ## Upstream dns servers used by dnsmasq
 #upstream_dns_servers:
 #  - 8.8.8.8
-#  - 8.8.4.4 ## There are some changes specific to the cloud providers ## for instance we need to encapsulate packets with some network plugins ## If set the possible values are either 'gce', 'aws', 'azure', 'openstack', 'vsphere', 'oci', or 'external'
+#  - 8.8.4.4
+
+## There are some changes specific to the cloud providers
+## for instance we need to encapsulate packets with some network plugins
+## If set the possible values are either 'gce', 'aws', 'azure', 'openstack', 'vsphere', 'oci', or 'external'
 ## When openstack is used make sure to source in the openstack credentials
 ## like you would do when using nova-client before starting the playbook.
 ## Note: The 'external' cloud provider is not supported. 
@@ -43,10 +47,10 @@ kubelet_load_modules: true
 #cloud_provider:
 
 ## kubeadm deployment mode
-kubeadm_enabled: true
+kubeadm_enabled: false
 
 # Skip alert information
-skip_non_kubeadm_warning: false
+skip_non_kubeadm_warning: true
 
 ## Set these proxy values in order to update package manager and docker daemon to use proxies
 #http_proxy: ""
@@ -86,5 +90,5 @@ kube_read_only_port: 10255
 ## Set Pypi repo and cert accordingly
 #pyrepo_index: https://pypi.example.com/simple
 #pyrepo_cert: /etc/ssl/certs/ca-certificates.crt
-#
+
 helm_version: "v2.11.0"

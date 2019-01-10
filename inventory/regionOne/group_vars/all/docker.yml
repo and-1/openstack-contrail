@@ -33,7 +33,7 @@ docker_rpm_keepcache: 0
 ## Can be ipaddress and domain_name.
 ## example define 172.19.16.11 or mirror.registry.io
 docker_insecure_registries:
-- "{{local_docker_registry}}"
+ - "{{local_docker_registry}}" # registry for osh images
 #   - mirror.registry.io
 #   - 172.19.16.11
 
@@ -63,6 +63,7 @@ docker_options: >-
   {%- else %}
   --data-root={{ docker_daemon_graph }} {{ docker_log_opts }}
   {%- endif %}
+  --live-restore
   {%- if ansible_architecture == "aarch64" and ansible_os_family == "RedHat" %}
   --add-runtime docker-runc=/usr/libexec/docker/docker-runc-current
   --default-runtime=docker-runc --exec-opt native.cgroupdriver=systemd

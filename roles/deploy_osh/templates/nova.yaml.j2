@@ -126,8 +126,11 @@ conf:
       db_max_retries: -1
     cell0_database:
       db_max_retries: -1
-{% if join_areas.enabled %}
+    glance:
+      region_name: {{region}}
     cinder:
+      os_region_name: {{region}}
+{% if join_areas.enabled %}
       cross_az_attach: 'false'
 {% endif %}
   rabbitmq:
@@ -143,7 +146,7 @@ conf:
         priority: 0
         apply-to: all
         pattern: '^(?!amq\.).*'
-# Will be added in future for domain instead role
+# Will be added in future domain filter instead role
 #  policy:
 #    az_by_role: "(not None:%(availability_zone)s and project_id:%(project_id)s and (( 'private':%(availability_zone)s and not role:dmz) or ('dmz':%(availability_zone)s and role:dmz))) or is_admin:True"
 #    os_compute_api:servers:create: rule:az_by_role

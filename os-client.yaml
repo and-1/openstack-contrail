@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: openstack-cli
+  labels:
+    app: openstack-cli
+  namespace: openstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openstack-cli
+  template:
+    metadata:
+     labels:
+       app: openstack-cli
+    spec:
+      containers:
+      - name: openstack-cli
+        command:
+        - sh
+        - -c
+        - "while true;do sleep 1000;done"
+        image: platform9/openstack-cli
+        env:
+        - name: OS_IDENTITY_API_VERSION
+          value: "3"
+        - name: OS_AUTH_URL
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_AUTH_URL
+        - name: OS_REGION_NAME
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_REGION_NAME
+        - name: OS_INTERFACE
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_INTERFACE
+        - name: OS_PROJECT_DOMAIN_NAME
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_PROJECT_DOMAIN_NAME
+        - name: OS_PROJECT_NAME
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_PROJECT_NAME
+        - name: OS_TENANT_NAME
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_PROJECT_NAME
+        - name: OS_USER_DOMAIN_NAME
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_USER_DOMAIN_NAME
+        - name: OS_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_USERNAME
+        - name: OS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nova-keystone-admin
+              key: OS_PASSWORD
+        - name: OS_ENDPOINT_TYPE
+          value: "internalURL"
+        - name: OS_AUTH_VERSION
+          value: "3"
+        - name: OS_AUTH_TYPE
+          value: "password"

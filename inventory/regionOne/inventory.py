@@ -224,8 +224,8 @@ class Inventory:
                      nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                      'ansible_host': iface['links'][0]['ip_address'],
                      'ip': self.getip(iface['links'][0]['ip_address']),
+                     'rack_ctl': 'true',
                      }
-                     nodes_meta['_meta']['hostvars'][node['hostname']+domain]['docker_iptables_enabled'] = True
                  except:
                    continue
              elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':

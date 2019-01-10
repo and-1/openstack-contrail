@@ -88,9 +88,9 @@ endpoints:
 {% if users.host_fqdn_override is defined %}
     host_fqdn_override:
 {% if endpoint == 'identity' and not multi_region.master %}
-      default: {{keystone_master}}
-      public: {{keystone_master}}
-      internal: {{keystone_master}}
+      default: {{keystone_endpoint.auth_url | urlsplit('hostname')}}
+      public: {{keystone_endpoint.auth_url | urlsplit('hostname')}}
+      internal: {{keystone_endpoint.auth_url | urlsplit('hostname')}}
     port:
       api:
         default: 80

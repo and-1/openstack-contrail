@@ -18,8 +18,7 @@ global:
      MAX_HEAP_SIZE: "{{contrail.cassandra.Xmx}}"
      HEAP_NEWSIZE: "{{contrail.cassandra.Xmn}}"
      METADATA_PROXY_SECRET: "{{metadata_secret_key}}"
-#     LOG_LEVEL: SYS_NOTICE
-     LOG_LEVEL: SYS_DEBUG
+     LOG_LEVEL: SYS_NOTICE
      CLOUD_ORCHESTRATOR: openstack
      AAA_MODE: cloud-admin
      CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "5"
@@ -40,8 +39,8 @@ global:
        {{image}}: "{{params.repo|default(local_docker_registry)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}"
 {% endfor %}
 
-#ingress:
-#  webui_ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
+ingress:
+  webui_ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
 
 endpoints:
   cluster_domain_suffix: "{{int_domain_suffix}}"
@@ -55,11 +54,15 @@ endpoints:
       region_name: "{{region}}"
 {% if not multi_region.master %}
     host_fqdn_override:
-       default: {{keystone_master}}
+       default: {{keystone_endpoint.auth_url | urlsplit('hostname')}}
 {% endif %}
   rabbitmq:
-#    auth:
-#      username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
-#      password: "{{contrail_endpoints_rabbitmq_pwd}}"
+    auth:
+      username: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
+      password: "{{contrail_endpoints_rabbitmq_pwd}}"
     hosts:
       default: "{{nodes | join(',')}}"
+
+#Patch until resolve https://bugs.launchpad.net/opencontrail/+bug/1781968
+manifests:
+  configmap_patch: true

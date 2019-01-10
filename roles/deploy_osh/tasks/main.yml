@@ -1,13 +1,4 @@
 ---
-- name: Share keystone master region endpoint
-  copy:
-    content: "keystone.{{ext_domain_suffix}}"
-    dest: "{{inventory_dir}}/../share_creds/identity.endpoint"
-  when: "multi_region.master"
-- name: Get keystone master region endpoint
-  set_fact:
-    keystone_master: "{{lookup('file', inventory_dir+'/../share_creds/identity.endpoint')}}"
-  when: "not multi_region.master"
 - name: import helm variables
   include_vars:
     file: "{{inventory_dir}}/helm_vars/{{item}}.yaml"
@@ -41,6 +32,20 @@
   include: prepare_helm.yaml
 - name: Generate info
   include: generate_main.yaml
+- name: "Add identity endpoint for region - {{region}}"
+  os_keystone_endpoint:
+    auth: "{{keystone_endpoint}}"
+    auth_type: password
+    endpoint_interface: "{{item}}"
+    region: "{{region}}"
+    service: keystone
+    state: present
+    url: "{{keystone_endpoint.auth_url}}"
+  with_items:
+  - admin
+  - internal
+  - public
+  when: "not multi_region.master"
 - name: Deploy INFRA essensial
   include: deploy_common.yaml GROUP="OSH_INFRA"
   with_items:
