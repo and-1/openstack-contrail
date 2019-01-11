@@ -69,15 +69,15 @@
   with_nested:
   - ['k8s_iface','ceph_iface']
   - "{{ groups['k8s-cluster'] }}"
-- name: Add endpoints to hosts for rbd provision
-  lineinfile:
-    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
-    path: /etc/hosts
-    state: present
-  with_nested:
-  - "{{ groups['control-plane'] }}"
-  - "{{ endpoints }}"
-  when: "endpoints | length != 0 and 'maas' not in group_names"
+#- name: Add endpoints to hosts for rbd provision
+#  lineinfile:
+#    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
+#    path: /etc/hosts
+#    state: present
+#  with_nested:
+#  - "{{ groups['control-plane'] }}"
+#  - "{{ endpoints }}"
+#  when: "endpoints | length != 0 and 'maas' not in group_names"
 - name: Disable swap
   lineinfile:
     regexp: 'swap'

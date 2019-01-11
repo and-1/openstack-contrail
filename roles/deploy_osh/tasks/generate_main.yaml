@@ -4,10 +4,6 @@
   - "{{endpoints}}"
   loop_control:
     loop_var: endpoint
-- name: Generate cloud credentials
-  template:
-    src: cloud.yaml.j2
-    dest: "{{inventory_dir}}/artifacts/cloud.yaml"
 - name: Share keystone master region endpoint
   copy:
     content: |
@@ -24,6 +20,10 @@
     name: keystone_endpoint
     file: "{{inventory_dir}}/../share_creds/identity.endpoint"
   when: "not multi_region.master"
+- name: Generate cloud credentials
+  template:
+    src: cloud.yaml.j2
+    dest: "{{inventory_dir}}/artifacts/cloud.yaml"
 - name: Generate helm common override values
   template:
     src: helm_vars_common.yaml.j2
