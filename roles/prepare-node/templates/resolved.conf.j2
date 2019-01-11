@@ -12,7 +12,7 @@
 # See resolved.conf(5) for details
 
 [Resolve]
-DNS={{[dns_srvs, kube_service_addresses|ipaddr('net')|ipaddr(3)|ipaddr('address')] | join(" ")}}
+DNS={{[dns_srvs, kube_service_addresses|ipaddr('net')|ipaddr(3)|ipaddr('address')] | flatten | join(" ")}}
 #FallbackDNS=
 #Domains=
 #LLMNR=no

@@ -37,7 +37,7 @@
   - "{{packages}}"
   register: packages
 - name: Bring ntp service to valid state
-  systemd: name=ntp state="{% if rack_ctl is defined and rack_ctl|bool%}stopped{%else%}started{%endif%}"
+  systemd: name=ntp state="{% if rack_ctl is defined and rack_ctl|bool%}stopped{%else%}started{%endif%}" masked="{% if rack_ctl is defined and rack_ctl|bool%}true{%else%}false{%endif%}"
 # Separate kubelet, docker logs from other
 - name: Force store journald logs on disk
   lineinfile:
