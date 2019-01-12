@@ -196,15 +196,16 @@ conf:
         apply-to: all
         pattern: '^(?!amq\.).*'
 
-# Will be added in the future
-#backup:
-#  external_ceph_rbd:
-#    enabled: false
-#    admin_keyring: null
-#    conf:
-#      global:
-#        mon_host: null
-#      osd:
+{% if cinder_backup_to_region %}
+backup:
+  external_ceph_rbd:
+    enabled: true
+    admin_keyring: ext_ceph_cinder.keyring
+    conf:
+      global:
+        mon_host: ext_ceph_cinder.mons
+      osd:
+{% endif %}
 
 {% if not multi_region.master %}
 dependencies:
