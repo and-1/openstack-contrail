@@ -27,7 +27,7 @@ mon_osd_full_ratio: .90
 mon_osd_nearfull_ratio: .80
 mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
-int_domain_suffix: "region2.local"
+int_domain_suffix: "region2"
 ext_domain_suffix: "logistic.lan"
 pod_resources: false
 #--------------------------Infra-------------#
@@ -57,7 +57,10 @@ multi_region:
 # Generate password and override static.
 # Don't disable it in production env
 gen_passwd: true
-#- Cinder default pool parameters------------+
+# Whether use external ceph region. Available
+# # values: false or <region name>
+cinder_backup_to_region: RegionOne
+# Cinder default pool parameters-------------+
 cinder_pool_percent: 50
 cinder_backup_pool_percent: 5
 infra_pool_percent: 10
@@ -65,8 +68,8 @@ glance_pool_percent: 5
 rgw_pool_percent: 15.7
 nova_ephimeral_pool_percent: 5
 #--------------------------------------------+
-# Join one more areas in one cluster.
-# If enabled, all areas must present in inventory
+# Join one more areas in one cluster. If 
+# enabled, all areas must present in inventory
 # [ AREA-compute ]
 # [ AREA-osd-node ]
 # where 'AREA' is name in join_areas.areas

@@ -16,16 +16,22 @@
   - name: "Apply new network configuration"
     shell: systemctl restart networking && sleep 10
   when: "ansible_distribution_version == '16.04'"
-- name: Add dns servers
-  template: 
-    src: resolved.conf.j2
-    dest: /etc/systemd/resolved.conf
-  register: resovle_restart
-- name: Restart systemd-resolved
+- name: Disable systemd-resolved
   systemd:
     name: systemd-resolved
-    state: restarted
-  when: "resovle_restart.changed"
+    masked: true
+    state: stopped
+    enabled: false
+- name: Add dns servers
+  template: 
+    src: "resolved.conf.j2"
+    dest: /run/systemd/resolve/resolv.conf
+- name: Create link to /etc/resolv.conf
+  file:
+    src: /run/systemd/resolve/resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
 - name: Disable systemd-timesyncd
   systemd:
     name: systemd-timesyncd
@@ -69,15 +75,15 @@
   with_nested:
   - ['k8s_iface','ceph_iface']
   - "{{ groups['k8s-cluster'] }}"
-#- name: Add endpoints to hosts for rbd provision
-#  lineinfile:
-#    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
-#    path: /etc/hosts
-#    state: present
-#  with_nested:
-#  - "{{ groups['control-plane'] }}"
-#  - "{{ endpoints }}"
-#  when: "endpoints | length != 0 and 'maas' not in group_names"
+- name: Add endpoints to hosts for rbd provision
+  lineinfile:
+    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
+    path: /etc/hosts
+    state: present
+  with_nested:
+  - "{{ groups['control-plane'] }}"
+  - "{{ endpoints }}"
+  when: "endpoints | length != 0 and 'maas' not in group_names"
 - name: Disable swap
   lineinfile:
     regexp: 'swap'
@@ -87,3 +93,5 @@
   template:
     src: ntp.conf.j2
     dest: /etc/ntp.conf
+- name: Check dependency for that region
+  include_tasks: check_deps.yaml
