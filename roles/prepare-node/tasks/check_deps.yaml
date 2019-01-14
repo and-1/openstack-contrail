@@ -2,7 +2,21 @@
   stat:
     path: "{{inventory_dir}}/../share_creds/identity.endpoint"
   register: ks_ep_file
+  delegate_to: localhost
+  run_once: true
+  when: "multi_region.master != true"
 - name: Notify if KS endpoint not exist
   fail: 
-    msg: "Master region doesn't deployed stil or deployed with fail"
-  when: "ks_ep_file.stat.exists == False and not multi_region.master|bool"
+    msg: "Master region isn't deployed stil or deployed with fail"
+  when: "multi_region.master != true and not ks_ep_file.stat.exists"
+- name: Check external ceph config
+  stat:
+    path: "{{inventory_dir}}/../share_creds/ceph.{{cinder_backup_to_region|lower}}.creds"
+  register: ext_ceph_file
+  delegate_to: localhost
+  run_once: true
+  when: "cinder_backup_to_region != false"
+- name: Notify if external ceph config not exist
+  fail: 
+    msg: "Target ceph region isn't deployed stil or deployed with fail"
+  when: "cinder_backup_to_region != false and not ext_ceph_file.stat.exists"

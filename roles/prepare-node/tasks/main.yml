@@ -1,7 +1,7 @@
 ---
 - name: Prepare node
-  include: pre-k8s.yaml
+  include_tasks: pre-k8s.yaml
   when: "stage == 'pre-k8s'"
 - name: Prepare node (local execution)
-  include: post-k8s.yaml
+  include_tasks: post-k8s.yaml
   when: "stage == 'post-k8s'"

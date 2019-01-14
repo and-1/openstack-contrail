@@ -33,3 +33,15 @@
   - "{{groups['osd-nodes']}}"
   loop_control:
     loop_var: node
+- name: Download kubectl
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kube_version }}/bin/linux/amd64/kubectl"
+    owner: root
+    mode: 755
+    dest: "{{inventory_dir}}/artifacts/kubectl"
+  delegate_to: localhost
+- name: Change kubeconfig on ansible host
+  shell: "./kubectl --kubeconfig admin.conf config set-cluster {{int_domain_suffix}} --server https://{{hostvars[groups['kube-master']|first]['ansible_default_ipv4']['address']}}:{{kube_apiserver_port}}"
+  args:
+    chdir: "{{inventory_dir}}/artifacts/"
+  delegate_to: localhost

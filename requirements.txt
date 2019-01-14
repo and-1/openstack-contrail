@@ -1,2 +1,3 @@
 oauth
 openstacksdk>=0.13.0
+ansible-lint

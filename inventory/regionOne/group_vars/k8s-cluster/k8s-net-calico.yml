@@ -25,4 +25,4 @@ calico_felix_prometheusmetricsport: "19091"
 # IPIP tunel enable
 ipip: false
 # #ipip_mode: CrossSubnet
-calico_ip_auto_method: "interface={{k8s_iface}}"
+calico_ip_auto_method: "interface={{k8s.iface}}"

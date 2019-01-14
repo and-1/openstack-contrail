@@ -3,8 +3,8 @@
 {{- net | ipaddr(host_num) | ipaddr('address') }}
 {%- endmacro %}
 {% for iface in ['ceph', 'k8s'] %}
-auto {{lookup('vars', iface+'_iface')}}
-iface {{lookup('vars', iface+'_iface')}} inet static
-address {{ipaddr(lookup('vars', iface+'_net'))}}
-netmask {{lookup('vars', iface+'_net') | ipaddr('netmask')}}
+auto {{hostvars[inventory_hostname][iface]['iface']}}
+iface {{hostvars[inventory_hostname][iface]['iface']}} inet static
+address {{ipaddr(hostvars[inventory_hostname][iface]['net'])}}
+netmask {{hostvars[inventory_hostname][iface]['net'] | ipaddr('netmask')}}
 {% endfor %}

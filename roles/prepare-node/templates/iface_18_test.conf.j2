@@ -6,10 +6,10 @@ network:
     version: 2
     ethernets:
 {% for iface in ['ceph', 'k8s'] %}
-{% set if_name = lookup('vars', iface+'_iface') %}
+{% set if_name = hostvars[inventory_hostname][iface]['iface'] %}
        {{if_name}} :
             addresses:
-            - {{ipaddr(lookup('vars', iface+'_net'))}}
+            - {{ipaddr(hostvars[inventory_hostname][iface]['net'])}}
             mtu: 1500
             match:
                 macaddress: {{hostvars[inventory_hostname]['ansible_'+if_name]['macaddress']}}

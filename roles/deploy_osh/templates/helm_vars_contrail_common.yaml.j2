@@ -1,6 +1,6 @@
 {% set nodes = [] %}
 {% for node in groups['control-plane'] %}
-{% do nodes.append(hostvars[node]['ansible_'+ k8s_iface]['ipv4']['address']) %}
+{% do nodes.append(hostvars[node]['ansible_'+ k8s.iface]['ipv4']['address']) %}
 {% endfor %}
 
 global:

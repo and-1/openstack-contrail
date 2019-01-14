@@ -6,10 +6,10 @@ network:
     version: 2
     vlans:
 {% for iface in ['ceph', 'k8s'] %}
-       {{lookup('vars', iface+'_iface')}} :
+       {{hostvars[inventory_hostname][iface]['iface']}} :
             addresses:
-            - {{ipaddr(lookup('vars', iface+'_net'))}}
-            id: {{lookup('vars', iface+'_vlan')}}
+            - {{ipaddr(hostvars[inventory_hostname][iface]['net'])}}
+            id: {{hostvars[inventory_hostname][iface]['vlan']}}
             link: bond0
             mtu: 1500
 {% endfor %}

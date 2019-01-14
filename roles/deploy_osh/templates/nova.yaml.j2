@@ -83,10 +83,10 @@ console:
   spice:
     compute:
       # IF blank, search default routing interface
-      server_proxyclient_interface: {{k8s_iface}}
+      server_proxyclient_interface: {{k8s.iface}}
     proxy:
       # IF blank, search default routing interface
-      server_proxyclient_interface: {{k8s_iface}}
+      server_proxyclient_interface: {{k8s.iface}}
 
 manifests:
   service_novncproxy: false

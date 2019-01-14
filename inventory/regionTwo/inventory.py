@@ -188,16 +188,23 @@ class Inventory:
                     }
 
         nodes = self.nodes()
-        hosts = []
+        hosts_zone = []
+        hosts_all = []
         for node in nodes:
            zone = node['zone']['name']
+           if (node['node_type_name'] == 'Machine' and node['status_name'] != 'Deployed') and node['node_type'] not in [2,4]:
+             continue
+           if type(Config.osh_config['cinder_backup_to_region']) is str and zone == Config.osh_config['cinder_backup_to_region']:
+             hosts_zone.append(node['hostname']+domain)
+             ansible[zone] = {
+                  "hosts": hosts_zone,       
+                  "vars": {}
+             }
            if zone == Config.osh_config['region']:
-             if (node['node_type_name'] == 'Machine' and node['status_name'] != 'Deployed') and node['node_type'] not in [2,4]:
-               continue
-             hosts.append(node['hostname']+domain)
+             hosts_all.append(node['hostname']+domain)
 
         ansible['all'] = {
-           "hosts": hosts,       
+           "hosts": hosts_all,       
            "vars": {
               'ansible_python_interpreter': '/usr/bin/python3',
               'ansible_ssh_private_key_file': '{{inventory_dir}}/../share_creds/maas.ssh.key',
@@ -215,37 +222,53 @@ class Inventory:
         
         for node in node_dump:
            zone = node['zone']['name']
-           if zone == Config.osh_config['region']:
+           ext_ceph_zone = False
+           my_zones = [Config.osh_config['region']]
+           if type(Config.osh_config['cinder_backup_to_region']) is str:
+             my_zones.append(Config.osh_config['cinder_backup_to_region'])
+             if zone == Config.osh_config['cinder_backup_to_region']:
+               ext_ceph_zone = True
+           if zone in my_zones:
              if node['node_type'] in [2,4]:
                for iface in node['interface_set']:
                  try:
                    dhcp = iface['links'][0]['subnet']['vlan']['dhcp_on']
                    if dhcp:
-                     nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
-                     'ansible_host': iface['links'][0]['ip_address'],
-                     'ip': self.getip(iface['links'][0]['ip_address']),
-                     'rack_ctl': 'true',
-                     }
+                     if not ext_ceph_zone:
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                       'ansible_host': iface['links'][0]['ip_address'],
+                        'ip': self.getip(iface['links'][0]['ip_address']),
+                       'rack_ctl': 'true',
+                       }
+                     else:
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                       'ansible_host': iface['links'][0]['ip_address'],
+                       }
                  except:
                    continue
              elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
                if not node['tag_names']:
                  pass
                else:
-                 nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
-                   'ansible_host': node['ip_addresses'][0],
-                   'ip': self.getip(node['ip_addresses'][0]),
-                 }
-                 if 'osd-nodes' in node['tag_names']:
-                   disks = []
-                   journal_disk = ""
-                   for disk in node['physicalblockdevice_set']:
-                     disks.append(disk['name'])
-                     if 'journal' in disk['tags']:
-                       journal_disk = disk['name']
-                       nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_jour'] = disk['name']
-                   if journal_disk:
-                     nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
+                 if not ext_ceph_zone:
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                     'ansible_host': node['ip_addresses'][0],
+                     'ip': self.getip(node['ip_addresses'][0]),
+                   }
+                   if 'osd-nodes' in node['tag_names']:
+                     disks = []
+                     journal_disk = ""
+                     for disk in node['physicalblockdevice_set']:
+                       disks.append(disk['name'])
+                       if 'journal' in disk['tags']:
+                         journal_disk = disk['name']
+                         nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_jour'] = disk['name']
+                     if journal_disk:
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain]['osd_disks'] = list(set(disks).difference([node['boot_disk']['name'],journal_disk]))
+                 else:
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
+                     'ansible_host': node['ip_addresses'][0],
+                   }
 
         # Add some static groups
 #        ansible['ungrouped'] = {}
@@ -282,7 +305,7 @@ class Inventory:
         return result
 
     def getip(self, src_ip):
-        dest_net = ipaddress.ip_network(Config.osh_config['k8s_net'].decode('utf-8'))
+        dest_net = ipaddress.ip_network(Config.osh_config['k8s']['net'].decode('utf-8'))
         prefix = dest_net.prefixlen
         src_ip_mask = ipaddress.IPv4Interface("{}/{}".format(src_ip,prefix).decode('utf-8'))
         src_net = ipaddress.ip_network(str(src_ip_mask.network).decode('utf-8'))

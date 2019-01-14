@@ -10,9 +10,9 @@
   - replicas
 - name: Import external ceph config
   include_vars:
-    file: "{{inventory_dir}}/../share_creds/ceph.{{cinder_backup_to_region|lower}}.cred"
+    file: "{{inventory_dir}}/../share_creds/ceph.{{cinder_backup_to_region|lower}}.creds"
     name: ext_ceph_cinder
-  when: "cinder_backup_to_region"
+  when: "cinder_backup_to_region != false"
 - name: Set components with not wait ready status
   set_fact:
     no_wait: 
@@ -82,11 +82,15 @@
   - "{{components.OS_SUPPL}}"
   when: "components.OS_SUPPL is defined"
 - name: Get ceph admin keyring
-  shell: "./kubectl --kubeconfig=admin.conf -n ceph get secret ceph-client-admin-keyring -o jsonpath='{.data.ceph\.client\.admin\.keyring}' | base64 -d | awk -F' = ' '/key/{print $2}'"
+  shell: "./kubectl --kubeconfig=admin.conf -n ceph get secret ceph-client-admin-keyring -o jsonpath='{.data.ceph\\.client\\.admin\\.keyring}' | base64 -d | awk -F' = ' '/key/{print $2}'"
+  args:
+    chdir: "{{inventory_dir}}/artifacts"
   register: ceph_keyring
 - name: Save ceph connection info
   copy:
     content: |
       keyring: "{{ceph_keyring.stdout}}"
       mons: "ceph-mon-{{region|lower}}.{{ext_domain_suffix}}"
-    dest: "{{inventory_dir}}/../share_creds/ceph.{{region|lower}}.cred"
+      ext_ceph_gw: "{{ceph.gw}}"
+      ext_ceph_net: "{{ceph.net}}"
+    dest: "{{inventory_dir}}/../share_creds/ceph.{{region|lower}}.creds"

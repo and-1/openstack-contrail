@@ -1,14 +1,19 @@
 ---
+- name: Check dependency for that region
+  include_tasks: check_deps.yaml
 - block:
   - name: "Config network interfaces ({{rollout_mode}}) Ubuntu 18.04"
     template:
       src: "iface_18_{{rollout_mode}}.conf.j2"
       dest: /etc/netplan/60-osh-iface.yaml
+      force: false
     register: netplan_config
   - name: "Apply new network configuration"
     shell: netplan apply
+    when: "netplan_config.changed"
   when: "ansible_distribution_version == '18.04'"
 - block:
+  # only for test purpose
   - name: "Config network interfaces ({{rollout_mode}}) Ubuntu 16.04"
     template:
       src: "iface_16_{{rollout_mode}}.conf.j2"
@@ -64,20 +69,20 @@
   setup:
   delegate_to: "{{ item }}"
   delegate_facts: True
-  when: hostvars[item]['ansible_'+k8s_iface]['ipv4'] is not defined
+  when: hostvars[item]['ansible_'+k8s.iface]['ipv4'] is not defined
   with_items: "{{ groups['k8s-cluster'] }}"
   run_once: true
 - name: Add dns names to hosts
   lineinfile:
-    line: "{{hostvars[item.1]['ansible_'+lookup('vars', item.0)]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}{%if fqdn_hostnames %}.{{int_domain_suffix}}{%endif%}"
+    line: "{{hostvars[item.1]['ansible_'+hostvars[inventory_hostname][item.0]['iface']]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}{%if fqdn_hostnames %}.{{int_domain_suffix}}{%endif%}"
     path: /etc/hosts
     state: present
   with_nested:
-  - ['k8s_iface','ceph_iface']
+  - ["k8s","ceph"]
   - "{{ groups['k8s-cluster'] }}"
 - name: Add endpoints to hosts for rbd provision
   lineinfile:
-    line: "{{hostvars[item.0]['ansible_'+ceph_iface]['ipv4']['address']}} {{item.1}}"
+    line: "{{hostvars[item.0]['ansible_'+ceph.iface]['ipv4']['address']}} {{item.1}}"
     path: /etc/hosts
     state: present
   with_nested:
@@ -93,5 +98,4 @@
   template:
     src: ntp.conf.j2
     dest: /etc/ntp.conf
-- name: Check dependency for that region
-  include_tasks: check_deps.yaml
+
