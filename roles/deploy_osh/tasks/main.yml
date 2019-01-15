@@ -26,7 +26,7 @@
 - name: Set control-plane mode
   set_fact:
     cp_mode: "{%if groups['control-plane']| length == 1 %}single{%elif groups['control-plane']| length > 1%}ha{%endif%}"
-- name: Disable os components in slave regions
+- name: Disable os components on slave regions
   set_fact:
     OSH_CORE: "{{components['OSH_CORE'] | difference(components['OSH_CORE'] | selectattr('name', 'in', item.1)| list)}}"
   with_together:

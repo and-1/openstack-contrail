@@ -170,7 +170,7 @@ kubeconfig_localhost: true
 
 ## Supplementary addresses that can be added in kubernetes ssl keys.
 ## That can be useful for example to setup a keepalived virtual IP
-supplementary_addresses_in_ssl_keys: ["{{vip_ip}}", "{%if ip != ansible_default_ipv4['address'] %}{{ansible_default_ipv4['address']}}{%endif%}"]
+supplementary_addresses_in_ssl_keys: ["{{vip_ip}}", "{%if ip != ansible_default_ipv4['address'] %}{{hostvars[groups['kube-master'][0]]['ansible_default_ipv4']['address']}}{%endif%}"]
 
 ## Running on top of openstack vms with cinder enabled may lead to unschedulable pods due to NoVolumeZoneConflict restriction in kube-scheduler.
 ## See https://github.com/kubernetes-sigs/kubespray/issues/2141

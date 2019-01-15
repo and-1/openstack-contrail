@@ -9,11 +9,11 @@
     with_items:
     - "{{groups['k8s-cluster']}}"
 
-#- hosts: k8s-cluster
-#  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
-#  gather_facts: true
-#  roles:
-#    - { role: prepare-node, stage: pre-k8s, tags: [init, pre-k8s]}
+- hosts: k8s-cluster
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  gather_facts: true
+  roles:
+    - { role: prepare-node, stage: pre-k8s, tags: [init, pre-k8s]}
 
 - hosts: master
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
@@ -22,21 +22,21 @@
       include_tasks: roles/prepare-node/tasks/routes.yaml
       when: "cinder_backup_to_region != false"
       tags: routes
-#
-#- name: Install k8s
-#  include: kubespray/cluster.yml  
-#  tags:
-#   - k8s
-#   - init
-#
-#- hosts: "{{groups['kube-master']|first}}"
-#  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
-#  gather_facts: false
-#  roles:
-#   - { role: prepare-node, stage: post-k8s, tags: [init, post-k8s]}
-#
-#- hosts: master
-#  roles:
-#  - { role: deploy_osh, tags: [osh]}
-#  environment:
-#    KUBECONFIG: "{{inventory_dir}}/artifacts/admin.conf"
+
+- name: Install k8s
+  include: kubespray/cluster.yml  
+  tags:
+   - k8s
+   - init
+
+- hosts: "{{groups['kube-master']|first}}"
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  gather_facts: false
+  roles:
+   - { role: prepare-node, stage: post-k8s, tags: [init, post-k8s]}
+
+- hosts: master
+  roles:
+  - { role: deploy_osh, tags: [osh]}
+  environment:
+    KUBECONFIG: "{{inventory_dir}}/artifacts/admin.conf"
