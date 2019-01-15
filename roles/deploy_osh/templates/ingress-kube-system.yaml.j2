@@ -16,6 +16,7 @@ network:
     mode: keepalived
     interface: {{hostvars[groups['control-plane']|first]['ansible_default_ipv4']['interface']}}
     addr: {{vip_ip}}/32
+    routerid: {{255| ramdom(seed=region)}}
 conf:
   ingress:
     bind-address: 0.0.0.0
