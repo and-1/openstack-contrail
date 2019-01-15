@@ -200,10 +200,10 @@ conf:
 backup:
   external_ceph_rbd:
     enabled: true
-    admin_keyring: ext_ceph_cinder.keyring
+    admin_keyring: {{ext_ceph_cinder.keyring}}
     conf:
       global:
-        mon_host: ext_ceph_cinder.mons
+        mon_host: {{ext_ceph_cinder.mons}}
       osd:
 {% endif %}
 
