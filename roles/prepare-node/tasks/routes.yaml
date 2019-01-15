@@ -32,7 +32,7 @@
   - "{{groups[cinder_backup_to_region]}}"
 
 - name: "Get existing route on ceph interface"
-  shell: "echo [$(ip r | grep {{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}} | grep -v {{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).net}} | awk '{print \"{to: \"$1\", via: \"$3\"},\"}' | tr -d '\n')]"
+  shell: "echo [$(ip r | awk /via.*{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}/ | grep -v {{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).net}} | awk '{print \"{to: \"$1\", via: \"$3\"},\"}' | tr -d '\n')]"
   delegate_to: "{{item}}"
   register: "ceph_cur_routes"
   run_once: true
@@ -43,7 +43,6 @@
 - name: "Set list routes for external ceph network"
   set_fact:
     "ceph_routes_{{item['item'] | replace('-','_') }}":
-      routes:
         "{{item.stdout | from_yaml | union([{'to': ceph.net, 'via': ext_ceph_set.ext_ceph_gw}])}}"
   when: "item['item'] in groups[cinder_backup_to_region]"
   run_once: true
@@ -53,7 +52,6 @@
 - name: "Set list routes for local ceph network"
   set_fact:
     "ceph_routes_{{item['item'] | replace('-','_') }}":
-      routes:
         "{{item.stdout | from_yaml | union([{'to': ext_ceph_set.ext_ceph_net, 'via': ceph.gw}])}}"
   when: "item['item'] in groups['k8s-cluster']"
   run_once: true
@@ -63,11 +61,10 @@
 - name: Add new routes to ceph interface
   yedit:
     src: /etc/netplan/60-osh-iface.yaml
-    update: true
     state: present
-    key: "{%if rollout_mode == 'test' %}{{'network.ethernets.'+lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}{%else%}{{'network.vlans.'+lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}{%endif%}"
+    key: "network.{%if rollout_mode == 'test' %}ethernets{%else%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
     value: "{{lookup('vars', 'ceph_routes_'+item|replace('-','_'))}}"
-    value_type: dict
+    value_type: list
   register: "apply_routes"
   delegate_to: "{{item}}"
   run_once: true

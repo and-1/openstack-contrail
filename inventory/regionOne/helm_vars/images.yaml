@@ -180,6 +180,10 @@ osh:
     repo: 'docker.io'
     image: 'docker'
     tag: '17.07.0'
+  keepalived: 
+    repo: 'docker.io/osixia'
+    image: 'keepalived'
+    tag: '2.0.10'
   ceph_key_placement:
     link: ceph_config_helper
   ceph_mon_check:
