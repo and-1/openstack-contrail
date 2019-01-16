@@ -12,7 +12,7 @@
   set_fact:
     "ceph_iface_{{item | replace('-','_') }}": >-
       {%- for iface in hostvars[item]['ansible_interfaces'] -%}
-      {%- if hostvars[item]['ansible_'+iface]['ipv4'] is defined and hostvars[item]['ansible_'+iface]['ipv4']['network'] == ext_ceph_set.ext_ceph_net | ipaddr('network') -%}
+      {%- if hostvars[item]['ansible_'+iface|replace('-','_')]['ipv4'] is defined and hostvars[item]['ansible_'+iface|replace('-','_')]['ipv4']['network'] == ext_ceph_set.ext_ceph_net | ipaddr('network') -%}
       {{iface}}
       {%- endif -%}
       {%- endfor -%}
@@ -62,11 +62,12 @@
   yedit:
     src: /etc/netplan/60-osh-iface.yaml
     state: present
-    key: "network.{%if iface_type == 'interface' %}ethernets{%elif%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
+    key: "network.{%if hostvars[item]['iface_type'] == 'interface'%}ethernets{%elif hostvars[item]['iface_type'] == 'bond'%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
     value: "{{lookup('vars', 'ceph_routes_'+item|replace('-','_'))}}"
     value_type: list
   register: "apply_routes"
   delegate_to: "{{item}}"
+  delefate_facts: true
   run_once: true
   with_items:
   - "{{groups['k8s-cluster']}}"

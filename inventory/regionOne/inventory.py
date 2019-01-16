@@ -69,8 +69,9 @@ class Inventory:
         self.cli_handler()
 
         if self.args.list:
-            self.checker()
-            print json.dumps(self.inventory(), sort_keys=True, indent=2)
+            inventory_content = self.inventory()
+            self.checker(inventory_content)
+            print json.dumps(inventory_content, sort_keys=True, indent=2)
         elif self.args.host:
             print json.dumps(self.host(), sort_keys=True, indent=2)
         elif self.args.nodes:
@@ -131,34 +132,19 @@ class Inventory:
         request = requests.get(url, headers=headers)
         return json.loads(request.text)
  
-    def checker(self):
+    def checker(self, inventory):
         """Check some segnificant parameters"""
-        res = {'counts':{'control-plane':0,'compute-plane':0,'osd-nodes':0}}
-        for tag in res['counts'].keys():
-            headers = self.auth()
-            url = "{}/tags/{}/?op=nodes".format(self.maas.rstrip(), tag)
-            request = requests.get(url, headers=headers)
-            node_list = json.loads(request.text)
-            for server in node_list:
-              if server['zone']['name'] == Config.osh_config['region']:
-                if (server['node_type_name'] == 'Machine' and server['status_name'] == 'Deployed') or server['node_type'] in [2,4]:
-                  res['counts'][tag] += 1
-                  if tag == 'osd-nodes':
-                    journal = False
-                    for disk in server['physicalblockdevice_set']:
-                      if 'journal' in disk['tags']:
-                        journal = True
-                        break
-                    if not journal:
-                      print("Journal is absent on server {}. Verify tag 'journal' on disk in maas".format(server['hostname']))
-                      sys.exit(1)
-        if res['counts']['control-plane'] < Config.min_control_nodes:
+        for server in inventory['osd-nodes']['hosts']:
+           if not inventory['_meta']['hostvars'][server].has_key('osd_disks'):
+              print("Journal is absent on server {}. Verify tag 'journal' on disk in maas".format(server['hostname']))
+              sys.exit(1)
+        if len(inventory['control-plane']['hosts']) < Config.min_control_nodes:
           print("Not enouth control nodes in inventory in region {}. Verify tag 'control-plane' on servers in maas".format(Config.osh_config['region']))
           sys.exit(1)
-        if res['counts']['compute-plane'] < Config.min_compute_nodes:
+        if len(inventory['compute-plane']['hosts']) < Config.min_compute_nodes:
           print("Not enouth compute nodes in inventory in region {}. Verify tag 'compute-plane' on servers in maas".format(Config.osh_config['region']))
           sys.exit(1)
-        if res['counts']['osd-nodes'] < Config.min_osd_nodes:
+        if len(inventory['osd-nodes']['hosts']) < Config.min_osd_nodes:
           print("Not enouth osd nodes in inventory in region {}. Verify tag 'osd-nodes' on servers in maas".format(Config.osh_config['region']))
           sys.exit(1)
           

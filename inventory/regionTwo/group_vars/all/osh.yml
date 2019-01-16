@@ -2,13 +2,13 @@
 ceph:
  net: "192.168.12.0/24"
  vlan: 1500
- iface: "ens55"
+ iface: "ens5"
  gw: "192.168.12.194"
 # mtu: 9000
 k8s:
  net: "192.168.11.0/24"
  vlan: 1501
- iface: "ens44"
+ iface: "ens4"
 default_gw: "192.168.10.194"
 vip_ip: "192.168.10.10"
 dns_srvs:
