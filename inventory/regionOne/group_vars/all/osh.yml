@@ -4,6 +4,7 @@ ceph:
   vlan: 1500
   iface: "ens5"
   gw: "192.168.2.194"
+#  mtu: 9000
 k8s:
   net: "192.168.1.0/24"
   vlan: 1501
@@ -57,7 +58,7 @@ os_release: "queens"
 region: "RegionOne"
 multi_region:
   master: true
-supplementary_domain:
+supplementary_domains:
 - prod
 - dev
 # Generate password and override static.

@@ -2,12 +2,13 @@
 ceph:
  net: "192.168.12.0/24"
  vlan: 1500
- iface: "ens5"
+ iface: "ens55"
  gw: "192.168.12.194"
+# mtu: 9000
 k8s:
  net: "192.168.11.0/24"
  vlan: 1501
- iface: "ens4"
+ iface: "ens44"
 default_gw: "192.168.10.194"
 vip_ip: "192.168.10.10"
 dns_srvs:
@@ -57,6 +58,9 @@ os_release: "queens"
 region: "RegionTwo"
 multi_region:
   master: false
+supplementary_domains:
+- prod
+- dev
 # Generate password and override static.
 # Don't disable it in production env
 gen_passwd: true

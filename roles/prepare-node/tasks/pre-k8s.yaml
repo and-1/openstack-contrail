@@ -2,11 +2,23 @@
 - name: Check dependency for that region
   include_tasks: check_deps.yaml
 - block:
-  - name: "Config network interfaces ({{rollout_mode}}) Ubuntu 18.04"
+  - name: Get interface type if it isn't defined
+    shell: ls /proc/net/bonding/* | xargs -I{} basename {}
+    register: stat_bond
+    changed_when: false
+  - name: Set bond name
+    set_fact: 
+      bond_name: "{{stat_bond.stdout_lines | first}}"
+    when: stat_bond.stdout_lines | length > 0
+  - name: Set interface type
+    set_fact:
+      iface_type: "{% if stat_bond.stdout_lines | length != 0 %}bond{%else%}interface{%endif%}"
+  when: iface_type is not defined
+- block:
+  - name: "Config network interfaces ({{iface_type}} mode - NETPLAN) "
     template:
-      src: "iface_18_{{rollout_mode}}.conf.j2"
+      src: "iface_18_{{iface_type}}.conf.j2"
       dest: /etc/netplan/60-osh-iface.yaml
-      force: false
     register: netplan_config
   - name: "Apply new network configuration"
     shell: netplan apply
@@ -14,9 +26,9 @@
   when: "ansible_distribution_version == '18.04'"
 - block:
   # only for test purpose
-  - name: "Config network interfaces ({{rollout_mode}}) Ubuntu 16.04"
+  - name: "Config network interfaces ({{iface_type}} mode - IFUPDOWN)"
     template:
-      src: "iface_16_{{rollout_mode}}.conf.j2"
+      src: "iface_16_{{iface_type}}.conf.j2"
       dest: /etc/network/interfaces.d/60-osh-iface.cfg
   - name: "Apply new network configuration"
     shell: systemctl restart networking && sleep 10
@@ -69,7 +81,7 @@
   setup:
   delegate_to: "{{ item }}"
   delegate_facts: True
-  when: hostvars[item]['ansible_'+k8s.iface]['ipv4'] is not defined
+  when: hostvars[item]['ansible_'+k8s.iface] is not defined or hostvars[item]['ansible_'+k8s.iface]['ipv4'] is not defined
   with_items: "{{ groups['k8s-cluster'] }}"
   run_once: true
 - name: Add dns names to hosts

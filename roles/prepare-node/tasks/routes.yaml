@@ -62,7 +62,7 @@
   yedit:
     src: /etc/netplan/60-osh-iface.yaml
     state: present
-    key: "network.{%if rollout_mode == 'test' %}ethernets{%else%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
+    key: "network.{%if iface_type == 'interface' %}ethernets{%elif%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
     value: "{{lookup('vars', 'ceph_routes_'+item|replace('-','_'))}}"
     value_type: list
   register: "apply_routes"

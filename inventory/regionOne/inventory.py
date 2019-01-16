@@ -240,10 +240,12 @@ class Inventory:
                         'ip': self.getip(iface['links'][0]['ip_address']),
                        'rack_ctl': 'true',
                        }
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
                      else:
                        nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                        'ansible_host': iface['links'][0]['ip_address'],
                        }
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
                  except:
                    continue
              elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
@@ -254,7 +256,8 @@ class Inventory:
                    nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                      'ansible_host': node['ip_addresses'][0],
                      'ip': self.getip(node['ip_addresses'][0]),
-                   }
+                   } 
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
                    if 'osd-nodes' in node['tag_names']:
                      disks = []
                      journal_disk = ""
@@ -268,7 +271,8 @@ class Inventory:
                  else:
                    nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                      'ansible_host': node['ip_addresses'][0],
-                   }
+                   } 
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
 
         # Add some static groups
 #        ansible['ungrouped'] = {}
@@ -302,6 +306,17 @@ class Inventory:
         # Need to merge ansible and nodes dict()s as a shallow copy, or Ansible shits itself and throws an error
         result = ansible.copy()
         result.update(nodes_meta)
+        return result
+
+    def get_iface_type(self, iface_set):
+        result = {}
+        for iface in iface_set:
+          if iface['type'] == 'bond':
+            result['iface_type'] = iface['type']
+            result['bond_name'] = iface['name']
+            break
+        if not result.has_key('iface_type'):
+          result['iface_type'] = 'interface'
         return result
 
     def getip(self, src_ip):
