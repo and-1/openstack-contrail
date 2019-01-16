@@ -117,12 +117,6 @@ bootstrap:
   enabled: true
   ks_user: admin
   script: |
-    #Provide admin user cloud-admin permissions
-    openstack role add \
-          --user="${OS_USERNAME}" \
-          --user-domain="${OS_USER_DOMAIN_NAME}" \
-          --domain="{{service_domain}}" \
-          "admin"
     openstack role create --or-show member
     openstack role add \
           --user="${OS_USERNAME}" \
@@ -138,6 +132,16 @@ bootstrap:
           --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
           --project="${OS_PROJECT_NAME}" \
           "heat_stack_owner"
+    #Provide admin user cloud-admin permissions
+    openstack role add \
+          --user="${OS_USERNAME}" \
+          --user-domain="${OS_USER_DOMAIN_NAME}" \
+          --domain="{{service_domain}}" \
+          "admin"
+    #Add supplementary domains
+{% for domain in supplementary_domains %}
+    openstack domain create --enable --or-show {{domain}}
+{% endfor %}
     
 jobs:
   fernet_rotate:

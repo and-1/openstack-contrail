@@ -57,6 +57,9 @@ os_release: "queens"
 region: "RegionOne"
 multi_region:
   master: true
+supplementary_domain:
+- prod
+- dev
 # Generate password and override static.
 # Don't disable it in production env
 gen_passwd: true
