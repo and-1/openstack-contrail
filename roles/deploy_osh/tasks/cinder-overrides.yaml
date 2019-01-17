@@ -1,0 +1,16 @@
+- name: import os component variables
+  include_vars:
+    file: "{{inventory_dir}}/helm_vars/{{item}}.yaml"
+    name: "{{item}}"
+  with_items:
+  - components
+
+- name: Override components dict (only cinder will be exist)
+  set_fact:
+    components:
+      OSH_CORE:
+        "{{components['OSH_CORE'] | selectattr('name', 'eq', 'cinder') | list}}"
+
+- name: Set force flag to true
+  set_fact:
+    force: true
