@@ -66,7 +66,7 @@ supplementary_domains:
 gen_passwd: true
 # Whether use external ceph region. Available
 # values: false or <region name>
-cinder_backup_to_region: false
+cinder_backup_to_region: RegionTwo
 # Cinder default pool parameters-------------+
 cinder_pool_percent: 50
 cinder_backup_pool_percent: 5

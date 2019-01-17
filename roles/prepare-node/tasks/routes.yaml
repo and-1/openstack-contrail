@@ -39,6 +39,7 @@
   with_items:
   - "{{groups['k8s-cluster']}}"
   - "{{groups[cinder_backup_to_region]}}"
+  changed_when: False
 
 - name: "Set list routes for external ceph network"
   set_fact:
@@ -67,7 +68,6 @@
     value_type: list
   register: "apply_routes"
   delegate_to: "{{item}}"
-  delefate_facts: true
   run_once: true
   with_items:
   - "{{groups['k8s-cluster']}}"

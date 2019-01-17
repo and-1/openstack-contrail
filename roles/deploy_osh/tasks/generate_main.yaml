@@ -1,5 +1,5 @@
 - name: Gen password
-  include: gen_password.yaml
+  include_tasks: gen_password.yaml
   with_dict:
   - "{{endpoints}}"
   loop_control:

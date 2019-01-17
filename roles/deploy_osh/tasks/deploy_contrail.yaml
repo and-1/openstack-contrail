@@ -3,10 +3,14 @@
     src: "{{playbook_dir}}/contrail-helm-deployer/helm-toolkit-contrail/charts"
     dest: "{{playbook_dir}}/{{item.path}}/charts"
     state: link
+  tags:
+  - osh-contrail
 - name: "{{GROUP}}: {{item.name}}: Check whether helm release exist"
   shell: "{{helm_bin}} list -q | grep -q {{item.name}} && echo ok || echo nok"
   register: helm_release
   changed_when: false
+  tags:
+  - osh-contrail
 - name: "{{GROUP}}: {{item.name}}: Deploy"
   shell: "{{helm_bin}} upgrade --install {{item['name']}} {{playbook_dir}}/{{item['path']}} \
          --namespace={{item['namespace']}} {% if force|default(false) %}--force {%endif%}\
@@ -15,4 +19,5 @@
          && {{playbook_dir}}/openstack-helm/tools/deployment/common/wait-for-pods.sh {{item['namespace']}}
          {% endif %}"
   when: "helm_vars_contrail_common_gen_res.changed or helm_release.stdout == 'nok'"
-
+  tags:
+  - osh-contrail

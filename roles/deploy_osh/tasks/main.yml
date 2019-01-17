@@ -4,15 +4,21 @@
     file: "{{inventory_dir}}/helm_vars/{{item}}.yaml"
     name: "{{item}}"
   with_items:
+  - components
   - images
   - endpoints
-  - components
   - replicas
+  tags:
+  - always
+
 - name: Import external ceph config
   include_vars:
     file: "{{inventory_dir}}/../share_creds/ceph.{{cinder_backup_to_region|lower}}.creds"
     name: ext_ceph_cinder
   when: "cinder_backup_to_region != false"
+  tags:
+  - always
+
 - name: Set components with not wait ready status
   set_fact:
     no_wait: 
@@ -23,9 +29,11 @@
     - 'cinder'
     - 'horizon'
     - 'prometheus-openstack-exporter'
+
 - name: Set control-plane mode
   set_fact:
     cp_mode: "{%if groups['control-plane']| length == 1 %}single{%elif groups['control-plane']| length > 1%}ha{%endif%}"
+
 - name: Disable os components on slave regions
   set_fact:
     OSH_CORE: "{{components['OSH_CORE'] | difference(components['OSH_CORE'] | selectattr('name', 'in', item.1)| list)}}"
@@ -33,10 +41,13 @@
   - ['master': true, 'master': false]
   - [[''], [['keystone','horizon']]]
   when: "components['OSH_CORE'] is defined and item.0['master'] == multi_region.master"
+
 - name: Prepare helm and tools
   include: prepare_helm.yaml
+
 - name: Generate info
-  include: generate_main.yaml
+  import_tasks: generate_main.yaml
+
 - name: "Add identity endpoint for region - {{region}}"
   os_keystone_endpoint:
     auth: "{{keystone_endpoint}}"
@@ -51,41 +62,50 @@
   - internal
   - public
   when: "not multi_region.master"
+
 - name: Deploy INFRA essensial
   include: deploy_common.yaml GROUP="OSH_INFRA"
   with_items:
   - "{{components.INFRA_CORE}}"
   when: "components.INFRA_CORE is defined"
+
 - name: Deploy MONITORING
   include: deploy_common.yaml GROUP="MONITORING"
   with_items:
   - "{{components.MONITORING}}"
   when: "components.MONITORING is defined and monitoring"
+
 - name: Deploy LOGGING
   include: deploy_common.yaml GROUP="LOGGING"
   with_items:
   - "{{components.LOGGING}}"
   when: "components.LOGGING is defined and logging"
+
 - name: Deploy OSH essensial
   include: deploy_common.yaml GROUP="OSH_CORE"
   with_items:
   - "{{OSH_CORE}}"
   when: "OSH_CORE is defined"
+
 - name: Deploy CONTRAIL components
   include: deploy_contrail.yaml GROUP="CONTRAIL"
   with_items:
   - "{{components.CONTRAIL}}"
   when: "components.CONTRAIL is defined"
+
 - name: Deploy OS SUPPLEMENTARY components
   include: deploy_common.yaml GROUP="OS_SUPPL"
   with_items:
   - "{{components.OS_SUPPL}}"
   when: "components.OS_SUPPL is defined"
+
 - name: Get ceph admin keyring
   shell: "./kubectl --kubeconfig=admin.conf -n ceph get secret ceph-client-admin-keyring -o jsonpath='{.data.ceph\\.client\\.admin\\.keyring}' | base64 -d | awk -F' = ' '/key/{print $2}'"
   args:
     chdir: "{{inventory_dir}}/artifacts"
   register: ceph_keyring
+  changed_when: false
+
 - name: Save ceph connection info
   copy:
     content: |

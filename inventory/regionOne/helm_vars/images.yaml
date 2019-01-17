@@ -110,8 +110,6 @@ osh:
     image: 'ubuntu-binary-ceilometer-notification'
   elasticsearch:
     image: 'ubuntu-binary-elasticsearch'
-  prometheus_mysql_exporter: 
-    image: 'ubuntu-binary-prometheus-mysqld-exporter'
   prometheus:
     image: 'ubuntu-binary-prometheus-server'
   alertmanager:
@@ -206,8 +204,6 @@ osh:
     link: ceph_config_helper
   s3_user:
     link: ceph_config_helper
-  prometheus_create_mysql_user: 
-    link: mariadb
   prometheus_mysql_exporter_helm_tests: 
     link: heat_engine
   barbican_db_sync:
@@ -290,8 +286,6 @@ osh:
     link: senlin_engine
   ceph_bootstrap:
     link: ceph_osd
-  prometheus_mysql_exporter_helm_tests:
-    link: heat_engine
   rabbit_init:
     link: rabbitmq
   prometheus_rabbitmq_exporter_helm_tests:

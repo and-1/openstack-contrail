@@ -6,8 +6,11 @@
     file:
       dest: "/tmp/{{item}}"
       state: absent
+    changed_when: false
     with_items:
     - "{{groups['k8s-cluster']}}"
+    tags:
+    - always
 
 - hosts: k8s-cluster
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
@@ -19,9 +22,11 @@
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   tasks:
     - name: Add routes for cinder and external ceph interconnect
-      include_tasks: roles/prepare-node/tasks/routes.yaml
+      import_tasks: roles/prepare-node/tasks/routes.yaml
       when: "cinder_backup_to_region != false"
-      tags: routes
+      tags: 
+      - routes
+      - init
 
 - name: Install k8s
   include: kubespray/cluster.yml  
@@ -36,7 +41,13 @@
    - { role: prepare-node, stage: post-k8s, tags: [init, post-k8s]}
 
 - hosts: master
-  roles:
-  - { role: deploy_osh, tags: [osh]}
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  tasks:
+  - name: include cinder overrides
+    import_tasks: roles/deploy_osh/tasks/cinder-overrides.yaml
+    tags: ['never', 'cinder-backup']
+  - name: include role for deploy osh-contrail
+    import_role: name=deploy_osh
+    tags: ['osh-contrail', 'cinder-backup']
   environment:
     KUBECONFIG: "{{inventory_dir}}/artifacts/admin.conf"

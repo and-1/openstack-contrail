@@ -14,6 +14,7 @@
     helm_bin: "{{inventory_dir}}/artifacts/helm"
 - name: Init helm
   shell: "{{helm_bin}} init --history-max 5 --upgrade"
+  changed_when: false
 - name: create folder for helm-toolkit charts
   file:
     state: directory

@@ -205,6 +205,8 @@ backup:
       global:
         mon_host: {{ext_ceph_cinder.mons}}
       osd:
+      client:
+        rdb_cache = true
 {% endif %}
 
 {% if not multi_region.master %}
