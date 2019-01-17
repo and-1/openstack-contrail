@@ -1,6 +1,6 @@
 ---
 - name: Check dependency for that region
-  include_tasks: check_deps.yaml
+  include_tasks: checks.yaml
 - block:
   - name: Get interface type if it isn't defined
     shell: ls /proc/net/bonding/* | xargs -I{} basename {}

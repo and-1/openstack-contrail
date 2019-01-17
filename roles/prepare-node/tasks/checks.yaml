@@ -20,3 +20,15 @@
   fail: 
     msg: "Target ceph region isn't deployed stil or deployed with fail"
   when: "cinder_backup_to_region != false and not ext_ceph_file.stat.exists"
+- name: Check gateway on maas rack controller
+  set_fact:
+    gw_correct: |>-
+      {%if ansible_default_ipv4 is defined and ansible_default_ipv4['gateway'] == default_gw %}
+      true
+      {%else%}
+      false
+      {%endif%}
+- name: Notify if default GW isn't correct
+  fail:
+    msg: "Default gateway isn't correct on node {{ansible_hostname}}"
+      

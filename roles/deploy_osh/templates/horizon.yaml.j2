@@ -81,6 +81,12 @@ pod:
           memory: "1024Mi"
           cpu: "2000m"
 
+network:
+  dashboard:
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: 512m
+
 # Bug in horizon. https://bugzilla.redhat.com/show_bug.cgi?id=1478042
 conf:
   horizon:

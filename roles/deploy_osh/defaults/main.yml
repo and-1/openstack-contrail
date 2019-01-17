@@ -1,6 +1,8 @@
 ---
+
 redeploy_all: false
 service_domain: "default"
+test: true
 
 infra:
   pool_name: 'cloud.infra'
