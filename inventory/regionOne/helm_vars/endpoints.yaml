@@ -184,9 +184,9 @@ identity:
     test:
       role: admin
       region_name: "{{region}}"
-      username: test
+      username: rally
       password: password
-      project_name: test
+      project_name: rally
       user_domain_name: "{{service_domain}}"
       project_domain_name: "{{service_domain}}"
     gnocchi:

@@ -22,13 +22,14 @@
   when: "cinder_backup_to_region != false and not ext_ceph_file.stat.exists"
 - name: Check gateway on maas rack controller
   set_fact:
-    gw_correct: |>-
-      {%if ansible_default_ipv4 is defined and ansible_default_ipv4['gateway'] == default_gw %}
+    gw_correct: >-
+      {%-if ansible_default_ipv4 is defined and ansible_default_ipv4['gateway'] == default_gw -%}
       true
-      {%else%}
+      {%-else-%}
       false
-      {%endif%}
+      {%-endif-%}
 - name: Notify if default GW isn't correct
   fail:
     msg: "Default gateway isn't correct on node {{ansible_hostname}}"
+  when: not gw_correct|bool
       

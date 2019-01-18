@@ -19,6 +19,8 @@
     template:
       src: "iface_18_{{iface_type}}.conf.j2"
       dest: /etc/netplan/60-osh-iface.yaml
+      # Force set to false because after routes will be added
+      force: false
     register: netplan_config
   - name: "Apply new network configuration"
     shell: netplan apply
@@ -33,22 +35,16 @@
   - name: "Apply new network configuration"
     shell: systemctl restart networking && sleep 10
   when: "ansible_distribution_version == '16.04'"
-- name: Disable systemd-resolved
-  systemd:
-    name: systemd-resolved
-    masked: true
-    state: stopped
-    enabled: false
 - name: Add dns servers
   template: 
-    src: "resolved.conf.j2"
-    dest: /run/systemd/resolve/resolv.conf
-- name: Create link to /etc/resolv.conf
-  file:
-    src: /run/systemd/resolve/resolv.conf
-    dest: /etc/resolv.conf
-    state: link
-    force: true
+    src: resolved.conf.j2
+    dest: /etc/systemd/resolved.conf
+  register: resovle_restart
+- name: Restart systemd-resolved
+  systemd:
+    name: systemd-resolved
+    state: restarted
+  when: "resovle_restart.changed"
 - name: Disable systemd-timesyncd
   systemd:
     name: systemd-timesyncd

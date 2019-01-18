@@ -1,4 +1,9 @@
-{% for srv in dns_srvs %}
-nameserver {{ srv }}
-{% endfor %}
-options rotate attempts:3
+-[Resolve]
+-DNS={{dns_srvs| join(" ")}}
+-#FallbackDNS=
+-#Domains=
+-#LLMNR=no
+-#MulticastDNS=no
+-DNSSEC=no
+-#Cache=yes
+-#DNSStubListener=yes

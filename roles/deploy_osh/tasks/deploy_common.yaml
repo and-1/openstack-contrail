@@ -25,9 +25,9 @@
   tags:
   - osh-contrail
   - cinder-backup
-  - name: "Run rally test for {{item.name}}"
-    shell: "{{helm_bin}} test {{item.name}} --cleanup"
-  when: "test|bool and lookup('vars', item.name +'_change').changed"
+- name: "Run rally test for {{item.name}}"
+  shell: "{{helm_bin}} test {{item.name}} --cleanup"
+  when: "test|bool and lookup('vars', item.name +'_change').changed and item.name != 'neutron'"
   tags:
   - test
   - osh-contrail
