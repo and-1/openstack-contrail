@@ -180,6 +180,23 @@ conf:
       {% if backend.zone is defined %}backend_availability_zone: {{backend.zone}}{% endif %}
 
 {% endfor %}
+  rally_tests:
+    run_tempest: false
+    tests:
+      CinderVolumes.create_and_list_volume_backups:
+        - args:
+            size: 1
+            detailed: True
+            do_delete: True
+            create_volume_kwargs: {}
+            create_backup_kwargs: {}
+          runner:
+            type: "constant"
+            times: 1
+            concurrency: 1
+          sla:
+            failure_rate:
+              max: 0
 
   rabbitmq:
     #NOTE(rk760n): adding rmq policy to mirror messages from notification queues and set expiration time for the ones

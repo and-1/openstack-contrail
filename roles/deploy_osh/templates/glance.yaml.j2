@@ -149,6 +149,10 @@ endpoints:
   ceph_object_store:
     namespace: openstack
 
+bootstrap:
+  structured:
+    {{glance.bootstrap | to_nice_yaml | indent(4) }}
+
 {% if not multi_region.master %}
 dependencies:
   static:
