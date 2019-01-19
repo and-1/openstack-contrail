@@ -106,4 +106,9 @@
   template:
     src: ntp.conf.j2
     dest: /etc/ntp.conf
-
+- name: Ensure share_creds directory exist
+  file: 
+    path: "{{inventory_dir}}/../share_creds"
+    state: directory
+  delegate_to: localhost
+  run_once: true
