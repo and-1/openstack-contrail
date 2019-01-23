@@ -4,9 +4,11 @@
 [submodule "openstack-helm-infra"]
 	path = openstack-helm-infra
 	url = https://github.com/and-1/openstack-helm-infra.git
+	branch = legacy
 [submodule "openstack-helm"]
 	path = openstack-helm
 	url = https://github.com/and-1/openstack-helm.git
+	branch = legacy
 [submodule "contrail-helm-deployer"]
 	path = contrail-helm-deployer
 	url = https://github.com/and-1/contrail-helm-deployer.git
