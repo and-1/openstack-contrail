@@ -129,20 +129,6 @@ conf:
         replication: {{replication}}
         percent_total_data: {{infra_pool_percent}}
       # Cinder pools
-{% if join_areas.enabled %}
-{% for area in join_areas.areas %}
-      - name: {{cinder.pool_name}}.{{area.name}}
-        application: cinder-volume
-        replication: {{replication}}
-        percent_total_data: {{area.cinder_pool_percent}}
-        crush_rule: {{area.name}}_rule
-      - name: {{cinder.backup_pool_name}}.{{area.name}}
-        application: cinder-backup
-        replication: {{replication}}
-        percent_total_data: {{cinder_backup_pool_percent}}
-        crush_rule: {{area.name}}_rule
-{% endfor %}
-{% else %}
       - name: {{cinder.pool_name}}
         application: cinder-volume
         replication: {{replication}}
@@ -151,7 +137,6 @@ conf:
         application: cinder-backup
         replication: {{replication}}
         percent_total_data: {{cinder_backup_pool_percent}}
-{% endif %}
       # Glance pool
       - name: {{glance.pool_name}}
         application: glance-image
@@ -243,13 +228,6 @@ endpoints:
     port:
       mgr:
         default: 7001
-
-group_by_class: 
-  enabled: {{join_areas.enabled}}
-  areas:
-{% for area in join_areas.areas %}
-  - name: {{area.name}}
-{% endfor %}
 
 manifests:
   cronjob_checkPGs: true

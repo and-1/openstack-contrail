@@ -1,12 +1,3 @@
-{% set backends = [] %}
-{% if join_areas.enabled %}
-{% for area in join_areas.areas %}
-{% do backends.append({'name': cinder.volume_backend_name+'-'+area.name, 'pool': cinder.pool_name+'.'+area.name, 'zone': area.name}|combine()) %}
-{% endfor %}
-{% else %}
-{% do backends.append({'name': cinder.volume_backend_name, 'pool': cinder.pool_name}|combine()) %}
-{% endif %}
-
 storage: ceph
 pod:
   replicas:
@@ -152,11 +143,12 @@ conf:
   cinder:
     DEFAULT:
       backup_driver: cinder.backup.drivers.ceph
-      enabled_backends: "{{backends | map(attribute='name') | join(',')}}"
+      enabled_backends: "{{cinder.volume_backend_name}}"
       os_region_name: {{region}}
       backup_ceph_chunk_size: "134217728"
       backup_ceph_stripe_unit: 0
       backup_ceph_stripe_count: 0
+      backup_ceph_pool: {{cinder.backup_pool_name}}
       restore_discard_excess_bytes: "true"
       osapi_volume_workers: {{cinder.workers.osapi_volume}}
       scheduler_default_filters: "AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter"
@@ -165,11 +157,10 @@ conf:
       
   backends:
     rbd1: null
-{% for backend in backends|list %}
-    {{backend.name}}:
-      volume_backend_name: {{backend.name}}
+    {{cinder.volume_backend_name}}:
+      volume_backend_name: {{cinder.volume_backend_name}}
       volume_driver: cinder.volume.drivers.rbd.RBDDriver
-      rbd_pool: {{backend.pool}}
+      rbd_pool: {{cinder.pool_name}}
       rbd_ceph_conf: "/etc/ceph/ceph.conf"
       rbd_flatten_volume_from_snapshot: false
       rbd_max_clone_depth: 5
@@ -177,9 +168,7 @@ conf:
       rados_connect_timeout: -1
       rbd_user: cinder
       rbd_secret_uuid: {{rbd_secret_uuid}}
-      {% if backend.zone is defined %}backend_availability_zone: {{backend.zone}}{% endif %}
 
-{% endfor %}
   rally_tests:
     run_tempest: false
     tests:
@@ -264,14 +253,3 @@ dependencies:
         - endpoint: internal
           service: volume
 {% endif %}
-
-AZ:
-  enabled: {{join_areas.enabled}}
-  default:
-    pool: {{cinder.backup_pool_name}}
-  areas:
-{% for area in join_areas.areas %}
-    {{area.name}}:
-      pool: {{cinder.backup_pool_name}}.{{area.name}}
-{% endfor %}
-

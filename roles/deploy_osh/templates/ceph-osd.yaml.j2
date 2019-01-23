@@ -2,16 +2,9 @@
 {%- for host in groups['osd-nodes'] %}
 {%- set host_osd_jour = hostvars[host]['osd_jour'] %}
 {%- set class = namespace(area="") %}
-{%- if join_areas.enabled %}
-{%- for area in join_areas.areas %}
-{%- if area.name+'-osd-node' in hostvars[host].group_names %}
-{%- set class.area = area.name %}
-{%- endif %}
-{%- endfor %}
-{%- endif %}
 {%- set disks = hostvars[host]['osd_disks'] %}
 {%- for disk in disks %}
-{%- do osd_pairs.append(disk+"-"+host_osd_jour+"-"+class.area) %}
+{%- do osd_pairs.append(disk+"-"+host_osd_jour) %}
 {%- endfor %}
 {%- endfor %}
 ---
@@ -59,16 +52,13 @@ conf:
 {% for osd in osd_pairs|unique %}
 {% set params = osd.split('-') %}
        - label: 
-{% if join_areas.enabled %}
-           key: d{{params[0]}}-j{{params[1]}}-{{params[2]}}
-{% else %}
-           key: d{{params[0]}}-j{{params[1]}}
-{% endif %}
+           key: "d{{params[0]}}-j{{params[1]}}"
            values: 
            - "enabled"
          #exclusive: false
          conf:
            storage:
+             osd_pg_interval_fix: "true"
              osd:
                - data:
                    type: block-bluestore
@@ -76,11 +66,4 @@ conf:
                  journal:
                    type: block-bluestore
                    location: /dev/{{params[1]}}
-{% endfor %}
-
-group_by_class: 
-  enabled: {{join_areas.enabled}}
-  areas:
-{% for area in join_areas.areas %}
-  - name: {{area.name}}
 {% endfor %}

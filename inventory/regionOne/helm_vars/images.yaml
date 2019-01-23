@@ -78,8 +78,6 @@ osh:
     image: 'ubuntu-binary-senlin-engine'
   tempest:
     image: 'ubuntu-binary-tempest'
-  test:
-    image: 'ubuntu-binary-rally'
   ceph_osd:
     image: 'ubuntu-binary-ceph-osd'
   ceph_mon:
@@ -182,6 +180,10 @@ osh:
     repo: 'docker.io/osixia'
     image: 'keepalived'
     tag: '2.0.10'
+  test:
+    repo: 'docker.io/xrally'
+    image: 'xrally-openstack'
+    tag: '1.3.0'
   ceph_key_placement:
     link: ceph_config_helper
   ceph_mon_check:
@@ -201,7 +203,7 @@ osh:
   rgw_s3_admin:
     link: ceph_config_helper
   s3_bucket:
-    link: ceph_config_helper
+    link: ceph_rgw
   s3_user:
     link: ceph_config_helper
   prometheus_mysql_exporter_helm_tests: 
@@ -278,8 +280,6 @@ osh:
     link: nova_novncproxy
   nova_spiceproxy_assets:
     link: nova_spiceproxy
-  scripted_test:
-    link: heat_engine
   senlin_db_sync:
     link: senlin_api
   senlin_engine_cleaner:

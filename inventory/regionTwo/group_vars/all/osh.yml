@@ -67,29 +67,13 @@ gen_passwd: true
 # Whether use external ceph region. Available
 # # values: false or <region name>
 cinder_backup_to_region: RegionOne
-# Cinder default pool parameters-------------+
 cinder_pool_percent: 50
 cinder_backup_pool_percent: 5
 infra_pool_percent: 10
 glance_pool_percent: 5
 rgw_pool_percent: 15.7
 nova_ephimeral_pool_percent: 5
-#--------------------------------------------+
-# Join one more areas in one cluster. If 
-# enabled, all areas must present in inventory
-# [ AREA-compute ]
-# [ AREA-osd-node ]
-# where 'AREA' is name in join_areas.areas
-join_areas: 
-  enabled: false
-  areas:
-  - name: "dev"
-    cinder_pool_percent: 25
-    cinder_backup_pool_percent: 5
-  - name: "prod"
-    cinder_pool_percent: 25
-    cinder_backup_pool_percent: 5
-#--------------------------------------------+
+#--------------------------Contrail----------#
 BGP_port: 1179
 contrail_bgp_asn: 64513
 #--------------------------Monitoring--------#

@@ -1,15 +1,8 @@
-- name: label osd (single areas)
+- name: label osd
   shell: "kubectl label node --overwrite {{ node }}  \
          d{{item}}-j{{hostvars[node].osd_jour}}=enabled"
   with_items:
   - "{{hostvars[node]['osd_disks']}}"
-  when: "item != hostvars[node].osd_jour and not join_areas.enabled"
-- name: label osd (join areas enabled)
-  shell: "kubectl label node --overwrite {{ node }}  \
-         d{{item.0}}-j{{hostvars[node].osd_jour}}-{{item.1.name}}=enabled"
-  with_nested:
-  - "{{hostvars[node]['osd_disks']}}"
-  - "{{join_areas.areas}}"
-  when: "item.0 != hostvars[node].osd_jour and join_areas.enabled and node in groups[item.1.name+'-osd-node']"
+  when: "item != hostvars[node].osd_jour"
 - name: Set common osd label
   shell: "kubectl label node --overwrite {{ hostvars[node].inventory_hostname }} ceph-osd=enabled"

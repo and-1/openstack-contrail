@@ -18,7 +18,7 @@ ntp_srvs:
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.194:5000"
 contrail_tag: "queens-master-454"
-osh_tag: 1.0
+osh_tag: 1.1
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#
 tunables: "hammer"
@@ -33,7 +33,7 @@ mon_max_pg_per_osd: 300
 #--------------------------k8s-Helm----------#
 int_domain_suffix: "region1"
 ext_domain_suffix: "logistic.lan"
-pod_resources: false
+pod_resources: true
 #--------------------------Infra-------------#
 infra:
   pool_name: 'cloud.infra'
@@ -66,35 +66,19 @@ supplementary_domains:
 gen_passwd: true
 # Whether use external ceph region. Available
 # values: false or <region name>
-cinder_backup_to_region: RegionTwo
-# Cinder default pool parameters-------------+
+cinder_backup_to_region: false
 cinder_pool_percent: 50
 cinder_backup_pool_percent: 5
 infra_pool_percent: 10
 glance_pool_percent: 5
 rgw_pool_percent: 15.7
 nova_ephimeral_pool_percent: 5
-#--------------------------------------------+
-# Join one more areas in one cluster. If 
-# enabled, all areas must present in inventory
-# [ AREA-compute ]
-# [ AREA-osd-node ]
-# where 'AREA' is name in join_areas.areas
-join_areas: 
-  enabled: false
-  areas:
-  - name: "dev"
-    cinder_pool_percent: 25
-    cinder_backup_pool_percent: 5
-  - name: "prod"
-    cinder_pool_percent: 25
-    cinder_backup_pool_percent: 5
-#--------------------------------------------+
+#--------------------------Contrail----------#
 BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
-monitoring: false
-logging: false
+monitoring: true
+logging: true
 alertmanager_notif:
   smtp_smarthost: '192.168.0.194:25'
   smtp_from: 'alertmanager@example.com'

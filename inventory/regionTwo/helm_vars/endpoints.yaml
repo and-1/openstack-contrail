@@ -288,6 +288,10 @@ elasticsearch:
   host_fqdn_override:
     public:
       host: "elasticsearch-{{region|lower}}.{{ext_domain_suffix}}"
+kibana:
+  host_fqdn_override:
+    public:
+      host: "kibana-{{region|lower}}.{{ext_domain_suffix}}"
 
 object_store:
   host_fqdn_override:

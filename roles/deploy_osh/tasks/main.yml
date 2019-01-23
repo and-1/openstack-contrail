@@ -22,11 +22,6 @@
 - name: Set components with not wait ready status
   set_fact:
     no_wait: 
-#    - 'nova'
-    - 'mariadb'
-    - 'rabbitmq'
-    - 'glance'
-    - 'cinder'
     - 'horizon'
     - 'prometheus-openstack-exporter'
 

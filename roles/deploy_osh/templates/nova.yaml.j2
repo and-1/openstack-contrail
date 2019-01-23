@@ -130,9 +130,6 @@ conf:
       region_name: {{region}}
     cinder:
       os_region_name: {{region}}
-{% if join_areas.enabled %}
-      cross_az_attach: 'false'
-{% endif %}
   rabbitmq:
     policies:
       - vhost: "nova"

@@ -20,13 +20,6 @@
   - "{{ groups['compute-plane'] }}"
   - "{{ compute_plane_labels }}"
   ignore_errors: yes
-- name: Set k8s node environment (compute)
-  shell: "kubectl label node --overwrite {{ item.0 }} AZ={{item.1.name}}"
-  with_nested:
-  - "{{ groups['compute-plane'] }}"
-  - "{{ join_areas.areas }}"
-  ignore_errors: yes
-  when: "join_areas.enabled and item.0 in groups[item.1.name+'-compute']"
 - name: Set k8s node labels (osd)
   include: "osd-labels.yaml"
   with_items:

@@ -1,6 +1,7 @@
 [submodule "kubespray"]
 	path = kubespray
 	url = https://github.com/and-1/kubespray.git
+	branch = custom_kubespray
 [submodule "openstack-helm-infra"]
 	path = openstack-helm-infra
 	url = https://github.com/and-1/openstack-helm-infra.git

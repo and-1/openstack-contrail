@@ -14,7 +14,7 @@ memcache:
   memory: 1024
 elastic:
   storage: '5Gi'
-  java_opt: "-Xms256m -Xmx256m"
+  java_opt: "-Xms512m -Xmx512m"
 ldap:
   storage: '2Gi'
 prometheus:
@@ -37,7 +37,7 @@ neutron:
 nova:
   ephimeral_pool_name: 'cloud.nova.ephimeral'
 # available values: kvm, lxc, qemu, uml, xen, parallels
-  virt_type: kvm
+  virt_type: qemu
   cpu_mode: host-model
   workers:
     osapi_compute: 1
@@ -94,7 +94,7 @@ glance:
         container_format: bare
         private: true
         properties:
-          hypervisor_type: "{{nova.virt_type}}"
+          hypervisor_type: "qemu"
           os_distro: "cirros"
 placement:
   processes: 1
