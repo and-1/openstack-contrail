@@ -2,39 +2,31 @@
 - name: Check dependency for that region
   include_tasks: checks.yaml
 - block:
-  - name: Get interface type if it isn't defined
-    shell: ls /proc/net/bonding/* | xargs -I{} basename {}
-    register: stat_bond
-    changed_when: false
-  - name: Set bond name
-    set_fact: 
-      bond_name: "{{stat_bond.stdout_lines | first}}"
-    when: stat_bond.stdout_lines | length > 0
-  - name: Set interface type
-    set_fact:
-      iface_type: "{% if stat_bond.stdout_lines | length != 0 %}bond{%else%}interface{%endif%}"
-  when: iface_type is not defined
-- block:
-  - name: "Config network interfaces ({{iface_type}} mode - NETPLAN) "
+  - name: "Config network interfaces (NETPLAN) "
     template:
-      src: "iface_18_{{iface_type}}.conf.j2"
-      dest: /etc/netplan/60-osh-iface.yaml
+      src: "iface.conf.j2"
+      dest: "/etc/netplan/60-{{item}}-iface.yaml"
       # Force set to false because after routes will be added
       force: false
     register: netplan_config
+    with_items:
+    - "k8s"
+    - "ceph"
+  - debug: msg="{{netplan_config}}"
   - name: "Apply new network configuration"
     shell: netplan apply
     when: "netplan_config.changed"
-  when: "ansible_distribution_version == '18.04'"
-- block:
-  # only for test purpose
-  - name: "Config network interfaces ({{iface_type}} mode - IFUPDOWN)"
-    template:
-      src: "iface_16_{{iface_type}}.conf.j2"
-      dest: /etc/network/interfaces.d/60-osh-iface.cfg
-  - name: "Apply new network configuration"
-    shell: systemctl restart networking && sleep 10
-  when: "ansible_distribution_version == '16.04'"
+  when: "ansible_distribution_version == '18.04' and 'maas' not in group_names"
+# TODO: Update template after add parent parameter
+#- block:
+#  # only for test purpose
+#  - name: "Config network interfaces (IFUPDOWN)"
+#    template:
+#      src: "iface_ifupdown.conf.j2"
+#      dest: /etc/network/interfaces.d/60-osh-iface.cfg
+#  - name: "Apply new network configuration"
+#    shell: systemctl restart networking && sleep 10
+#  when: "ansible_distribution_version == '16.04'"
 - name: Add dns servers
   template: 
     src: resolved.conf.j2
@@ -55,6 +47,10 @@
   with_items:
   - "{{packages}}"
   register: packages
+- name: Install pip packages
+  pip: name="{{item}}"
+  with_items:
+  - "{{pip_packages}}"
 - name: Bring ntp service to valid state
   systemd: name=ntp state="{% if rack_ctl is defined and rack_ctl|bool%}stopped{%else%}started{%endif%}" masked="{% if rack_ctl is defined and rack_ctl|bool%}true{%else%}false{%endif%}"
 # Separate kubelet, docker logs from other
@@ -77,20 +73,21 @@
   setup:
   delegate_to: "{{ item }}"
   delegate_facts: True
-  when: hostvars[item]['ansible_'+k8s.iface] is not defined or hostvars[item]['ansible_'+k8s.iface]['ipv4'] is not defined
+  when: hostvars[item]['ansible_'+k8s.iface|replace('-','_')] is not defined or hostvars[item]['ansible_'+k8s.iface|replace('-','_')]['ipv4'] is not defined
   with_items: "{{ groups['k8s-cluster'] }}"
   run_once: true
 - name: Add dns names to hosts
   lineinfile:
-    line: "{{hostvars[item.1]['ansible_'+hostvars[inventory_hostname][item.0]['iface']]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}{%if fqdn_hostnames %}.{{int_domain_suffix}}{%endif%}"
+    line: "{{hostvars[item.1]['ansible_'+hostvars[inventory_hostname][item.0]['iface']|replace('-','_')]['ipv4']['address']}} {{hostvars[item.1]['ansible_hostname']}}{%if fqdn_hostnames %}.{{int_domain_suffix}}{%endif%}"
     path: /etc/hosts
     state: present
   with_nested:
   - ["k8s","ceph"]
   - "{{ groups['k8s-cluster'] }}"
+  when: "'maas' not in group_names"
 - name: Add endpoints to hosts for rbd provision
   lineinfile:
-    line: "{{hostvars[item.0]['ansible_'+ceph.iface]['ipv4']['address']}} {{item.1}}"
+    line: "{{hostvars[item.0]['ansible_'+ceph.iface|replace('-','_')]['ipv4']['address']}} {{item.1}}"
     path: /etc/hosts
     state: present
   with_nested:

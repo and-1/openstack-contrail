@@ -219,21 +219,24 @@ class Inventory:
                for iface in node['interface_set']:
                  try:
                    dhcp = iface['links'][0]['subnet']['vlan']['dhcp_on']
-                   if dhcp:
+                   if dhcp and iface['links'][0]['subnet'].has_key('gateway_ip'):
                      if not ext_ceph_zone:
                        nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                        'ansible_host': iface['links'][0]['ip_address'],
                         'ip': self.getip(iface['links'][0]['ip_address']),
                        'rack_ctl': 'true',
                        }
-                       nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_parent(node['interface_set']))
                      else:
                        nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                        'ansible_host': iface['links'][0]['ip_address'],
                        }
-                       nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
+                       nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_parent(node['interface_set']))
                  except:
                    continue
+               if not nodes_meta['_meta']['hostvars'].has_key(node['hostname']+domain):
+                 print("Could not get ansible_hostname ip for node {}.".format(node['hostname']+domain))
+                 sys.exit(1)
              elif node['node_type_name'] == 'Machine' and node['status_name'] == 'Deployed':
                if not node['tag_names']:
                  pass
@@ -243,7 +246,7 @@ class Inventory:
                      'ansible_host': node['ip_addresses'][0],
                      'ip': self.getip(node['ip_addresses'][0]),
                    } 
-                   nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_parent(node['interface_set']))
                    if 'osd-nodes' in node['tag_names']:
                      disks = []
                      journal_disk = ""
@@ -258,7 +261,7 @@ class Inventory:
                    nodes_meta['_meta']['hostvars'][node['hostname']+domain] = {
                      'ansible_host': node['ip_addresses'][0],
                    } 
-                   nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_type(node['interface_set']))
+                   nodes_meta['_meta']['hostvars'][node['hostname']+domain].update(self.get_iface_parent(node['interface_set']))
 
         # Add some static groups
 #        ansible['ungrouped'] = {}
@@ -294,15 +297,12 @@ class Inventory:
         result.update(nodes_meta)
         return result
 
-    def get_iface_type(self, iface_set):
+    def get_iface_parent(self, iface_set):
         result = {}
         for iface in iface_set:
-          if iface['type'] == 'bond':
-            result['iface_type'] = iface['type']
-            result['bond_name'] = iface['name']
-            break
-        if not result.has_key('iface_type'):
-          result['iface_type'] = 'interface'
+          if len(iface['tags']) != 0:
+            for net in iface['tags']:
+              result[net+'_parent'] = iface['name']
         return result
 
     def getip(self, src_ip):

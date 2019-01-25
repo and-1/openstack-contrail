@@ -1,0 +1,32 @@
+{%- macro ipaddr(net="") %}
+{%- set host_num = ansible_default_ipv4.address | ipaddr("int") - ansible_default_ipv4.network | ipaddr("int") %}
+{{- net | ipaddr(host_num) }}
+{%- endmacro %}
+network:
+    version: 2
+{%if hostvars[inventory_hostname][item+'_parent'] is not defined or hostvars[inventory_hostname]['ansible_'+lookup('vars', item+'_parent')]['type'] != 'bonding' %}
+    ethernets:
+{% if hostvars[inventory_hostname][item+'_parent'] is defined %}
+{% set if_name = hostvars[inventory_hostname][item+'_parent'] %}
+{% else %}
+{% set if_name = hostvars[inventory_hostname][item]['iface']%}
+{% endif %}
+       {{if_name}}:
+            set-name: {{if_name}}
+            match:
+                macaddress: {{hostvars[inventory_hostname]['ansible_'+if_name]['macaddress']}}
+{% if hostvars[inventory_hostname][item+'_parent'] is not defined %}
+            addresses:
+            - {{ipaddr(hostvars[inventory_hostname][item]['net'])}}
+            mtu: {{hostvars[inventory_hostname][item]['mtu'] | default('1500')}}
+{% endif %}
+{% endif %}
+{% if hostvars[inventory_hostname][item+'_parent'] is defined%}
+    vlans:
+       {{hostvars[inventory_hostname][item]['iface']}}:
+            addresses:
+            - {{ipaddr(hostvars[inventory_hostname][item]['net'])}}
+            mtu: {{hostvars[inventory_hostname][item]['mtu'] | default('1500')}}
+            id: {{hostvars[inventory_hostname][item]['vlan']}}
+            link: {{hostvars[inventory_hostname][item+'_parent']}}
+{% endif %}

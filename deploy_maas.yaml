@@ -10,7 +10,7 @@
 
 - hosts: maas
   roles:
-  - { role: prepare-node, stage: pre-k8s}
-  - bootstrap-os
-  - container-engine
-  - maas
+  - { role: prepare-node, stage: pre-k8s, tags: ['init', 'prepare']}
+  - { role: bootstrap-os, tags: ['init', 'docker']}
+  - { role: container-engine, tags: ['init', 'docker']}
+  - { role: maas, tags: ['maas']}

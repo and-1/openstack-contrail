@@ -1,3 +1,4 @@
+# Tasks for adding routes for cinder-backup and ceph from other region interconnect
 - name: Import external ceph information
   include_vars:
     file: "{{inventory_dir}}/../share_creds/ceph.{{cinder_backup_to_region|lower}}.creds"
@@ -26,13 +27,14 @@
        net: "{%if item in groups[cinder_backup_to_region]%}{{ext_ceph_set.ext_ceph_net}}{%else%}{{ceph.net}}{%endif%}"
        iface: "{%if item in groups[cinder_backup_to_region]%}{{lookup('vars', 'ceph_iface_'+item | replace('-','_'))}}{%else%}{{ceph.iface}}{%endif%}"
        gw: "{%if item in groups[cinder_backup_to_region]%}{{ext_ceph_set.ext_ceph_gw}}{%else%}{{ceph.gw}}{%endif%}"
+       if_slave: "{%if hostvars[item]['ceph_parent'] is defined %}True{%else%}False{%endif%}"
   run_once: true
   with_items:
   - "{{groups['k8s-cluster']}}"
   - "{{groups[cinder_backup_to_region]}}"
 
 - name: "Get existing route on ceph interface"
-  shell: "echo [$(ip r | awk /via.*{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}/ | grep -v {{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).net}} | awk '{print \"{to: \"$1\", via: \"$3\"},\"}' | tr -d '\n')]"
+  shell: "route=$(yq '.network.{%if lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).if_slave | bool %}vlans{%else%}ethernetes{%endif%}.\"{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}\".routes' /etc/netplan/60-ceph-iface.yaml) && [ \"$route\" != 'null' ] && echo $route || echo '[]'"
   delegate_to: "{{item}}"
   register: "ceph_cur_routes"
   run_once: true
@@ -40,6 +42,8 @@
   - "{{groups['k8s-cluster']}}"
   - "{{groups[cinder_backup_to_region]}}"
   changed_when: False
+
+- debug: msg="{{ceph_cur_routes.results}}"
 
 - name: "Set list routes for external ceph network"
   set_fact:
@@ -61,9 +65,9 @@
 
 - name: Add new routes to ceph interface
   yedit:
-    src: /etc/netplan/60-osh-iface.yaml
+    src: /etc/netplan/60-ceph-iface.yaml
     state: present
-    key: "network.{%if hostvars[item]['iface_type'] == 'interface'%}ethernets{%elif hostvars[item]['iface_type'] == 'bond'%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
+    key: "network.{%if hostvars[item]['ceph_parent'] is not defined%}ethernets{%else%}vlans{%endif%}.{{lookup('vars', 'temp_ceph_set_'+item | replace('-','_')).iface}}.routes"
     value: "{{lookup('vars', 'ceph_routes_'+item|replace('-','_'))}}"
     value_type: list
   register: "apply_routes"
