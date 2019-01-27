@@ -77,8 +77,8 @@ nova_ephimeral_pool_percent: 5
 BGP_port: 1179
 contrail_bgp_asn: 64512 
 #--------------------------Monitoring--------#
-monitoring: true
-logging: true
+monitoring: false
+logging: false
 alertmanager_notif:
   smtp_smarthost: '192.168.0.194:25'
   smtp_from: 'alertmanager@example.com'

@@ -12,10 +12,9 @@
     with_items:
     - "k8s"
     - "ceph"
-  - debug: msg="{{netplan_config}}"
   - name: "Apply new network configuration"
     shell: netplan apply
-    when: "netplan_config.changed"
+    when: "netplan_config.results | selectattr('changed','eq',True) | list | length > 0"
   when: "ansible_distribution_version == '18.04' and 'maas' not in group_names"
 # TODO: Update template after add parent parameter
 #- block:
