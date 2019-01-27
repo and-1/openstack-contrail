@@ -368,6 +368,8 @@ contrail:
     image: "contrail-status"
   node_init:
     image: "contrail-node-init"
+  kube_manager: 
+    image: "contrail-kubernetes-kube-manager"
   dep_check:
     image: "kubernetes-entrypoint"
     repo: 'quay.io/stackanetes'

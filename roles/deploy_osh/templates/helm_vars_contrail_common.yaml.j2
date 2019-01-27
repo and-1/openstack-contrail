@@ -37,7 +37,7 @@ global:
 {% if params.link is defined %}
 {% set params = images['contrail'][params.link] %}
 {% endif %}
-       {{image}}: "{{params.repo|default(local_docker_registry)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}"
+       {{image}}: "{{params.repo|default(local_docker_registry+'/'+os_release)}}/{{params.image}}:{{params.tag|default(contrail_tag)}}"
 {% endfor %}
 
 ingress:
@@ -63,7 +63,3 @@ endpoints:
       password: "{{contrail_endpoints_rabbitmq_pwd}}"
     hosts:
       default: "{{nodes | join(',')}}"
-
-#Patch until resolve https://bugs.launchpad.net/opencontrail/+bug/1781968
-manifests:
-  configmap_patch: true
