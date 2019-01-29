@@ -18,7 +18,7 @@ ntp_srvs:
 #---------------------------Images-----------#
 local_docker_registry: "192.168.10.138:5000"
 contrail_tag: "queens-master-454"
-osh_tag: 1.0
+osh_tag: 1.1
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#
 tunables: "hammer"

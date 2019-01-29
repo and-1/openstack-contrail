@@ -64,14 +64,16 @@ function config_pxe_net {
   while ! $(maas ${ADMIN_USERNAME} subnets read | jq -r ' .[] | .name' | grep -q "$subnet");do
     sleep 5
   done
+  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "DEFAULT_'${REGION}'" then .id else "" end' | tr -d '[:space:]' )
+  if [ "x$fabric_id" == "x" ];then
+     fabric_id=$(maas ${ADMIN_USERNAME} fabrics create name="DEFAULT_${REGION}" | jq '.id')
+  fi
   subnet_id=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .id else "" end' | tr -d '[:space:]')
-  vid=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .vlan.vid else "" end' | tr -d '[:space:]')
-  fabric=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .vlan.fabric else "" end' | tr -d '[:space:]')
-  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "'$fabric'" then .id else "" end' | tr -d '[:space:]')
+  vid=$(maas ${ADMIN_USERNAME} fabric read $fabric_id | jq -r '.vlans | .[] | if .vid == 0 then .id else "" end'| tr -d '[:space:]')
+  maas ${ADMIN_USERNAME} subnet update $subnet_id vlan=$vid
   maas ${ADMIN_USERNAME} ipranges create type=dynamic start_ip=${start_ip} end_ip=${end_ip}
   maas ${ADMIN_USERNAME} ipranges create type=reserved start_ip={{vip_ip}} end_ip={{vip_ip}} comment="VIP"
-  maas ${ADMIN_USERNAME} vlan update $fabric_id $vid dhcp_on=true space=${REGION} primary_rack=${rack_id}
-  maas ${ADMIN_USERNAME} fabric update $fabric_id name="DEFAULT_${REGION}"
+  maas ${ADMIN_USERNAME} vlan update $fabric_id 0 dhcp_on=true space=${REGION} primary_rack=${rack_id}
 }
 
 
