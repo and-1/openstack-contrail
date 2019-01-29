@@ -2,21 +2,21 @@
 ceph:
   net: "192.168.2.0/24"
   vlan: 1500
-  iface: "ceph-net"
+  iface: "ens5"
   gw: "192.168.2.194"
 #  mtu: 9000
 k8s:
   net: "192.168.1.0/24"
   vlan: 1501
-  iface: "k8s-net"
-default_gw: "192.168.0.194"
+  iface: "ens4"
+default_gw: "192.168.0.138"
 vip_ip: "192.168.0.10"
 dns_srvs:
-- "192.168.0.194"
+- "192.168.0.138"
 ntp_srvs:
 - "194.190.168.1"
 #---------------------------Images-----------#
-local_docker_registry: "192.168.0.194:5000"
+local_docker_registry: "192.168.0.138:5000"
 contrail_tag: "queens-master-454"
 osh_tag: 1.1
 pull_policy: "IfNotPresent"
@@ -54,7 +54,7 @@ alertmanager:
   storage: '5Gi'
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
-os_release: "queens"
+OS_release: "queens"
 region: "RegionOne"
 multi_region:
   master: true

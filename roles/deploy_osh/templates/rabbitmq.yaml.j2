@@ -38,4 +38,4 @@ monitoring:
 
 images:
   tags:
-    scripted_test: {{images.osh.rabbitmq.repo|default(local_docker_registry+"/"+os_release)}}/{{images.osh.rabbitmq.image}}:{{images.osh.rabbitmq.tag|default(osh_tag)}}
+    scripted_test: {{images.osh.rabbitmq.repo|default(local_docker_registry+"/"+OS_release)}}/{{images.osh.rabbitmq.image}}:{{images.osh.rabbitmq.tag|default(osh_tag)}}

@@ -9,14 +9,14 @@ k8s:
  net: "192.168.11.0/24"
  vlan: 1501
  iface: "ens4"
-default_gw: "192.168.10.194"
+default_gw: "192.168.10.138"
 vip_ip: "192.168.10.10"
 dns_srvs:
-- "192.168.10.194"
+- "192.168.10.138"
 ntp_srvs:
 - "194.190.168.1"
 #---------------------------Images-----------#
-local_docker_registry: "192.168.10.194:5000"
+local_docker_registry: "192.168.10.138:5000"
 contrail_tag: "queens-master-454"
 osh_tag: 1.0
 pull_policy: "IfNotPresent"
@@ -54,7 +54,7 @@ alertmanager:
   storage: '5Gi'
 #--------------------------OpenStack---------#
 # OpenStack release. Now only queens supported
-os_release: "queens"
+OS_release: "queens"
 region: "RegionTwo"
 multi_region:
   master: false

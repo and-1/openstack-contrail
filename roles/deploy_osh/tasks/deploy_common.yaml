@@ -26,7 +26,7 @@
   - osh-contrail
   - cinder-backup
 - name: "Run rally test for {{item.name}}"
-  shell: "{{helm_bin}} test {{item.name}} --cleanup"
+  shell: "{{helm_bin}} test {{item.name}} --cleanup --timeout 500"
   when: "test|bool and (lookup('vars', item.name +'_change').changed or helm_release.stdout == 'nok') and item.name not in ['neutron']"
   register: helm_test
   changed_when: helm_test.stdout != 'No Tests Found'

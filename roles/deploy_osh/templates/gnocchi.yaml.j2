@@ -6,7 +6,7 @@ images:
 {% if params.link is defined %}
 {% set params = images['gnocchi'][params.link] %}
 {% endif %}
-    {{image}}: {{params.repo|default(local_docker_registry+"/"+os_release)}}/{{params.image}}:{{params.tag|default(osh_tag)}}
+    {{image}}: {{params.repo|default(local_docker_registry+"/"+OS_release)}}/{{params.image}}:{{params.tag|default(osh_tag)}}
 {% endfor %}
 
 pod:

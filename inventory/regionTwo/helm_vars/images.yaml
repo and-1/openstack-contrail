@@ -304,72 +304,72 @@ osh:
     link: mariadb
 contrail:
   opencontrail_compute_init:
-    image: 'contrail-openstack-compute-init'
+    image: 'centos-binary-contrail-openstack-compute-init'
     move: osh
   opencontrail_neutron_init:
-    image: 'contrail-openstack-neutron-init'
+    image: 'centos-binary-contrail-openstack-neutron-init'
     move: osh
   opencontrail_heat_init:
-    image: 'contrail-openstack-heat-init'
+    image: 'centos-binary-contrail-openstack-heat-init'
     move: osh
   kafka:
-    image: "contrail-external-kafka"
+    image: "centos-binary-contrail-external-kafka"
   cassandra:
-    image: "contrail-external-cassandra"
+    image: "centos-binary-contrail-external-cassandra"
   redis:
-    image: "contrail-external-redis"
+    image: "centos-binary-contrail-external-redis"
   zookeeper:
-    image: "contrail-external-zookeeper"
+    image: "centos-binary-contrail-external-zookeeper"
   rabbitmq:
-    image: "contrail-external-rabbitmq"
+    image: "centos-binary-contrail-external-rabbitmq"
   contrail_control:
-    image: "contrail-controller-control-control"
+    image: "centos-binary-contrail-controller-control-control"
   control_dns:
-    image: "contrail-controller-control-dns"
+    image: "centos-binary-contrail-controller-control-dns"
   control_named:
-    image: "contrail-controller-control-named"
+    image: "centos-binary-contrail-controller-control-named"
   config_api:
-    image: "contrail-controller-config-api"
+    image: "centos-binary-contrail-controller-config-api"
   config_devicemgr:
-    image: "contrail-controller-config-devicemgr"
+    image: "centos-binary-contrail-controller-config-devicemgr"
   config_schema_transformer:
-    image: "contrail-controller-config-schema"
+    image: "centos-binary-contrail-controller-config-schema"
   config_svcmonitor:
-    image: "contrail-controller-config-svcmonitor"
+    image: "centos-binary-contrail-controller-config-svcmonitor"
   webui_middleware:
-    image: "contrail-controller-webui-job"
+    image: "centos-binary-contrail-controller-webui-job"
   webui:
-    image: "contrail-controller-webui-web"
+    image: "centos-binary-contrail-controller-webui-web"
   analytics_api:
-    image: "contrail-analytics-api"
+    image: "centos-binary-contrail-analytics-api"
   contrail_collector:
-    image: "contrail-analytics-collector"
+    image: "centos-binary-contrail-analytics-collector"
   analytics_alarm_gen:
-    image: "contrail-analytics-alarm-gen"
+    image: "centos-binary-contrail-analytics-alarm-gen"
   analytics_query_engine:
-    image: "contrail-analytics-query-engine"
+    image: "centos-binary-contrail-analytics-query-engine"
   analytics_snmp_collector:
-    image: "contrail-analytics-snmp-collector"
+    image: "centos-binary-contrail-analytics-snmp-collector"
   contrail_topology:
-    image: "contrail-analytics-topology"
+    image: "centos-binary-contrail-analytics-topology"
   build_driver_init:
-    image: "contrail-vrouter-kernel-build-init"
+    image: "centos-binary-contrail-vrouter-kernel-build-init"
   vrouter_agent:
-    image: "contrail-vrouter-agent"
+    image: "centos-binary-contrail-vrouter-agent"
   vrouter_init_kernel:
-    image: "contrail-vrouter-kernel-init"
+    image: "centos-binary-contrail-vrouter-kernel-init"
   vrouter_dpdk:
-    image: "contrail-vrouter-agent-dpdk"
+    image: "centos-binary-contrail-vrouter-agent-dpdk"
   vrouter_init_dpdk:
-    image: "contrail-vrouter-kernel-init-dpdk"
+    image: "centos-binary-contrail-vrouter-kernel-init-dpdk"
   nodemgr:
-    image: "contrail-nodemgr"
+    image: "centos-binary-contrail-nodemgr"
   contrail_status:
-    image: "contrail-status"
+    image: "centos-binary-contrail-status"
   node_init:
-    image: "contrail-node-init"
+    image: "centos-binary-contrail-node-init"
   kube_manager: 
-    image: "contrail-kubernetes-kube-manager"
+    image: "centos-binary-contrail-kubernetes-kube-manager"
   dep_check:
     image: "kubernetes-entrypoint"
     repo: 'quay.io/stackanetes'

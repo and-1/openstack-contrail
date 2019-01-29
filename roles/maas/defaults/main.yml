@@ -1,6 +1,6 @@
 ---
-MAAS_REGION_IMG: "{{local_docker_registry}}/maas-region-controller:1.0"
-MAAS_RACK_IMG: "{{local_docker_registry}}/maas-rack-controller:1.0"
+MAAS_REGION_IMG: "{{local_docker_registry}}/{{OS_release}}/ubuntu-binary-maas-region-controller:{{osh_tag}}"
+MAAS_RACK_IMG: "{{local_docker_registry}}/{{OS_release}}/ubuntu-binary-maas-rack-controller:{{osh_tag}}"
 MAAS_DB_USER: maas
 MAAS_DB_PASS: password
 MAAS_DB_NAME: maas

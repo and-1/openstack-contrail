@@ -9,7 +9,7 @@ network:
 {% if hostvars[inventory_hostname][item+'_parent'] is defined %}
 {% set if_name = hostvars[inventory_hostname][item+'_parent'] %}
 {% else %}
-{% set if_name = hostvars[inventory_hostname][item]['iface']%}
+{% set if_name = hostvars[inventory_hostname][item]['iface'] | replace('-','_') %}
 {% endif %}
        {{if_name}}:
             set-name: {{if_name}}

@@ -73,25 +73,10 @@
     name: maas-region-controller
     image: "{{MAAS_REGION_IMG}}"
     state: started
-#    networks:
-#    - name: maas
-#    purge_networks: yes
     network_mode: host
     restart_policy: always
     privileged: true
     dns_servers: "{{MAAS_DNS_UPSTREAM}}"
-#    hostname: maas-region-controller
-#    ports:
-#    - "{{ansible_default_ipv4.address}}:{{MAAS_UI_PORT}}:80"
-#    - "{{ansible_default_ipv4.address}}:{{MAAS_PROXY_PORT}}:{{MAAS_PROXY_PORT}}"
-#    - "{{ansible_default_ipv4.address}}:53:53"
-#    - "{{ansible_default_ipv4.address}}:5240:5240"
-#    - "{{ansible_default_ipv4.address}}:5250:5250"
-#    - "{{ansible_default_ipv4.address}}:5251:5251"
-#    - "{{ansible_default_ipv4.address}}:5252:5252"
-#    - "{{ansible_default_ipv4.address}}:5253:5253"
-#    - "{{ansible_default_ipv4.address}}:5254:5254"
-#    - "{{ansible_default_ipv4.address}}:5255:5255"
     tty: true
     volumes:
     - /etc/ntp.conf:/etc/ntp.conf
