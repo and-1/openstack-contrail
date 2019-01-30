@@ -121,13 +121,13 @@ CONTRAIL:
 - name: contrail-vrouter
   path: contrail-helm-deployer/contrail-vrouter
   namespace: contrail
-#OS_SUPPL:
-#- name: heat
-#  path: openstack-helm/heat
-#  namespace: openstack
-#- name: gnocchi
-#  path: openstack-helm-infra/gnocchi
-#  namespace: openstack
-#- name: ceilometer
-#  namespace: openstack
-#  path: openstack-helm/ceilometer
+OS_SUPPL:
+- name: heat
+  path: openstack-helm/heat
+  namespace: openstack
+- name: gnocchi
+  path: openstack-helm-infra/gnocchi
+  namespace: openstack
+- name: ceilometer
+  namespace: openstack
+  path: openstack-helm/ceilometer

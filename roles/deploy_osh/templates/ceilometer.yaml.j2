@@ -464,6 +464,8 @@ manifests:
   service_api: false
   service_ingress_api: false
   job_db_init_mongodb: false
+  pod_rally_test: false
+
 dependencies:
   static:
     central:
@@ -508,5 +510,11 @@ dependencies:
           service: identity
         - endpoint: internal
           service: oslo_db
+        - endpoint: internal
+          service: metric
+    tests:
+      services:
+        - endpoint: internal
+          service: identity
         - endpoint: internal
           service: metric

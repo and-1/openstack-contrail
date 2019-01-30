@@ -1,0 +1,79 @@
+all:
+  hosts: 
+    compute-plane3-r1:
+      ansible_host: 192.168.0.2
+      ip: 192.168.1.2
+      osd_disks: 
+      - vdc
+      - vdd
+      osd_jour: vdb
+#      ceph_parent: bond0
+#      k8s_parent: bond0
+    compute-plane1-r1:
+      ansible_host: 192.168.0.4
+      ip: 192.168.1.4
+      osd_disks: 
+      - vdc
+      - vdd
+      osd_jour: vdb
+    compute-plane2-r1:
+      ansible_host: 192.168.0.3
+      ip: 192.168.1.3
+      osd_disks: 
+      - vdc
+      - vdd
+      osd_jour: vdb
+    control-plane1-r1:
+      ansible_host: 192.168.0.1
+      ip: 192.168.1.1
+      rack_ctl: 'true'
+  vars: 
+    ansible_become: 'true'
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_private_key_file: '{{inventory_dir}}/../share_creds/maas.ssh.key'
+    ansible_user: ubuntu
+compute-plane:
+  hosts: 
+    compute-plane3-r1:
+    compute-plane1-r1:
+    compute-plane2-r1:
+  vars: {}
+control-plane:
+  hosts: 
+    control-plane1-r1:
+  vars: {}
+etcd:
+  children: 
+    control-plane:
+  hosts: {}
+  vars: {}
+k8s-cluster:
+  children: 
+    kube-master:
+    kube-node:
+  hosts: {}
+  vars: {}
+kube-master:
+  children: 
+    control-plane:
+  hosts: {}
+  vars: {}
+kube-node:
+  children: 
+    control-plane:
+    compute-plane:
+    osd-nodes:
+  hosts: {}
+  vars: {}
+master:
+  hosts: 
+    localhost:
+  vars: 
+    ansible_connection: local
+osd-nodes:
+  hosts: 
+    compute-plane3-r1:
+    compute-plane1-r1:
+    compute-plane2-r1:
+  vars: {}
+
