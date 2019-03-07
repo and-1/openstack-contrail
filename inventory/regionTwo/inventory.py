@@ -134,6 +134,21 @@ class Inventory:
  
     def checker(self, inventory):
         """Check some segnificant parameters"""
+        try:
+          inventory['osd-nodes']['hosts']
+        except:
+          print('Osd nodes not found')
+          sys.exit(1)
+        try:
+          inventory['control-plane']['hosts']
+        except:
+          print('Control nodes not found')
+          sys.exit(1)
+        try:
+          inventory['compute-plane']['hosts']
+        except:
+          print('Compute nodes not found')
+          sys.exit(1)
         for server in inventory['osd-nodes']['hosts']:
            if not inventory['_meta']['hostvars'][server].has_key('osd_disks'):
               print("Journal is absent on server {}. Verify tag 'journal' on disk in maas".format(server['hostname']))
