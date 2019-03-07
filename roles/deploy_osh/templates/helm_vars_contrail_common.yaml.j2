@@ -62,3 +62,22 @@ endpoints:
       password: "{{contrail_endpoints_rabbitmq_pwd}}"
     hosts:
       default: "{{nodes | join(',')}}"
+
+contrail_env_vrouter_sriov:
+  SRIOV: true
+  per_compute_info:
+    node_name: k8snode1
+    SRIOV_VF:  10
+    SRIOV_PHYSICAL_INTERFACE: enp129s0f1
+    SRIOV_PHYS_NET:  physnet1
+
+manifests:
+  configmap_vrouter_kernel: true
+  configmap_vrouter_keystone: true
+  configmap_vrouter_dpdk: false
+  configmap_vrouter_sriov: true
+  daemonset_kernel: true
+  daemonset_dpdk: false
+  daemonset_vrouter_sriov: true
+  secret_vrouter_keystone_admin: true
+  job_kubernetes_cni_init: false

@@ -52,17 +52,16 @@
     name: ubuntu
     home: /home/ubuntu
     append: true
-    groups:
-    - sudo
     shell: /bin/bash
     state: present
     create_home: true
-- name: "RACK_CONTROLLER: ensure sudo group is admin"
+- name: "RACK_CONTROLLER: ensure ubuntu is admin"
   lineinfile:
-    regexp: "^%sudo.*"
-    line: "%sudo   ALL=(ALL:ALL) ALL"
+    regexp: "^ubuntu.*"
+    line: "ubuntu ALL=(ALL) NOPASSWD:ALL"
     state: present
-    path: /etc/sudoers
+    path: /etc/sudoers.d/90-cloud-init-users
+    create: true
 - name: "RACK_CONTROLLER: set ssh key for ubuntu user"
   lineinfile:
     line: "{{maas_ssh_key}}"
