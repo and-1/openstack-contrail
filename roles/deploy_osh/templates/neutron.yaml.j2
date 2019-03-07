@@ -126,12 +126,48 @@ conf:
         api_server_ip: config-api-server.contrail
         api_server_port: 8082
         contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
-        multi_tenancy: True
+#        multi_tenancy: True
       COLLECTOR:
         analytics_api_ip: analytics-api-server.contrail
         analytics_api_port: 8081
       KEYSTONE:
         insecure: True
+  paste:
+    composite:neutron:
+      use: egg:Paste#urlmap
+      /: neutronversions_composite
+      /v2.0: neutronapi_v2_0
+    composite:neutronapi_v2_0:
+      use: call:neutron.auth:pipeline_factory
+      noauth: cors http_proxy_to_wsgi request_id catch_errors extensions neutronapiapp_v2_0
+      keystone: cors http_proxy_to_wsgi user_token request_id catch_errors authtoken keystonecontext extensions neutronapiapp_v2_0
+    composite:neutronversions_composite:
+      use: call:neutron.auth:pipeline_factory
+      noauth: cors http_proxy_to_wsgi neutronversions
+      keystone: cors http_proxy_to_wsgi neutronversions
+    filter:request_id:
+      paste.filter_factory: oslo_middleware:RequestId.factory
+    filter:catch_errors:
+      paste.filter_factory: oslo_middleware:CatchErrors.factory
+    filter:user_token:
+      paste.filter_factory: neutron_plugin_contrail.plugins.opencontrail.neutron_middleware:token_factory
+    filter:cors:
+      paste.filter_factory: oslo_middleware.cors:filter_factory
+      oslo_config_project: neutron
+    filter:http_proxy_to_wsgi:
+      paste.filter_factory: oslo_middleware.http_proxy_to_wsgi:HTTPProxyToWSGI.factory
+    filter:keystonecontext:
+      paste.filter_factory: neutron.auth:NeutronKeystoneContext.factory
+    filter:authtoken:
+      paste.filter_factory: keystonemiddleware.auth_token:filter_factory
+    filter:extensions:
+      paste.filter_factory: neutron.api.extensions:plugin_aware_extension_middleware_factory
+    app:neutronversions:
+      paste.app_factory: neutron.api.versions:Versions.factory
+    app:neutronapiapp_v2_0:
+      paste.app_factory: neutron.api.v2.router:APIRouter.factory
+    filter:osprofiler:
+      paste.filter_factory: osprofiler.web:WsgiMiddleware.factory
 
   rabbitmq:
     policies:

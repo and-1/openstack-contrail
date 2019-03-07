@@ -24,7 +24,7 @@ pull_policy: "IfNotPresent"
 tunables: "hammer"
 replication: 3 
 pg_per_osd: 100
-target_osds: 3
+target_osds: 6
 bluestore_block_db_size: "1073741824"
 bluestore_block_wal_size: "2147483648"
 mon_osd_full_ratio: .90
@@ -45,7 +45,7 @@ memcache:
   memory: 1024
 elastic:
   storage: '5Gi'
-  java_opt: "-Xms256m -Xmx256m"
+  java_opt: "-Xms1024m -Xmx1024m"
 ldap:
   storage: '2Gi'
 prometheus:

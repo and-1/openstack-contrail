@@ -116,6 +116,4 @@ gnocchi:
     metricd: 1
 
 contrail:
-  cassandra:
-    Xmx: '2G'
-    Xmn: '256M'
+  jvm_opts: "-Xms1g -Xmx2g"

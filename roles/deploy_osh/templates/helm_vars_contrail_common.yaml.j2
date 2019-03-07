@@ -15,8 +15,7 @@ global:
      RABBITMQ_USER: "{{endpoints.contrail_endpoints.auth.rabbitmq.username}}"
      RABBITMQ_PASSWORD: "{{contrail_endpoints_rabbitmq_pwd}}"
      RABBITMQ_ERLANG_COOKIE: "{{rabbitmq_contrail_cookie}}"
-     MAX_HEAP_SIZE: "{{contrail.cassandra.Xmx}}"
-     HEAP_NEWSIZE: "{{contrail.cassandra.Xmn}}"
+     JVM_EXTRA_OPTS: "{{contrail.jvm_opts}}"
      METADATA_PROXY_SECRET: "{{metadata_secret_key}}"
      LOG_LEVEL: SYS_NOTICE
      CLOUD_ORCHESTRATOR: openstack
@@ -41,7 +40,7 @@ global:
 {% endfor %}
 
 ingress:
-  webui_ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
+  ext_suffix: -{{region|lower}}.{{ext_domain_suffix}}
 
 endpoints:
   cluster_domain_suffix: "{{int_domain_suffix}}"

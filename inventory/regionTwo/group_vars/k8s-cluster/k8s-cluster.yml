@@ -192,6 +192,10 @@ persistent_volumes_enabled: false
 ## flavor can be tesla or gtx
 # nvidia_gpu_flavor: gtx
 
+kubelet_custom_flags:
+- "--eviction-hard=imagefs.available<10%,memory.available<500Mi,nodefs.available<10%,nodefs.inodesFree<5%"
+- "--eviction-soft-grace-period=memory.available=60s"
+- "--eviction-soft=memory.available<300Mi"
 kubelet_status_update_frequency: 4s
 kube_controller_node_monitor_grace_period: 16s
 kube_controller_node_monitor_period: 2s
