@@ -23,6 +23,7 @@ calico_felix_prometheusmetricsenabled: "{{monitoring}}"
 calico_felix_prometheusmetricsport: "19091"
 
 # IPIP tunel enable
+# ipip parameter apply to calico version < 3.0.0 only
 ipip: false
-# #ipip_mode: CrossSubnet
+ipip_mode: Never
 calico_ip_auto_method: "interface={{k8s.iface}}"
