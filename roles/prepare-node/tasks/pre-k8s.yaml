@@ -9,6 +9,7 @@
       # Force set to false because after routes will be added
       force: false
     register: netplan_config
+    changed_when: "netplan_config.changed or hostvars[ansible_hostname]['ansible_'+item] is not defined"
     with_items:
     - "k8s"
     - "ceph"
