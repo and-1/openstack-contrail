@@ -1,7 +1,5 @@
 ---
 redeploy_all: false
-service_domain: "default"
-test: true
 
 infra:
   pool_name: 'cloud.infra'
@@ -37,7 +35,7 @@ neutron:
 nova:
   ephimeral_pool_name: 'cloud.nova.ephimeral'
 # available values: kvm, lxc, qemu, uml, xen, parallels
-  virt_type: qemu
+  virt_type: kvm
   cpu_mode: host-model
   workers:
     osapi_compute: 1

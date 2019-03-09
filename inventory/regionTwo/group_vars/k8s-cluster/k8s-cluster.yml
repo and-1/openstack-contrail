@@ -192,6 +192,9 @@ persistent_volumes_enabled: false
 ## flavor can be tesla or gtx
 # nvidia_gpu_flavor: gtx
 
+dns_min_replicas: 2
+dns_nodes_per_replica: 10
+dns_cores_per_replica: 256
 kubelet_custom_flags:
 - "--eviction-hard=imagefs.available<10%,memory.available<500Mi,nodefs.available<10%,nodefs.inodesFree<5%"
 - "--eviction-soft-grace-period=memory.available=60s"

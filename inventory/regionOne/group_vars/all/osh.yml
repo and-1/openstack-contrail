@@ -58,6 +58,7 @@ OS_release: "queens"
 region: "RegionOne"
 multi_region:
   master: true
+service_domain: "default"
 supplementary_domains:
 - prod
 - dev

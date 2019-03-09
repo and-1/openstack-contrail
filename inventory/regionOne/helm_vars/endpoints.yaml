@@ -321,10 +321,10 @@ compute:
   host_fqdn_override:
     public:
       host: "nova-{{region|lower}}.{{ext_domain_suffix}}"
-compute_novnc_proxy:
-  host_fqdn_override:
-    public:
-      host: "novncproxy-{{region|lower}}.{{ext_domain_suffix}}"
+#compute_novnc_proxy:
+#  host_fqdn_override:
+#    public:
+#      host: "novncproxy-{{region|lower}}.{{ext_domain_suffix}}"
 compute_spice_proxy:
   host_fqdn_override:
     public:
