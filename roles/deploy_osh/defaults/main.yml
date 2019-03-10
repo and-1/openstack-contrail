@@ -1,5 +1,6 @@
 ---
 redeploy_all: false
+rally_test: true
 
 infra:
   pool_name: 'cloud.infra'
