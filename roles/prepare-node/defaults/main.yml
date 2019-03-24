@@ -9,6 +9,7 @@ packages:
  - ntp
  - python3-pip
  - jq
+ - sysfsutils
 pip_packages:
  - yq
 # k8s node labels

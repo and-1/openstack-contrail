@@ -1,4 +1,6 @@
 #---------------------------Networks---------#
+sriov_on: true
+sriov_vf_num: 4
 ceph:
   net: "192.168.2.0/24"
   vlan: 1500
@@ -21,7 +23,7 @@ contrail_tag: "queens-master-454"
 osh_tag: 1.1
 pull_policy: "IfNotPresent"
 #---------------------------Ceph-------------#
-tunables: "hammer"
+tunables: "jewel"
 replication: 3 
 pg_per_osd: 100
 target_osds: 3

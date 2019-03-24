@@ -23,8 +23,14 @@ global:
      AAA_MODE: rbac
      CONFIG_NODEMGR__DEFAULTS__minimum_diskGB: "5"
      DATABASE_NODEMGR__DEFAULTS__minimum_diskGB: "5"
-#     SVC_MONITOR__DEFAULTS__region_name: {{region}}
-#     VROUTER_AGENT__DEFAULT__gateway_mode: server
+     SVC_MONITOR__DEFAULTS__region_name: {{region}}
+# Not used now, vf will be activated through sysfsutils
+#   contrail_env_vrouter_sriov:
+#     SRIOV: true
+#     per_compute_info:
+#     - node_name: node1
+#       SRIOV_VF:  4
+#       SRIOV_PHYSICAL_INTERFACE: enp2s0f0
 
    images:
      imagePullPolicy: {{pull_policy}}
@@ -63,19 +69,11 @@ endpoints:
     hosts:
       default: "{{nodes | join(',')}}"
 
-contrail_env_vrouter_sriov:
-  SRIOV: true
-  per_compute_info:
-    node_name: node1
-    SRIOV_VF:  0
-    SRIOV_PHYSICAL_INTERFACE: enp2s0f0
-    SRIOV_PHYS_NET:  physnet1
-
 manifests:
   configmap_vrouter_kernel: true
   configmap_vrouter_keystone: true
   configmap_vrouter_dpdk: false
-  configmap_vrouter_sriov: true
+  configmap_vrouter_sriov: false
   daemonset_kernel: true
   daemonset_dpdk: false
   daemonset_vrouter_sriov: true

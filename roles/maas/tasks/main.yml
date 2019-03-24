@@ -41,5 +41,6 @@
           -e MAAS_DEFAULT_DISTRO={{MAAS_DEFAULT_DISTRO}}
           -e MAAS_DEFAULT_KERNEL={{MAAS_DEFAULT_KERNEL}}
           -e MAAS_SSH_PUBLIC='{{maas_ssh_pub}}'
+          -e SRIOV={%if sriov_on|bool %}YES{%endif%}
           maas-region-controller bash -c /tmp/import-boot-resources.sh"
   when: "region_ctl is defined and region_ctl|bool"

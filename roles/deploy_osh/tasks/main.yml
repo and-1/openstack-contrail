@@ -37,6 +37,12 @@
   - [[''], [['keystone','horizon']]]
   when: "components['OSH_CORE'] is defined and item.0['master'] == multi_region.master"
 
+- name: Get sriov caps
+  include: sriov_caps.yml
+  with_items:
+  - "{{groups['compute-plane']}}"
+  when: "sriov_on|bool"
+
 - name: Prepare helm and tools
   include: prepare_helm.yaml
 

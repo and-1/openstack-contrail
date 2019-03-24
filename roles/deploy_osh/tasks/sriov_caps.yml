@@ -1,0 +1,42 @@
+- name: Get iface with sr-iov capabilities
+  shell: "lspci -vvv -s {{hostvars[item]['ansible_'+iface|replace('-','_')]['pciid']}} 2>/dev/null | grep -q SR-IOV && echo {{iface}} || echo NOT"
+  with_items:
+  - "{{hostvars[item]['ansible_interfaces']}}"
+  register: "sriov_ifaces"
+  delegate_to: "{{item}}"
+  delegate_facts: true
+  when: "hostvars[item]['ansible_'+iface|replace('-','_')]['pciid'] is defined"
+  changed_when: false
+  loop_control:
+    loop_var: iface
+- name: Save SR-IOV iface
+  set_fact:
+    sriov_ifs: "{{sriov_ifaces| json_query('results[*].stdout')| difference(['NOT']) | list}}"
+  delegate_to: "{{item}}"
+  delegate_facts: true
+- name: Configure sysfs for sriov
+  template:
+    src: sriov_sysfs.conf
+    dest: /etc/sysfs.d/sriov.conf
+  delegate_to: "{{item}}"
+  delegate_facts: true
+  when: "hostvars[item]['sriov_ifs'] is defined and hostvars[item]['sriov_ifs'] | length > 0"
+- name: Check existing values
+  shell: "cat /sys/class/net/{{iface}}/device/sriov_numvfs"
+  with_items:
+  - "{{hostvars[item]['sriov_ifs']}}"
+  register: vf_check
+  loop_control:
+    loop_var: iface
+  delegate_to: "{{item}}"
+  delegate_facts: true
+- name: Apply vf to runtime config
+  shell: "echo {{sriov_vf_num}} > /sys/class/net/{{iface['item']}}/device/sriov_numvfs"
+  with_items:
+  - "{{vf_check.results}}"
+  loop_control:
+    loop_var: iface
+  delegate_to: "{{item}}"
+  delegate_facts: true
+  when: "iface.stdout == '0'"
+

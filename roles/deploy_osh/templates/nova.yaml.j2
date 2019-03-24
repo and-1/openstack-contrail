@@ -179,6 +179,27 @@ conf:
         WSGIPassAuthorization On
     </Location>
 
+{% if sriov_on| bool %}
+  overrides:
+    nova_compute:
+      hosts:
+{% for node in groups['compute-plane'] %}
+{% if hostvars[node]['sriov_ifs'] is defined and hostvars[node]['sriov_ifs']|length > 0 %}
+      - name: {{node}}
+        conf:
+          nova:
+            DEFAULT:
+              pci_passthrough_whitelist: 
+                type: multistring
+                values:
+{% for if in hostvars[node]['sriov_ifs']%}
+                - '{ "devname": "{{if}}", "physical_network":"link{{loop.index}}"}'
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+
 pod:
   replicas:
 {% for pod, rep in replicas[item.name].iteritems() %}
