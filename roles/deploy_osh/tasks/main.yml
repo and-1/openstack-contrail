@@ -49,7 +49,7 @@
 - name: Generate info
   import_tasks: generate_main.yaml
 
-- name: "Add identity endpoint for region - {{region}}"
+- name: "Add identity endpoints for region - {{region}}"
   os_keystone_endpoint:
     auth: "{{keystone_endpoint}}"
     auth_type: password

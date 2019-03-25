@@ -1,0 +1,274 @@
+heat_template_version: queens
+
+description: EDGE Router
+
+parameters:
+{% for env in output_vrfs %}
+  {{env.name|lower}}_vlan:
+    type: number
+    constraints:
+    - range: {min: 0, max: 4096}
+  {{env.name|lower}}_prefix:
+    type: string
+  {{env.name|lower}}_alloc_pool:
+    type: string
+  {{env.name|lower}}_gw:
+    type: string
+  {{env.name|lower}}_hub_prefix:
+    type: string
+  {{env.name|lower}}_hub_import_rt:
+    type: string
+  {{env.name|lower}}_hub_export_rt:
+    type: string
+{% endfor %}
+  mgnt_vlan:
+    type: number
+    constraints:
+    - range: {min: 0, max: 4096}
+  mgnt_prefix:
+    type: string
+  mgnt_alloc_pool:
+    type: string
+  mgnt_gw:
+    type: string
+  edge_image:
+    type: string
+  edge_count:
+    type: number
+  edge_flavor:
+    type: string
+  tf_endpoint:
+    type: string
+  ks_endpoint:
+    type: string
+  ks_password:
+    type: string
+    hidden: true
+  router_as:
+    type: string
+  dns_srv:
+    type: string
+  ntp_srv:
+    type: string
+  health_check_delay:
+    type: number
+  health_check_retries:
+    type: number
+  health_check_timeout:
+    type: number
+  update_min_count:
+    type: number
+  update_pause:
+    type: number
+  update_max_batch:
+    type: number
+
+resources:
+
+  Ipam:
+    type: OS::ContrailV2::NetworkIpam
+    properties:
+      name: edge-router-ipam
+  
+  infra_key:
+    type: OS::Nova::KeyPair
+    properties:
+      name: infra-admin
+      public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDig4uo/BcdMqp1vbFPQ8sj4pHsKGSd51EXZ2eCQ1XQkiOyKLJBiy24k0msApLsfWL7644fgyVy6Np3yiQsVTlfNyeCiCd9vLytVPt8OmtZUAaoSpeXokPAqKJvK1nLqtWIOLPxAS9Bav7UjvHkwRTbmgGylEvHwxpmFNL4uwyIQzq+nWnCPsiZGol74aHE5CMA/8bF2Yn/0kCwgLefMWqLRoP9IY5NGxlv9ASt1JBw1lNnG1+bmZNBVpRqX+PkhOJWlJrUOhPp5lnilreU4FEBAphcfnz6GGlT+VQ/dWh9WYt9cL6WV1b9MAaCAE2vHLZNTGdyMG7WxvjJs0+gO5En'
+
+{% for env in output_vrfs %}
+  network_{{env.name|lower}}_link1:
+    type: OS::Neutron::ProviderNet
+    properties:
+      name: edge-{{env.name|lower}}-link1
+      network_type: vlan
+      physical_network: link1
+      port_security_enabled: False
+      segmentation_id: { get_param: {{env.name|lower}}_vlan }
+      shared: False
+  network_{{env.name|lower}}_link1_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      allocation_pools:
+        - start: {str_split: [',', {get_param: {{env.name|lower}}_alloc_pool}, 0]}
+          end: {str_split: [',', {get_param: {{env.name|lower}}_alloc_pool}, 1]}
+      cidr: {get_param: {{env.name|lower}}_prefix}
+      enable_dhcp: false
+      gateway_ip: { get_param: {{env.name|lower}}_gw }
+      name: {{env.name|lower}}_subnet_l1
+      network: {get_resource: network_{{env.name|lower}}_link1}
+
+  network_{{env.name|lower}}_link2:
+    type: OS::Neutron::ProviderNet
+    properties:
+      name: edge-{{env.name|lower}}-link2
+      network_type: vlan
+      physical_network: link2
+      port_security_enabled: False
+      segmentation_id: { get_param: {{env.name|lower}}_vlan }
+      shared: False
+  network_{{env.name|lower}}_link2_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      allocation_pools:
+        - start: {str_split: [',', {get_param: {{env.name|lower}}_alloc_pool}, 0]}
+          end: {str_split: [',', {get_param: {{env.name|lower}}_alloc_pool}, 1]}
+      cidr: {get_param: {{env.name|lower}}_prefix}
+      enable_dhcp: false
+      gateway_ip: { get_param: {{env.name|lower}}_gw }
+      name: {{env.name|lower}}_subnet_l2
+      network: {get_resource: network_{{env.name|lower}}_link2}
+
+  network_{{env.name|lower}}_hub:
+    type: OS::ContrailV2::VirtualNetwork
+    depends_on: [ Ipam ]
+    properties:
+      name: {{env.name|lower}}_hub
+      ecmp_hashing_include_fields:
+        ecmp_hashing_include_fields_destination_ip: true
+        ecmp_hashing_include_fields_destination_port: true
+        ecmp_hashing_include_fields_hashing_configured: true
+        ecmp_hashing_include_fields_ip_protocol: true
+        ecmp_hashing_include_fields_source_ip: true
+        ecmp_hashing_include_fields_source_port: true
+      export_route_target_list:
+        export_route_target_list_route_target:
+        - str_replace:
+            template: target:rt
+            params:
+              rt: { get_param: {{env.name|lower}}_hub_export_rt}
+      import_route_target_list:
+        import_route_target_list_route_target:
+        - str_replace:
+            template: target:rt
+            params:
+              rt: { get_param: {{env.name|lower}}_hub_import_rt}
+      network_ipam_refs:
+      - { get_resource: Ipam }
+      network_ipam_refs_data:
+      - network_ipam_refs_data_ipam_subnets:
+        - network_ipam_refs_data_ipam_subnets_subnet:
+            network_ipam_refs_data_ipam_subnets_subnet_ip_prefix: {str_split: ['/', {get_param: {{env.name|lower}}_hub_prefix}, 0]}
+            network_ipam_refs_data_ipam_subnets_subnet_ip_prefix_len: {str_split: ['/', {get_param: {{env.name|lower}}_hub_prefix}, 1]}
+          network_ipam_refs_data_ipam_subnets_subnet_name: {{env.name|lower}}_subnet
+          network_ipam_refs_data_ipam_subnets_enable_dhcp: true
+      virtual_network_properties:
+        virtual_network_properties_forwarding_mode: l3
+        virtual_network_properties_allow_transit: true
+
+{% endfor %}
+  network_mgnt_link1:
+    type: OS::Neutron::ProviderNet
+    properties:
+      name: edge-mgnt-link1
+      network_type: vlan
+      physical_network: link1
+      port_security_enabled: False
+      segmentation_id: { get_param: mgnt_vlan }
+      shared: False
+  network_mgnt_link1_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      allocation_pools:
+        - start: {str_split: [',', {get_param: mgnt_alloc_pool}, 0]}
+          end: {str_split: [',', {get_param: mgnt_alloc_pool}, 1]}
+      cidr: {get_param: mgnt_prefix}
+      enable_dhcp: false
+      gateway_ip: { get_param: mgnt_gw }
+      name: mgnt_subnet_l1
+      network: {get_resource: network_mgnt_link1}
+
+  network_mgnt_link2:
+    type: OS::Neutron::ProviderNet
+    properties:
+      name: edge-mgnt-link2
+      network_type: vlan
+      physical_network: link2
+      port_security_enabled: False
+      segmentation_id: { get_param: mgnt_vlan }
+      shared: False
+  network_mgnt_link2_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      allocation_pools:
+        - start: {str_split: [',', {get_param: mgnt_alloc_pool}, 0]}
+          end: {str_split: [',', {get_param: mgnt_alloc_pool}, 1]}
+      cidr: {get_param: mgnt_prefix}
+      enable_dhcp: false
+      gateway_ip: { get_param: mgnt_gw }
+      name: mgnt_subnet_l2
+      network: {get_resource: network_mgnt_link2}
+
+  edge_router_tmpl:
+    type: OS::ContrailV2::ServiceTemplate
+    properties:
+      name: edge_router_template
+      service_template_properties:
+        service_template_properties_version: 2
+        service_template_properties_service_mode: in-network
+        service_template_properties_service_type: firewall
+        service_template_properties_service_scaling: true
+        service_template_properties_interface_type:
+{% for env in output_vrfs %}
+        - service_template_properties_interface_type_service_interface_type: 
+{%- if loop.index == 1 %}
+ left
+{% else %}
+ other{{loop.index-2}}
+{% endif %}
+          service_template_properties_interface_type_shared_ip: false
+          service_template_properties_interface_type_static_route_enable: true
+{% endfor %}
+        service_template_properties_ordered_interfaces: true
+        service_template_properties_service_virtualization_type: virtual-machine
+      domain: default-domain
+
+  edge_group:
+    type: OS::Heat::AutoScalingGroup
+    depends_on: [infra_key]
+    properties:
+      cooldown: 60
+      desired_capacity: { get_param: edge_count }
+      max_size: 10
+      min_size: 1
+      rolling_updates:
+        min_in_service: {get_param: update_min_count}
+        pause_time: {get_param: update_pause}
+        max_batch_size: {get_param: update_max_batch}
+      resource:
+        type: {{inventory_dir}}/artifacts/HOT_edge_scale.yaml
+        properties:
+          image: { get_param: edge_image }
+          flavor: { get_param: edge_flavor }
+          tf_endpoint: {get_param: tf_endpoint}
+          ks_endpoint: {get_param: ks_endpoint}
+          ks_password: {get_param: ks_password}
+          router_as:  {get_param: router_as}
+          dns_srv: {get_param: dns_srv}
+          ntp_srv: {get_param: ntp_srv}
+{% for env in output_vrfs %}
+          {{env.name|lower}}_link_out_if1_id: { get_resource: network_{{env.name|lower}}_link1 }
+          {{env.name|lower}}_link_out_if2_id: { get_resource:  network_{{env.name|lower}}_link2 }
+          {{env.name|lower}}_link_out_if2_subnet: { get_resource: network_{{env.name|lower}}_link2_subnet }
+          {{env.name|lower}}_rt_import: {get_param: {{env.name|lower}}_hub_import_rt}
+          {{env.name|lower}}_hub: { get_attr: [ network_{{env.name|lower}}_hub, display_name ] }
+          {{env.name|lower}}_hub_fqdn: { list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ] }
+          {{env.name|lower}}_gw: {get_param: {{env.name|lower}}_gw}
+{% endfor %}
+          mgnt_link_if1_id: { get_resource: network_mgnt_link1}
+          mgnt_link_if2_id: { get_resource: network_mgnt_link2}
+          mgnt_link_if2_subnet: { get_resource: network_mgnt_link2_subnet }
+          mgnt_gw: {get_param: mgnt_gw}
+          service_template: { get_resource: edge_router_tmpl }
+{% for env in output_vrfs %}
+          service_interface_type_{{env.name|lower}}: 
+{%- if loop.index == 1%}
+ left
+{%else%}
+ other{{loop.index-2}}
+{%endif%}
+{% endfor %}
+          port_tuple_name: 'edge_port_tuple'
+          health_check_delay: {get_param: health_check_delay}
+          health_check_retries: {get_param: health_check_retries}
+          health_check_timeout: {get_param: health_check_timeout}

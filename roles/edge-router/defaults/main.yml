@@ -1,0 +1,39 @@
+---
+# defaults file for edge-router
+output_vrfs:
+- name: TEST
+  vlan: 1
+  prefix: "192.168.1.0/24"
+  alloc_pool: "192.168.1.50,192.168.1.254"
+  gw: "192.168.1.1"
+  hub_prefix: "192.168.254.0/24"
+  hub_export_rt: "64512:201"
+  hub_import_rt: "64512:101"
+- name: DEV
+  vlan: 2
+  prefix: "192.168.1.0/24"
+  alloc_pool: "192.168.1.50,192.168.1.254"
+  gw: "192.168.1.1"
+  hub_prefix: "192.168.254.0/24"
+  hub_export_rt: "64512:201"
+  hub_import_rt: "64512:101"
+mgnt_vlan: "3"
+mgnt_prefix: "192.168.10.0/24"
+mgnt_alloc_pool: "192.168.10.200,192.168.10.220"
+mgnt_gw: "192.168.10.138"
+edge_flavor: "c2m4096"
+edge_image: "46201583-5cc2-4608-8f4e-4b5f802c1a2a"
+edge_count: 2
+update_min_count: 1
+update_pause: 300
+update_max_batch: 1
+router_as: '64512'
+edge_dns_srvs: '192.168.1.138'
+edge_ntp_srvs: '192.168.1.138'
+health_check_delay: 2
+health_check_retries: 2
+health_check_timeout: 5
+# Will be fil automaticaly
+tf_endpoint: 'contrail-config-api-regionone.logistic.lan'
+ks_endpoint: 'keystone.logistic.lan'
+ks_password: 'DCepQWQentJgbvy'

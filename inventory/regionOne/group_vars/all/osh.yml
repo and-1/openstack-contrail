@@ -1,6 +1,4 @@
 #---------------------------Networks---------#
-sriov_on: true
-sriov_vf_num: 4
 ceph:
   net: "192.168.2.0/24"
   vlan: 1500
@@ -17,6 +15,46 @@ dns_srvs:
 - "192.168.0.138"
 ntp_srvs:
 - "194.190.168.1"
+# sriov_on must be true, if you desire 
+# to use edge router
+sriov_on: true
+sriov_vf_num: 4
+#--------------------------Edge-router-------#
+edge_count: 2
+output_vrfs:
+- name: TEST
+  vlan: 2
+  prefix: "192.168.10.0/24"
+  alloc_pool: "192.168.10.75,192.168.10.85"
+  gw: "192.168.10.1"
+  hub_prefix: "192.168.254.0/24"
+  hub_export_rt: "64512:201"
+  hub_import_rt: "64512:101"
+- name: DEV
+  vlan: 3
+  prefix: "192.168.20.0/24"
+  alloc_pool: "192.168.20.75,192.168.20.85"
+  gw: "192.168.20.1"
+  hub_prefix: "192.168.254.0/24"
+  hub_export_rt: "64512:200"
+  hub_import_rt: "64512:100"
+mgnt_vlan: "4"
+mgnt_prefix: "192.168.1.0/24"
+mgnt_alloc_pool: "192.168.1.200,192.168.1.220"
+mgnt_gw: "192.168.1.138"
+edge_flavor: "c2m4096"
+edge_image: "46201583-5cc2-4608-8f4e-4b5f802c1a2a"
+update_min_count: 1
+update_pause: 300
+update_max_batch: 1
+router_as: "{{contrail_bgp_asn}}"
+edge_dns_srvs: 
+- '192.168.1.138'
+edge_ntp_srvs: 
+- '192.168.1.138'
+health_check_delay: 2
+health_check_retries: 2
+health_check_timeout: 1
 #---------------------------Images-----------#
 local_docker_registry: "192.168.0.138:5000"
 contrail_tag: "queens-master-454"

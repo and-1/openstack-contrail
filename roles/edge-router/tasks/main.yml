@@ -1,0 +1,35 @@
+---
+# tasks file for edge-router
+- name: Get keystone admin endpoint
+  include_vars:
+    file: "{{inventory_dir}}/../share_creds/identity.endpoint"
+    name: ks_ep
+- name: Set ks url endpoint
+  set_fact:
+    ks_endpoint: "{{ks_ep['auth_url']|urlsplit('hostname')}}"
+- name: Set ks password
+  set_fact:
+    ks_password: "{{ks_ep['password']}}"
+- name: Set TungstenFabric API endpoint
+  set_fact:
+    tf_endpoint: "contrail-config-api-{{region|lower}}.{{ext_domain_suffix}}"
+- name: Generate HOT files
+  template:
+    src: "{{item}}.j2"
+    dest: "{{inventory_dir}}/artifacts/{{item}}"
+  with_items:
+  - HOT_edge.yaml
+  - HOT_edge_scale.yaml
+  - edge_router.env
+  register: hot_template
+- name: Deploy edge router(s)
+  os_stack:
+    auth: "{{ks_ep}}"
+    environment: "{{inventory_dir}}/artifacts/edge_router.env"
+    region_name: "{{region}}"
+    state: present
+    template: "{{inventory_dir}}/artifacts/HOT_edge.yaml"
+    timeout: 300
+    wait: true
+    name: EDGE_Router
+  when: "hot_template.results | selectattr('changed') | list | length > 0"
