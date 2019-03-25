@@ -1,6 +1,21 @@
 ---
 - name: Check dependency for that region
   include_tasks: checks.yaml
+- name: Config networkd-dispatcher
+  copy:
+    src: ringUP.sh
+    dest: /etc/networkd-dispatcher/{{item}}/ringUP.sh
+    mode: 0770
+    owner: root
+  with_items:
+  - unmanaged.d
+  - configured.d
+  register: netd_conf
+- name: Up to max rings buffer in runtime
+  shell: "IFACE={{item}} /etc/networkd-dispatcher/unmanaged.d/ringUP.sh"
+  with_items:
+  - "{{ansible_interfaces}}"
+  when: "netd_conf.results | selectattr('changed') | list | length > 0"
 - block:
   - name: "Config network interfaces (NETPLAN) "
     template:
