@@ -1,5 +1,6 @@
 ---
 # defaults file for edge-router
+action: apply
 output_vrfs:
 - name: TEST
   vlan: 1
