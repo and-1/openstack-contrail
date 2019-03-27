@@ -77,6 +77,17 @@ resources:
       public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDig4uo/BcdMqp1vbFPQ8sj4pHsKGSd51EXZ2eCQ1XQkiOyKLJBiy24k0msApLsfWL7644fgyVy6Np3yiQsVTlfNyeCiCd9vLytVPt8OmtZUAaoSpeXokPAqKJvK1nLqtWIOLPxAS9Bav7UjvHkwRTbmgGylEvHwxpmFNL4uwyIQzq+nWnCPsiZGol74aHE5CMA/8bF2Yn/0kCwgLefMWqLRoP9IY5NGxlv9ASt1JBw1lNnG1+bmZNBVpRqX+PkhOJWlJrUOhPp5lnilreU4FEBAphcfnz6GGlT+VQ/dWh9WYt9cL6WV1b9MAaCAE2vHLZNTGdyMG7WxvjJs0+gO5En'
 
 {% for env in output_vrfs %}
+  {{env.name|lower}}_iface_type:
+    type: OS::Heat::Value
+    properties:
+      type: string
+      value: 
+{%- if loop.index == 1%}
+ left
+{%else%}
+ other{{loop.index-2}}
+{%endif%}
+
   network_{{env.name|lower}}_link1:
     type: OS::Neutron::ProviderNet
     properties:
@@ -210,18 +221,56 @@ resources:
         service_template_properties_service_scaling: true
         service_template_properties_interface_type:
 {% for env in output_vrfs %}
-        - service_template_properties_interface_type_service_interface_type: 
-{%- if loop.index == 1 %}
- left
-{% else %}
- other{{loop.index-2}}
-{% endif %}
+        - service_template_properties_interface_type_service_interface_type: { get_attr: [{{env.name|lower}}_iface_type, value]}
           service_template_properties_interface_type_shared_ip: false
           service_template_properties_interface_type_static_route_enable: true
 {% endfor %}
         service_template_properties_ordered_interfaces: true
         service_template_properties_service_virtualization_type: virtual-machine
       domain: default-domain
+
+  edge_router_svc:
+    type: OS::ContrailV2::ServiceInstance
+    properties:
+      name: edge-router
+      service_instance_properties:
+        service_instance_properties_interface_list:
+{% for env in output_vrfs %}
+        - service_instance_properties_interface_list_virtual_network: {list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ]}
+{% endfor %}
+      service_template_refs: [{ get_resource: edge_router_tmpl }]
+
+{% for env in output_vrfs %}
+  iface_route_{{env.name|lower}}:
+    type: OS::ContrailV2::InterfaceRouteTable
+    properties:
+      name: default-{{env.name|lower}}
+      interface_route_table_routes:
+        interface_route_table_routes_route:
+        - interface_route_table_routes_route_prefix: '0.0.0.0/0'
+      service_instance_refs: [{ get_resource: edge_router_svc}]
+      service_instance_refs_data:
+      - service_instance_refs_data_interface_type: {get_attr: [{{env.name|lower}}_iface_type, value]}
+
+  svc_health_check_{{env.name|lower}}:
+    type: OS::ContrailV2::ServiceHealthCheck
+    properties:
+      name: health_check_{{env.name|lower}}
+      service_health_check_properties:
+        service_health_check_properties_delay: {get_param: health_check_delay }
+        service_health_check_properties_enabled: True
+        #service_health_check_properties_health_check_type: end-to-end
+        service_health_check_properties_health_check_type: link-local
+        service_health_check_properties_max_retries: {get_param: health_check_retries }
+        service_health_check_properties_timeout: {get_param: health_check_timeout }
+        service_health_check_properties_monitor_type: PING
+        #service_health_check_properties_url_path: { get_param: {{env.name|lower}}_gw }
+        service_health_check_properties_url_path: local-ip
+      service_instance_refs: [{ get_resource: edge_router_svc }]
+      service_instance_refs_data:
+      - service_instance_refs_data_interface_type: {get_attr: [{{env.name|lower}}_iface_type, value]}
+
+{% endfor %}
 
   edge_group:
     type: OS::Heat::AutoScalingGroup
@@ -259,14 +308,10 @@ resources:
           mgnt_link_if2_id: { get_resource: network_mgnt_link2}
           mgnt_link_if2_subnet: { get_resource: network_mgnt_link2_subnet }
           mgnt_gw: {get_param: mgnt_gw}
-          service_template: { get_resource: edge_router_tmpl }
+          #service_template: { get_resource: edge_router_tmpl }
+          service_instance_name: { list_join: [':', { get_attr: [ edge_router_svc, fq_name ] } ] }
 {% for env in output_vrfs %}
-          service_interface_type_{{env.name|lower}}: 
-{%- if loop.index == 1%}
- left
-{%else%}
- other{{loop.index-2}}
-{%endif%}
+          service_interface_type_{{env.name|lower}}: {get_attr: [{{env.name|lower}}_iface_type, value]}
 {% endfor %}
           port_tuple_name: 'edge_port_tuple'
           health_check_delay: {get_param: health_check_delay}

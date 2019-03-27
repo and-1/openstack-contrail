@@ -33,7 +33,7 @@ parameters:
     type: string
   flavor:
     type: string
-  service_template:
+  service_instance_name:
     type: string
   port_tuple_name:
     type: string
@@ -61,7 +61,7 @@ resources:
     type: OS::ContrailV2::PortTuple
     properties:
       name: { get_param: port_tuple_name }
-      service_instance: { list_join: [':', { get_attr: [ edge_router_svc, fq_name ] } ] }
+      service_instance: { get_param: service_instance_name }
 
 {% for env in output_vrfs %}
   port_out_{{env.name|lower}}1:
@@ -121,49 +121,6 @@ resources:
       - ip_address: {get_attr: [port_mgnt1,fixed_ips, 0, ip_address]}
         subnet_id: {get_param: mgnt_link_if2_subnet }
 
-  edge_router_svc:
-    type: OS::ContrailV2::ServiceInstance
-    properties:
-      name: edge-router
-      service_instance_properties:
-        service_instance_properties_interface_list:
-{% for env in output_vrfs %}
-        - service_instance_properties_interface_list_virtual_network: {get_param: {{env.name|lower}}_hub_fqdn}
-{% endfor %}
-      service_template_refs: [{ get_param: service_template }]
-
-{% for env in output_vrfs %}
-  iface_route_{{env.name|lower}}:
-    type: OS::ContrailV2::InterfaceRouteTable
-    properties:
-      name: default-{{env.name|lower}}
-      interface_route_table_routes:
-        interface_route_table_routes_route:
-        - interface_route_table_routes_route_prefix: '0.0.0.0/0'
-      service_instance_refs: [{ get_resource: edge_router_svc}]
-      service_instance_refs_data:
-      - service_instance_refs_data_interface_type: {get_param: service_interface_type_{{env.name|lower}}}
-
-  svc_health_check_{{env.name|lower}}:
-    type: OS::ContrailV2::ServiceHealthCheck
-    properties:
-      name: health_check_{{env.name|lower}}
-      service_health_check_properties:
-        service_health_check_properties_delay: {get_param: health_check_delay }
-        service_health_check_properties_enabled: True
-        #service_health_check_properties_health_check_type: end-to-end
-        service_health_check_properties_health_check_type: link-local
-        service_health_check_properties_max_retries: {get_param: health_check_retries }
-        service_health_check_properties_timeout: {get_param: health_check_timeout }
-        service_health_check_properties_monitor_type: PING
-        #service_health_check_properties_url_path: { get_param: {{env.name|lower}}_gw }
-        service_health_check_properties_url_path: local-ip
-      service_instance_refs: [{ get_resource: edge_router_svc }]
-      service_instance_refs_data:
-      - service_instance_refs_data_interface_type: {get_param: service_interface_type_{{env.name|lower}}}
-
-{% endfor %}
-
   bootstrap:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -184,8 +141,9 @@ resources:
             export {{env.name|upper}}_OUT_IP=$${{env.name|lower}}_out_ip
             export {{env.name|upper}}_GW=$${{env.name|lower}}_gw
             export {{env.name|upper}}_RT=$${{env.name|lower}}_rt
-            export {{env.name|upper}}_IF_ID=$${{env.name|lower}}_if_id
+            export {{env.name|upper}}_IF_ID=$${{env.name|lower}}_lif_id
             export {{env.name|upper}}_LIF=ens{{loop.index+2}}
+            export {{env.name|upper}}_LIF_IP=$${{env.name|lower}}_lif_ip
 {% endfor %}
             export MGNT_MAC=$$mgnt_mac
             export MGNT_IP=$$mgnt_ip
@@ -261,7 +219,8 @@ resources:
               lif_name="${env}_LIF"
               gw="${env}_GW"
               rt="${env}_RT"
-              if_id="${env}_IF_ID"
+              lif_id="${env}_IF_ID"
+              lif_ip="${env}_LIF_IP"
               # add VRF interface
               cat<<EOF>>/etc/network/interfaces.d/ifaces
             auto $env
@@ -280,10 +239,16 @@ resources:
                 peer_as: external
                 iface: ${!lif_name}
                 import_rt: ${!rt}
-                lif_id: ${!if_id}
+                lif_id: ${!lif_id}
+                static:
+                - ${!lif_ip}/32
             EOF
+            #Workaroud. Use firewall rules and link-local check enstead end-to-end
+            iptables -t nat -A POSTROUTING -o ${bond} -d ${!gw} -p icmp -j SNAT --to-source ${!lif_ip}
+            iptables -t nat -A PREROUTING -i ${!lif_name} -d ${!lif_ip} -p icmp -j DNAT --to-destination ${!gw}
             done
-            
+
+            iptables-save > /etc/iptables/rules.v4 
             echo '*/1 * * * * /opt/tf_sync/vnc_sync' | crontab -u root -
             systemctl restart networking
             systemctl restart systemd-resolved
@@ -294,7 +259,8 @@ resources:
             $${{env.name|lower}}_out_ip: {get_attr: [port_out_{{env.name|lower}}1,fixed_ips, 0, ip_address]}
             $${{env.name|lower}}_gw: {get_param: {{env.name|lower}}_gw}
             $${{env.name|lower}}_rt: {get_param: {{env.name|lower}}_rt_import}
-            $${{env.name|lower}}_if_id: {get_resource: port_in_{{env.name|lower}}}
+            $${{env.name|lower}}_lif_id: {get_resource: port_in_{{env.name|lower}}}
+            $${{env.name|lower}}_lif_ip: {get_attr: [port_in_{{env.name|lower}}_ip, instance_ip_address]}
 {% endfor %}
             $$mgnt_mac: {get_attr: [port_mgnt1,mac_address]}
             $$mgnt_ip: {get_attr: [port_mgnt1, fixed_ips, 0, ip_address]}
