@@ -183,7 +183,7 @@ function configure_tags {
 
 function configure_kernel_param {
   if [ "${SRIOV}" ];then
-    MAAS_KERNEL_OPTS="$MAAS_KERNEL_OPTS intel_iommu=on"
+    MAAS_KERNEL_OPTS="$MAAS_KERNEL_OPTS intel_iommu=on iommu=pt"
   fi
   check_then_set kernel_opts ${MAAS_KERNEL_OPTS}
 }
