@@ -47,6 +47,8 @@ edge_image: "46201583-5cc2-4608-8f4e-4b5f802c1a2a"
 update_min_count: 1
 update_pause: 300
 update_max_batch: 1
+peer_keepalive: 3
+peer_holdtime: 9
 router_as: "{{contrail_bgp_asn}}"
 edge_dns_srvs: 
 - '192.168.1.138'

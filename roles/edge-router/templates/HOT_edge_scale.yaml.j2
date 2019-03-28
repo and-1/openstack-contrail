@@ -55,6 +55,10 @@ parameters:
     type: number
   health_check_timeout:
     type: number
+  peer_keepalive:
+    type: number
+  peer_holdtime:
+    type: number
 
 resources:
   PortTuple:
@@ -136,6 +140,8 @@ resources:
             export ROUTER_AS=$$router_as
             export DNS_SRV="$$dns_srv"
             export NTP_SRV="$$ntp_srv"
+            export PEER_KEEPALIVE="$$peer_keepalive"
+            export PEER_HOLDTIME="$$peer_holdtime"
 {% for env in output_vrfs %}
             export {{env.name|upper}}_OUT_MAC=$${{env.name|lower}}_out_mac
             export {{env.name|upper}}_OUT_IP=$${{env.name|lower}}_out_ip
@@ -271,6 +277,8 @@ resources:
             $$router_as:  {get_param: router_as}
             $$dns_srv: {get_param: dns_srv}
             $$ntp_srv: {get_param: ntp_srv}
+            $$peer_holdtime: {get_param: peer_holdtime}
+            $$peer_keepalive: {get_param: peer_keepalive}
 
   edge:
     type: OS::Nova::Server
