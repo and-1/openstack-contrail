@@ -140,6 +140,17 @@ pod:
           cpu: "2000m"
 
 conf:
+  ceph:
+    override:
+    append:
+    monitors: []
+    admin_keyring: null
+    pools:
+      backup:
+        replication: {{replication}}
+      volume:
+        replication: {{replication}}
+
   cinder:
     DEFAULT:
       backup_driver: cinder.backup.drivers.ceph
