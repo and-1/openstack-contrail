@@ -98,6 +98,7 @@ osh:
     image: 'ubuntu-binary-openvswitch-db-server'
   libvirt:
     image: 'ubuntu-binary-nova-libvirt'
+    tag: 'rocky'
   mongodb:
     image: 'ubuntu-binary-mongodb'
   ceilometer_central:
