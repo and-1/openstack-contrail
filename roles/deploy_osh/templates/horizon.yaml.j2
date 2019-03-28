@@ -129,6 +129,8 @@ conf:
         keystone_multidomain_support: "True"
         keystone_default_domain: Default
         site_branding: "Logistic Cloud"
+        launch_instance_defaults:
+          create_volume: "False"
         openstack_cinder_features:
           enable_backup: "True"
         openstack_neutron_network:
@@ -338,6 +340,19 @@ conf:
         # both.
         #LAUNCH_INSTANCE_LEGACY_ENABLED = True
         #LAUNCH_INSTANCE_NG_ENABLED = False
+
+        # A dictionary of settings which can be used to provide the default values for
+        # properties found in the Launch Instance modal.
+        LAUNCH_INSTANCE_DEFAULTS = {
+        #    'config_drive': False,
+        #    'enable_scheduler_hints': True,
+        #    'disable_image': False,
+        #    'disable_instance_snapshot': False,
+        #    'disable_volume': False,
+        #    'disable_volume_snapshot': False,
+            'create_volume': {{ .Values.conf.horizon.local_settings.config.launch_instance_defaults.create_volume }},
+        }
+
         # The Xen Hypervisor has the ability to set the mount point for volumes
         # attached to instances (other Hypervisors currently do not). Setting
         # can_set_mount_point to True will add the option to set the mount point

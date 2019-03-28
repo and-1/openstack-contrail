@@ -50,31 +50,31 @@ nova:
           name: "c1m512"
           id: "auto"
           ram: 512
-          disk: 0
+          disk: 10
           vcpus: 1
         m1_small:
           name: "c1m2048"
           id: "auto"
           ram: 2048
-          disk: 0
+          disk: 10
           vcpus: 1
         m1_medium:
           name: "c2m4096"
           id: "auto"
           ram: 4096
-          disk: 0
+          disk: 10
           vcpus: 2
         m1_large:
           name: "c4m8192"
           id: "auto"
           ram: 8192
-          disk: 0
+          disk: 10
           vcpus: 4
         m1_xlarge:
           name: "c8m16384"
           id: "auto"
           ram: 16384
-          disk: 0
+          disk: 10
           vcpus: 8
 glance:
   pool_name: 'cloud.glance'
