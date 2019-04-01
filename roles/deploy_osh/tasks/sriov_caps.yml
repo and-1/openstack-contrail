@@ -30,6 +30,7 @@
     loop_var: iface
   delegate_to: "{{item}}"
   delegate_facts: true
+  changed_when: false
 - name: Apply vf to runtime config
   shell: "echo {{sriov_vf_num}} > /sys/class/net/{{iface['item']}}/device/sriov_numvfs"
   with_items:

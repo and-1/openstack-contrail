@@ -34,7 +34,7 @@
       wait: true
       name: EDGE_Router
     when: "hot_template.results | selectattr('changed') | list | length > 0"
-  when: "action == 'apply'"
+  when: "action == 'apply' and sriov_on|bool"
 - block:
   - name: Delete HOT files
     file:
