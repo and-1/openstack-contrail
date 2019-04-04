@@ -1,9 +1,15 @@
+{% set vrfs = [] %}
+{% for env in output_vrfs%}
+{% if env['dedicated_edge'] is undefined or not env['dedicated_edge'] | bool  %}
+{% do vrfs.append(env) %}
+{% endif %}
+{% endfor %}
 heat_template_version: queens
 
 description: EDGE Router (Autoscale components)
 
 parameters:
-{% for env in output_vrfs %}
+{% for env in vrfs %}
   {{env.name|lower}}_link_out_if1_id:
     type: string
   {{env.name|lower}}_link_out_if2_id:
@@ -67,7 +73,7 @@ resources:
       name: { get_param: port_tuple_name }
       service_instance: { get_param: service_instance_name }
 
-{% for env in output_vrfs %}
+{% for env in vrfs %}
   port_out_{{env.name|lower}}1:
     type: OS::Neutron::Port
     properties:
@@ -142,7 +148,7 @@ resources:
             export NTP_SRV="$$ntp_srv"
             export PEER_KEEPALIVE="$$peer_keepalive"
             export PEER_HOLDTIME="$$peer_holdtime"
-{% for env in output_vrfs %}
+{% for env in vrfs %}
             export {{env.name|upper}}_OUT_MAC=$${{env.name|lower}}_out_mac
             export {{env.name|upper}}_OUT_IP=$${{env.name|lower}}_out_ip
             export {{env.name|upper}}_GW=$${{env.name|lower}}_gw
@@ -154,7 +160,7 @@ resources:
             export MGNT_MAC=$$mgnt_mac
             export MGNT_IP=$$mgnt_ip
             export MGNT_GW=$$mgnt_gw
-            export ENVS="{% for env in output_vrfs %}{{env.name|upper}} {% endfor %}"
+            export ENVS="{% for env in vrfs %}{{env.name|upper}} {% endfor %}"
             #----------------functions----
             function bond_conf {
               local name=$1
@@ -260,7 +266,7 @@ resources:
             systemctl restart systemd-resolved
             echo "Configuring edge router complete"
           params:
-{% for env in output_vrfs %}
+{% for env in vrfs %}
             $${{env.name|lower}}_out_mac: {get_attr: [port_out_{{env.name|lower}}1,mac_address]}
             $${{env.name|lower}}_out_ip: {get_attr: [port_out_{{env.name|lower}}1,fixed_ips, 0, ip_address]}
             $${{env.name|lower}}_gw: {get_param: {{env.name|lower}}_gw}
@@ -288,10 +294,10 @@ resources:
       config_drive: True
       key_name: infra-admin
       networks:
-{% for env in output_vrfs %}
+{% for env in vrfs %}
       - port: { get_resource: port_in_{{env.name|lower}} }
 {% endfor %}
-{% for env in output_vrfs %}
+{% for env in vrfs %}
       - port: { get_resource: port_out_{{env.name|lower}}1}
       - port: { get_resource: port_out_{{env.name|lower}}2}
 {% endfor %}

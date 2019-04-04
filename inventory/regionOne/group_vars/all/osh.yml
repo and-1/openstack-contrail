@@ -20,6 +20,7 @@ ntp_srvs:
 sriov_on: true
 sriov_vf_num: 4
 #--------------------------Edge-router-------#
+# Default edge count
 edge_count: 2
 output_vrfs:
 - name: TEST
@@ -30,6 +31,9 @@ output_vrfs:
   hub_prefix: "192.168.254.0/24"
   hub_export_rt: "64512:201"
   hub_import_rt: "64512:101"
+# edge_count used when "dedicated_edge: true" only
+  dedicated_edge: true
+  edge_count: 1
 - name: DEV
   vlan: 3
   prefix: "192.168.20.0/24"

@@ -14,16 +14,27 @@
   set_fact:
     tf_endpoint: "contrail-config-api-{{region|lower}}.{{ext_domain_suffix}}"
 - block:
-  - name: Generate HOT files
+  - name: Generate HOT files (common)
     template:
       src: "{{item}}.j2"
       dest: "{{inventory_dir}}/artifacts/{{item}}"
     with_items:
     - HOT_edge.yaml
-    - HOT_edge_scale.yaml
     - edge_router.env
-    register: hot_template
-  - name: Deploy edge router(s)
+    register: hot_template_common
+  - name: Generate scale file (shared)
+    template:
+      src: "HOT_edge_scale_shared.yaml.j2"
+      dest: "{{inventory_dir}}/artifacts/HOT_edge_scale_shared.yaml"
+    register: "hot_template_scale_shared"
+    when: output_vrfs|length - output_vrfs | map(attribute='dedicated_edge') | select('defined') | select('eq', True)  | list | length != 0
+  - name: Generate scale file (dedicated)
+    template:
+      src: "HOT_edge_scale_dedicated.yaml.j2"
+      dest: "{{inventory_dir}}/artifacts/HOT_edge_scale_dedicated.yaml"
+    register: "hot_template_scale_shared"
+    when: output_vrfs | map(attribute='dedicated_edge') | select('defined') | select('eq', True)  | list | length > 0
+  - name: Deploy edge router
     os_stack:
       auth: "{{ks_ep}}"
       environment: "{{inventory_dir}}/artifacts/edge_router.env"
@@ -33,8 +44,8 @@
       timeout: 300
       wait: true
       name: EDGE_Router
-    when: "hot_template.results | selectattr('changed') | list | length > 0"
-  when: "action == 'apply' and sriov_on|bool"
+    when: "(hot_template_common.results is defined and hot_template_common.results | selectattr('changed') | list | length > 0) or (hot_template_scale_shared is defined and hot_template_scale_shared.changed) or (hot_template_scale_dedicated is defined and hot_template_scale_dedicated.changed)"
+  when: "action == 'apply'"
 - block:
   - name: Delete HOT files
     file:
@@ -42,7 +53,8 @@
       state: absent
     with_items:
     - HOT_edge.yaml
-    - HOT_edge_scale.yaml
+    - HOT_edge_scale_shared.yaml
+    - HOT_edge_scale_dedicated.yaml
     - edge_router.env
   - name: Delete edge router(s)
     os_stack:

@@ -1,0 +1,314 @@
+heat_template_version: queens
+
+description: EDGE Router (Autoscale components)
+
+parameters:
+  link_out_if1_id:
+    type: string
+  link_out_if2_id:
+    type: string
+  link_out_if2_subnet:
+    type: string
+  gw:
+    type: string
+  hub:
+    type: string
+  hub_fqdn:
+    type: string
+  rt_import:
+    type: string
+  service_interface_type:
+    type: string
+  mgnt_link_if1_id:
+    type: string
+  mgnt_link_if2_id:
+    type: string
+  mgnt_link_if2_subnet:
+    type: string
+  mgnt_gw:
+    type: string
+  image:
+    type: string
+  flavor:
+    type: string
+  service_instance_name:
+    type: string
+  port_tuple_name:
+    type: string
+  tf_endpoint:
+    type: string
+  ks_endpoint:
+    type: string
+  ks_password:
+    type: string
+  router_as:
+    type: string
+  dns_srv:
+    type: string
+  ntp_srv:
+    type: string
+  health_check_delay:
+    type: number
+  health_check_retries:
+    type: number
+  health_check_timeout:
+    type: number
+  peer_keepalive:
+    type: number
+  peer_holdtime:
+    type: number
+  vrf_name:
+    type: string
+
+resources:
+  PortTuple:
+    type: OS::ContrailV2::PortTuple
+    properties:
+      name: { get_param: port_tuple_name }
+      service_instance: { get_param: service_instance_name }
+
+  port_out_1:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: True
+      binding:vnic_type: direct
+      name: 
+        str_replace:
+          template: env_port1
+          params:
+            env: {get_param: vrf_name}
+      network: { get_param: link_out_if1_id }
+
+  port_out_2:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: True
+      binding:vnic_type: direct
+      name: 
+        str_replace:
+          template: env_port2
+          params:
+            env: {get_param: vrf_name}
+      network: { get_param: link_out_if2_id }
+      mac_address: {get_attr: [port_out_1, mac_address]}
+      fixed_ips:
+      - ip_address: {get_attr: [port_out_1,fixed_ips, 0, ip_address]}
+        subnet_id: {get_param: link_out_if2_subnet }
+
+  port_in:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      name:
+        str_replace:
+          template: env_hub
+          params:
+            env: {get_param: vrf_name}
+      virtual_machine_interface_disable_policy: true
+      virtual_network_refs: [{get_param: hub_fqdn}]
+      virtual_machine_interface_properties:
+        virtual_machine_interface_properties_service_interface_type: { get_param: service_interface_type }
+      port_tuple_refs: [{ get_resource: PortTuple }]
+  port_in_ip:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      name:
+        str_replace:
+          template: env_hub
+          params:
+            env: {get_param: vrf_name}
+      virtual_machine_interface_refs: [{ get_resource: port_in }]
+      virtual_network_refs: [{get_param: hub_fqdn}]
+
+  port_mgnt1:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: True
+      binding:vnic_type: direct
+      name: mgnt_port1
+      network: { get_param: mgnt_link_if1_id }
+
+  port_mgnt2:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: True
+      binding:vnic_type: direct
+      name: mgnt_port2
+      network: { get_param: mgnt_link_if2_id }
+      mac_address: {get_attr: [port_mgnt1, mac_address]}
+      fixed_ips:
+      - ip_address: {get_attr: [port_mgnt1,fixed_ips, 0, ip_address]}
+        subnet_id: {get_param: mgnt_link_if2_subnet }
+
+  bootstrap:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash
+            echo "Configuring edge router..."
+            export TF_ENDPOINT=$$tf_endpoint
+            export KS_ENDPOINT=$$ks_endpoint
+            export KS_PASSWORD=$$ks_password
+            export ROUTER_AS=$$router_as
+            export DNS_SRV="$$dns_srv"
+            export NTP_SRV="$$ntp_srv"
+            export PEER_KEEPALIVE="$$peer_keepalive"
+            export PEER_HOLDTIME="$$peer_holdtime"
+            export $$vrf_name_OUT_MAC=$$out_mac
+            export $$vrf_name_OUT_IP=$$out_ip
+            export $$vrf_name_GW=$$gw
+            export $$vrf_name_RT=$$rt
+            export $$vrf_name_IF_ID=$$lif_id
+            export $$vrf_name_LIF=ens3
+            export $$vrf_name_LIF_IP=$$lif_ip
+            export MGNT_MAC=$$mgnt_mac
+            export MGNT_IP=$$mgnt_ip
+            export MGNT_GW=$$mgnt_gw
+            export ENVS="$$vrf_name"
+            #----------------functions----
+            function bond_conf {
+              local name=$1
+              local mac=$2
+              local ip=$3
+              local vrf=$4
+              if [ ! -z "$vrf" ];then
+                vrf_line="vrf $vrf"
+              fi
+              local slaves=$(ip l | grep $mac -B1 | awk -F': ' /^[0-9]/'{print $2}' | grep -v $name | tr '\n' ' ')
+              # add slave interfaces
+              for slave in $slaves;do
+                echo -e "auto $slave\niface $slave\n" >> /etc/network/interfaces.d/ifaces
+              done
+              # add bond
+              cat<<EOF>>/etc/network/interfaces.d/ifaces
+            auto $name
+            iface $name
+              address $ip/24
+              bond-slaves $slaves
+              bond-mode balance-rr
+              bond-miimon 100
+              bond-min-links 1
+              $vrf_line
+            EOF
+            }
+            #----------------common----------
+            rm -f /etc/network/interfaces.d/*
+            echo -e 'auto lo\niface lo inet loopback' > /etc/network/interfaces
+            echo source /etc/network/interfaces.d/* >> /etc/network/interfaces
+            # add mgnt interface
+            bond_conf MGNT ${MGNT_MAC} ${MGNT_IP} 
+            # add gw to default vrf
+            echo "  gateway $MGNT_GW" >> /etc/network/interfaces.d/ifaces
+            # config dns servers
+            sed -i "/^#*DNS=/s/^#*DNS.*/DNS=$DNS_SRV/" /etc/systemd/resolved.conf
+            # config for vnc_sync script
+            cat<<EOF>/opt/tf_sync/etc/vnc_sync/sync.conf
+            vnc:
+              web_server: ${TF_ENDPOINT}
+              web_port: 80
+              base_url: '/'
+              authn_type: keystone
+              authn_protocol: http
+              authn_server: ${KS_ENDPOINT}
+              authn_port: 80
+              authn_url: /v3/auth/tokens
+              authn_domain: default
+              authn_username: admin
+              authn_project: admin
+              authn_password: ${KS_PASSWORD}
+            main:
+              mode: tf_chain
+              router_id: ${MGNT_IP}
+              as: ${ROUTER_AS}
+              frr_conf_file: /etc/frr/frr.conf
+              ifupdown_conf_file: /etc/network/interfaces.d/ifaces
+            log:
+              file: /var/log/vnc_sync.log
+              level: INFO
+            vrfs:
+            EOF
+            #------------------envs----------
+            for env in $ENVS;do
+              bond="${env}_OUT"
+              bond_ip="${bond}_IP"
+              bond_mac="${bond}_MAC"
+              lif_name="${env}_LIF"
+              gw="${env}_GW"
+              rt="${env}_RT"
+              lif_id="${env}_IF_ID"
+              lif_ip="${env}_LIF_IP"
+              # add VRF interface
+              cat<<EOF>>/etc/network/interfaces.d/ifaces
+            auto $env
+            iface $env
+              vrf-table auto
+              up ip route add vrf $env default via ${!gw}
+            EOF
+              # add input(left) interface
+              echo -e "auto ${!lif_name}\niface ${!lif_name} inet dhcp\n  vrf $env\n" >> /etc/network/interfaces.d/ifaces
+              # add bond
+              bond_conf $bond ${!bond_mac} ${!bond_ip} $env
+              cat<<EOF>>/opt/tf_sync/etc/vnc_sync/sync.conf
+              $env:
+                bgp_peers:
+                - ${!gw}
+                peer_as: external
+                iface: ${!lif_name}
+                import_rt: ${!rt}
+                lif_id: ${!lif_id}
+                static:
+                - ${!lif_ip}/32
+            EOF
+            #Workaroud. Use firewall rules and link-local check enstead end-to-end
+            iptables -t nat -A POSTROUTING -o ${bond} -d ${!gw} -p icmp -j SNAT --to-source ${!lif_ip}
+            iptables -t nat -A PREROUTING -i ${!lif_name} -d ${!lif_ip} -p icmp -j DNAT --to-destination ${!gw}
+            done
+
+            iptables-save > /etc/iptables/rules.v4 
+            echo '*/1 * * * * /opt/tf_sync/vnc_sync' | crontab -u root -
+            systemctl restart networking
+            systemctl restart systemd-resolved
+            echo "Configuring edge router complete"
+          params:
+            $$out_mac: {get_attr: [port_out_1,mac_address]}
+            $$out_ip: {get_attr: [port_out_1,fixed_ips, 0, ip_address]}
+            $$gw: {get_param: gw}
+            $$rt: {get_param: rt_import}
+            $$lif_id: {get_resource: port_in}
+            $$lif_ip: {get_attr: [port_in_ip, instance_ip_address]}
+            $$mgnt_mac: {get_attr: [port_mgnt1,mac_address]}
+            $$mgnt_ip: {get_attr: [port_mgnt1, fixed_ips, 0, ip_address]}
+            $$mgnt_gw: {get_param: mgnt_gw}
+            $$tf_endpoint: {get_param: tf_endpoint}
+            $$ks_endpoint: {get_param: ks_endpoint}
+            $$ks_password: {get_param: ks_password}
+            $$router_as:  {get_param: router_as}
+            $$dns_srv: {get_param: dns_srv}
+            $$ntp_srv: {get_param: ntp_srv}
+            $$peer_holdtime: {get_param: peer_holdtime}
+            $$peer_keepalive: {get_param: peer_keepalive}
+            $$vrf_name: {get_param: vrf_name}
+
+  edge:
+    type: OS::Nova::Server
+    properties:
+      name: edge_router
+      flavor: { get_param: flavor }
+      config_drive: True
+      key_name: 'infra-admin'
+      networks:
+      - port: { get_resource: port_in }
+      - port: { get_resource: port_out_1}
+      - port: { get_resource: port_out_2}
+      - port: { get_resource: port_mgnt1}
+      - port: { get_resource: port_mgnt2}
+      block_device_mapping_v2:
+      - boot_index: 0
+        delete_on_termination: True
+        image_id: { get_param: image}
+        volume_size: 10
+      user_data_format: SOFTWARE_CONFIG
+      user_data: {get_resource: bootstrap}
+

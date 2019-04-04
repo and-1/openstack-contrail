@@ -1,3 +1,12 @@
+{% set vrfs_shared = [] %}
+{% set vrfs_dedicated = [] %}
+{% for env in output_vrfs%}
+{% if env['dedicated_edge'] is defined and env['dedicated_edge'] | bool  %}
+{% do vrfs_dedicated.append(env) %}
+{% else %}
+{% do vrfs_shared.append(env) %}
+{% endif %}
+{% endfor %}
 heat_template_version: queens
 
 description: EDGE Router
@@ -20,6 +29,10 @@ parameters:
     type: string
   {{env.name|lower}}_hub_export_rt:
     type: string
+{% if env['dedicated_edge'] is defined and env['dedicated_edge'] | bool  %}
+  {{env.name|lower}}_edge_count:
+    type: number
+{% endif %}
 {% endfor %}
   mgnt_vlan:
     type: number
@@ -80,7 +93,7 @@ resources:
       name: infra-admin
       public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDig4uo/BcdMqp1vbFPQ8sj4pHsKGSd51EXZ2eCQ1XQkiOyKLJBiy24k0msApLsfWL7644fgyVy6Np3yiQsVTlfNyeCiCd9vLytVPt8OmtZUAaoSpeXokPAqKJvK1nLqtWIOLPxAS9Bav7UjvHkwRTbmgGylEvHwxpmFNL4uwyIQzq+nWnCPsiZGol74aHE5CMA/8bF2Yn/0kCwgLefMWqLRoP9IY5NGxlv9ASt1JBw1lNnG1+bmZNBVpRqX+PkhOJWlJrUOhPp5lnilreU4FEBAphcfnz6GGlT+VQ/dWh9WYt9cL6WV1b9MAaCAE2vHLZNTGdyMG7WxvjJs0+gO5En'
 
-{% for env in output_vrfs %}
+{% for env in vrfs_shared %}
   {{env.name|lower}}_iface_type:
     type: OS::Heat::Value
     properties:
@@ -91,7 +104,9 @@ resources:
 {%else%}
  other{{loop.index-2}}
 {%endif%}
+{% endfor %}
 
+{% for env in output_vrfs %}
   network_{{env.name|lower}}_link1:
     type: OS::Neutron::ProviderNet
     properties:
@@ -214,17 +229,18 @@ resources:
       name: mgnt_subnet_l2
       network: {get_resource: network_mgnt_link2}
 
-  edge_router_tmpl:
+{% if vrfs_shared | length > 0 %}
+  edge_router_tmpl_shared:
     type: OS::ContrailV2::ServiceTemplate
     properties:
-      name: edge_router_template
+      name: edge_shared_router_template
       service_template_properties:
         service_template_properties_version: 2
         service_template_properties_service_mode: in-network
         service_template_properties_service_type: firewall
         service_template_properties_service_scaling: true
         service_template_properties_interface_type:
-{% for env in output_vrfs %}
+{% for env in vrfs_shared %}
         - service_template_properties_interface_type_service_interface_type: { get_attr: [{{env.name|lower}}_iface_type, value]}
           service_template_properties_interface_type_shared_ip: false
           service_template_properties_interface_type_static_route_enable: true
@@ -233,16 +249,48 @@ resources:
         service_template_properties_service_virtualization_type: virtual-machine
       domain: default-domain
 
-  edge_router_svc:
+  edge_router_svc_shared:
     type: OS::ContrailV2::ServiceInstance
     properties:
-      name: edge-router
+      name: edge-router-shared
       service_instance_properties:
         service_instance_properties_interface_list:
-{% for env in output_vrfs %}
+{% for env in vrfs_shared %}
         - service_instance_properties_interface_list_virtual_network: {list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ]}
 {% endfor %}
-      service_template_refs: [{ get_resource: edge_router_tmpl }]
+      service_template_refs: [{ get_resource: edge_router_tmpl_shared }]
+{% endif %}
+
+{% if vrfs_dedicated | length > 0 %}
+  edge_router_tmpl_dedicated:
+    type: OS::ContrailV2::ServiceTemplate
+    properties:
+      name: edge_dedicated_router_template
+      service_template_properties:
+        service_template_properties_version: 2
+        service_template_properties_service_mode: in-network
+        service_template_properties_service_type: firewall
+        service_template_properties_service_scaling: true
+        service_template_properties_interface_type:
+        - service_template_properties_interface_type_service_interface_type: left
+          service_template_properties_interface_type_shared_ip: false
+          service_template_properties_interface_type_static_route_enable: true
+        service_template_properties_ordered_interfaces: true
+        service_template_properties_service_virtualization_type: virtual-machine
+      domain: default-domain
+
+{% for env in vrfs_dedicated %}
+  edge_router_svc_{{env.name|lower}}:
+    type: OS::ContrailV2::ServiceInstance
+    properties:
+      name: edge-router-{{env.name|lower}}
+      service_instance_properties:
+        service_instance_properties_interface_list:
+        - service_instance_properties_interface_list_virtual_network: {list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ]}
+      service_template_refs: [{ get_resource: edge_router_tmpl_dedicated }]
+{% endfor %}
+{% endif %}
+
 
 {% for env in output_vrfs %}
   iface_route_{{env.name|lower}}:
@@ -252,9 +300,15 @@ resources:
       interface_route_table_routes:
         interface_route_table_routes_route:
         - interface_route_table_routes_route_prefix: '0.0.0.0/0'
-      service_instance_refs: [{ get_resource: edge_router_svc}]
+{%if env in vrfs_shared %}
+      service_instance_refs: [{ get_resource: edge_router_svc_shared}]
       service_instance_refs_data:
-      - service_instance_refs_data_interface_type: {get_attr: [{{env.name|lower}}_iface_type, value]}
+      - service_instance_refs_data_interface_type: {get_attr: [{{env.name|lower}}_iface_type, value]} 
+{%elif env in vrfs_dedicated%}
+      service_instance_refs: [{ get_resource: edge_router_svc_{{env.name|lower}}}]
+      service_instance_refs_data:
+      - service_instance_refs_data_interface_type: left 
+{% endif %}
 
   svc_health_check_{{env.name|lower}}:
     type: OS::ContrailV2::ServiceHealthCheck
@@ -270,13 +324,20 @@ resources:
         service_health_check_properties_monitor_type: PING
         #service_health_check_properties_url_path: { get_param: {{env.name|lower}}_gw }
         service_health_check_properties_url_path: local-ip
-      service_instance_refs: [{ get_resource: edge_router_svc }]
+{%if env in vrfs_shared %}
+      service_instance_refs: [{ get_resource: edge_router_svc_shared }]
       service_instance_refs_data:
       - service_instance_refs_data_interface_type: {get_attr: [{{env.name|lower}}_iface_type, value]}
+{%elif env in vrfs_dedicated%}
+      service_instance_refs: [{ get_resource: edge_router_svc_{{env.name|lower}} }]
+      service_instance_refs_data:
+      - service_instance_refs_data_interface_type: left
+{% endif %}
 
 {% endfor %}
 
-  edge_group:
+{% if vrfs_shared | length > 0 %}
+  edge_group_shared:
     type: OS::Heat::AutoScalingGroup
     depends_on: [infra_key]
     properties:
@@ -289,7 +350,7 @@ resources:
         pause_time: {get_param: update_pause}
         max_batch_size: {get_param: update_max_batch}
       resource:
-        type: {{inventory_dir}}/artifacts/HOT_edge_scale.yaml
+        type: {{inventory_dir}}/artifacts/HOT_edge_scale_shared.yaml
         properties:
           image: { get_param: edge_image }
           flavor: { get_param: edge_flavor }
@@ -299,7 +360,7 @@ resources:
           router_as:  {get_param: router_as}
           dns_srv: {get_param: dns_srv}
           ntp_srv: {get_param: ntp_srv}
-{% for env in output_vrfs %}
+{% for env in vrfs_shared %}
           {{env.name|lower}}_link_out_if1_id: { get_resource: network_{{env.name|lower}}_link1 }
           {{env.name|lower}}_link_out_if2_id: { get_resource:  network_{{env.name|lower}}_link2 }
           {{env.name|lower}}_link_out_if2_subnet: { get_resource: network_{{env.name|lower}}_link2_subnet }
@@ -312,12 +373,65 @@ resources:
           mgnt_link_if2_id: { get_resource: network_mgnt_link2}
           mgnt_link_if2_subnet: { get_resource: network_mgnt_link2_subnet }
           mgnt_gw: {get_param: mgnt_gw}
-          #service_template: { get_resource: edge_router_tmpl }
-          service_instance_name: { list_join: [':', { get_attr: [ edge_router_svc, fq_name ] } ] }
-{% for env in output_vrfs %}
+          #service_template: { get_resource: edge_router_tmpl_shared }
+          service_instance_name: { list_join: [':', { get_attr: [ edge_router_svc_shared, fq_name ] } ] }
+{% for env in vrfs_shared %}
           service_interface_type_{{env.name|lower}}: {get_attr: [{{env.name|lower}}_iface_type, value]}
 {% endfor %}
           port_tuple_name: 'edge_port_tuple'
           health_check_delay: {get_param: health_check_delay}
           health_check_retries: {get_param: health_check_retries}
           health_check_timeout: {get_param: health_check_timeout}
+          peer_keepalive: {get_param: peer_keepalive}
+          peer_holdtime: {get_param: peer_holdtime}
+{% endif %}
+
+{% if vrfs_dedicated | length > 0 %}
+{% for env in vrfs_dedicated %}
+  edge_group_{{env.name|lower}}:
+    type: OS::Heat::AutoScalingGroup
+    depends_on: [infra_key]
+    properties:
+      cooldown: 60
+      desired_capacity: { get_param: {{env.name|lower}}_edge_count }
+      max_size: 10
+      min_size: 1
+      rolling_updates:
+        min_in_service: {get_param: update_min_count}
+        pause_time: {get_param: update_pause}
+        max_batch_size: {get_param: update_max_batch}
+      resource:
+        type: {{inventory_dir}}/artifacts/HOT_edge_scale_dedicated.yaml
+        properties:
+          image: { get_param: edge_image }
+          flavor: { get_param: edge_flavor }
+          tf_endpoint: {get_param: tf_endpoint}
+          ks_endpoint: {get_param: ks_endpoint}
+          ks_password: {get_param: ks_password}
+          router_as:  {get_param: router_as}
+          dns_srv: {get_param: dns_srv}
+          ntp_srv: {get_param: ntp_srv}
+          vrf_name: {{env.name | lower}}
+          link_out_if1_id: { get_resource: network_{{env.name|lower}}_link1 }
+          link_out_if2_id: { get_resource:  network_{{env.name|lower}}_link2 }
+          link_out_if2_subnet: { get_resource: network_{{env.name|lower}}_link2_subnet }
+          rt_import: {get_param: {{env.name|lower}}_hub_import_rt}
+          hub: { get_attr: [ network_{{env.name|lower}}_hub, display_name ] }
+          hub_fqdn: { list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ] }
+          gw: {get_param: {{env.name|lower}}_gw}
+          mgnt_link_if1_id: { get_resource: network_mgnt_link1}
+          mgnt_link_if2_id: { get_resource: network_mgnt_link2}
+          mgnt_link_if2_subnet: { get_resource: network_mgnt_link2_subnet }
+          mgnt_gw: {get_param: mgnt_gw}
+          #service_template: { get_resource: edge_router_tmpl }
+          service_instance_name: { list_join: [':', { get_attr: [ edge_router_svc_{{env.name|lower}}, fq_name ] } ] }
+          service_interface_type: left
+          port_tuple_name: 'edge_port_tuple'
+          health_check_delay: {get_param: health_check_delay}
+          health_check_retries: {get_param: health_check_retries}
+          health_check_timeout: {get_param: health_check_timeout}
+          peer_keepalive: {get_param: peer_keepalive}
+          peer_holdtime: {get_param: peer_holdtime}
+{% endfor %}
+
+{% endif %}
