@@ -36,7 +36,7 @@
       # Force set to false because after routes will be added
       force: false
     register: netplan_config
-    changed_when: "netplan_config.changed or hostvars[ansible_hostname]['ansible_'+item] is not defined"
+    changed_when: "netplan_config.changed or hostvars[ansible_hostname]['ansible_'+hostvars[ansible_hostname][item]['iface']] is not defined"
     with_items:
     - "k8s"
     - "ceph"
@@ -64,6 +64,34 @@
     name: systemd-resolved
     state: restarted
   when: "resovle_restart.changed"
+# Check dns records
+- block:
+  - name: Get endpoints
+    include_vars:
+      file: "{{inventory_dir}}/helm_vars/endpoints.yaml"
+      name: ep
+  - name: Check resovle dns names
+    shell: getent hosts "{{ep[item]['host_fqdn_override']['public']['host']}}"
+    with_items:
+    - "{{ep|list}}"
+    when: "ep[item]['host_fqdn_override'] is defined and ep[item]['host_fqdn_override']['public'] is defined"
+    register: ep_dns_check
+    failed_when: false
+    changed_when: false
+  - name: Notify if resolve test fail
+    fail:
+      msg: "{{ep[item['item']]['host_fqdn_override']['public']['host']}} record doesn't exist or don't equal VIP"
+    with_items:
+    - "{{ep_dns_check.results | rejectattr('item','in',['identity','dashboard'])|list }}"
+    when: "item.rc is defined and (item.rc != 0 or item.stdout.split(' ')[0] != vip_ip)"
+  - name: Notify if resolve test fail
+    fail:
+      msg: "{{ep[item['item']]['host_fqdn_override']['public']['host']}} record doesn't exist or don't equal VIP"
+    with_items:
+    - "{{ep_dns_check.results | selectattr('item','in',['identity','dashboard'])|list }}"
+    when: "item.rc is defined and item.rc != 0"
+  when: "'maas' not in group_names"
+  run_once: true
 - name: Disable systemd-timesyncd
   systemd:
     name: systemd-timesyncd

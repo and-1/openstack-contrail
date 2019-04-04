@@ -32,23 +32,3 @@
   fail:
     msg: "Default gateway isn't correct on node {{ansible_hostname}}"
   when: not gw_correct|bool
-- block:
-  - name: Get endpoints
-    include_vars: 
-      file: "{{inventory_dir}}/helm_vars/endpoints.yaml"
-      name: ep
-  - name: Check resovle dns names
-    shell: getent hosts "{{ep[item]['host_fqdn_override']['public']['host']}}"
-    with_items:
-    - "{{ep|list}}"
-    when: "ep[item]['host_fqdn_override'] is defined and ep[item]['host_fqdn_override']['public'] is defined"  
-    register: ep_dns_check
-    failed_when: false
-  - name: Notify if resolve test fail
-    fail:
-      msg: "{{ep[item['item']]['host_fqdn_override']['public']['host']}} record doesn't exist or don't equal VIP"
-    with_items:
-    - "{{ep_dns_check.results}}"
-    when: "item.rc is defined and (item.rc != 0 or item.stdout.split(' ')[0] != vip_ip)"
-  when: "'maas' not in group_names"
-  run_once: true
