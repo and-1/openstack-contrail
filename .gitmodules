@@ -11,10 +11,6 @@
 [submodule "contrail-helm-deployer"]
 	path = contrail-helm-deployer
 	url = https://github.com/and-1/contrail-helm-deployer.git
-[submodule "kolla"]
-	path = kolla
-	url = https://github.com/and-1/kolla.git
-	branch = stable/queens
 [submodule "contrail-container-builder"]
 	path = contrail-container-builder
 	url = https://github.com/and-1/contrail-container-builder.git
