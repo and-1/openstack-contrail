@@ -59,6 +59,8 @@ parameters:
     type: number
   vrf_name:
     type: string
+  affinity:
+    type: string
 
 resources:
   PortTuple:
@@ -311,4 +313,6 @@ resources:
         volume_size: 10
       user_data_format: SOFTWARE_CONFIG
       user_data: {get_resource: bootstrap}
+      scheduler_hints:
+        group: { get_param: affinity }
 

@@ -337,6 +337,13 @@ resources:
 {% endfor %}
 
 {% if vrfs_shared | length > 0 %}
+  affinity_shared:
+   type: OS::Nova::ServerGroup
+   properties:
+    name: Edge on one compute-node
+    policies:
+     - anti-affinity
+
   edge_group_shared:
     type: OS::Heat::AutoScalingGroup
     depends_on: [infra_key]
@@ -384,10 +391,18 @@ resources:
           health_check_timeout: {get_param: health_check_timeout}
           peer_keepalive: {get_param: peer_keepalive}
           peer_holdtime: {get_param: peer_holdtime}
+          affinity: {get_resource: affinity_shared}
 {% endif %}
 
 {% if vrfs_dedicated | length > 0 %}
 {% for env in vrfs_dedicated %}
+  affinity_{env.name|lower}:
+   type: OS::Nova::ServerGroup
+   properties:
+    name: Edge on one compute-node
+    policies:
+     - anti-affinity
+
   edge_group_{{env.name|lower}}:
     type: OS::Heat::AutoScalingGroup
     depends_on: [infra_key]
@@ -432,6 +447,7 @@ resources:
           health_check_timeout: {get_param: health_check_timeout}
           peer_keepalive: {get_param: peer_keepalive}
           peer_holdtime: {get_param: peer_holdtime}
+          affinity: {get_resource: affinity_{{env.name|lower}}}
 {% endfor %}
 
 {% endif %}

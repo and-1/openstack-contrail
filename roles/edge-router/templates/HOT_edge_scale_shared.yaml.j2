@@ -65,6 +65,8 @@ parameters:
     type: number
   peer_holdtime:
     type: number
+  affinity:
+    type: string
 
 resources:
   PortTuple:
@@ -255,7 +257,7 @@ resources:
                 static:
                 - ${!lif_ip}/32
             EOF
-            #Workaroud. Use firewall rules and link-local check enstead end-to-end
+            #Workaroud. Use firewall rules and link-local check instead end-to-end
             iptables -t nat -A POSTROUTING -o ${bond} -d ${!gw} -p icmp -j SNAT --to-source ${!lif_ip}
             iptables -t nat -A PREROUTING -i ${!lif_name} -d ${!lif_ip} -p icmp -j DNAT --to-destination ${!gw}
             done
@@ -310,4 +312,5 @@ resources:
         volume_size: 10
       user_data_format: SOFTWARE_CONFIG
       user_data: {get_resource: bootstrap}
-
+      scheduler_hints:
+        group: { get_param: affinity }
