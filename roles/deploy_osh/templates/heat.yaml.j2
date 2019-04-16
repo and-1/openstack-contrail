@@ -37,6 +37,7 @@ conf:
     DEFAULT:
       num_engine_workers: {{heat.workers.num_engine_workers}}
       plugin_dirs: /opt/plugin/site-packages/vnc_api/gen/heat/resources,/opt/plugin/site-packages/contrail_heat/resources
+      region_name_for_services: {{region}}
     database:
       db_max_retries: -1
     heat_api:
