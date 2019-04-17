@@ -79,6 +79,8 @@ parameters:
     type: number
   peer_holdtime:
     type: number
+  ssh_key:
+    type: string
 
 resources:
 
@@ -91,7 +93,7 @@ resources:
     type: OS::Nova::KeyPair
     properties:
       name: infra-admin
-      public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDig4uo/BcdMqp1vbFPQ8sj4pHsKGSd51EXZ2eCQ1XQkiOyKLJBiy24k0msApLsfWL7644fgyVy6Np3yiQsVTlfNyeCiCd9vLytVPt8OmtZUAaoSpeXokPAqKJvK1nLqtWIOLPxAS9Bav7UjvHkwRTbmgGylEvHwxpmFNL4uwyIQzq+nWnCPsiZGol74aHE5CMA/8bF2Yn/0kCwgLefMWqLRoP9IY5NGxlv9ASt1JBw1lNnG1+bmZNBVpRqX+PkhOJWlJrUOhPp5lnilreU4FEBAphcfnz6GGlT+VQ/dWh9WYt9cL6WV1b9MAaCAE2vHLZNTGdyMG7WxvjJs0+gO5En'
+      public_key: {get_param: ssh_key}
 
 {% for env in vrfs_shared %}
   {{env.name|lower}}_iface_type:

@@ -13,6 +13,9 @@
 - name: Set TungstenFabric API endpoint
   set_fact:
     tf_endpoint: "contrail-config-api-{{region|lower}}.{{ext_domain_suffix}}"
+- name: Get ssh key
+  set_fact:
+    ssh_key: "{{lookup('file', inventory_dir+'/../share_creds/maas.ssh.key.pub')}}"
 - block:
   - name: Generate HOT files (common)
     template:
