@@ -76,6 +76,17 @@ nova:
           ram: 16384
           disk: 10
           vcpus: 8
+# set default quotas
+nova_quotas:
+  cores: 0
+  ram: 0
+  instances: 0
+cinder_quotas:
+  quota_gigabytes: 0
+  quota_snapshots: 0
+  quota_volumes: 0
+
+
 glance:
   pool_name: 'cloud.glance'
   workers:

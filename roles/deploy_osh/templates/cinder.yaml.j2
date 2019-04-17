@@ -163,6 +163,7 @@ conf:
       restore_discard_excess_bytes: "true"
       osapi_volume_workers: {{cinder.workers.osapi_volume}}
       scheduler_default_filters: "AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter"
+      {{cinder_quotas | to_nice_yaml | indent(6)}}
     database:
       db_max_retries: -1
       
