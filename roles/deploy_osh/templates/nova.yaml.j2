@@ -105,7 +105,6 @@ conf:
       osapi_compute_workers: {{nova.workers.osapi_compute}}
       metadata_workers: {{nova.workers.metadata}}
       allow_resize_to_same_host: true
-      {{nova_quotas | to_nice_yaml | indent(6)}}
     conductor:
       workers: {{nova.workers.conductor}}
     scheduler:
