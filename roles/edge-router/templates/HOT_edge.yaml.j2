@@ -373,6 +373,7 @@ resources:
           {{env.name|lower}}_link_out_if1_id: { get_resource: network_{{env.name|lower}}_link1 }
           {{env.name|lower}}_link_out_if2_id: { get_resource:  network_{{env.name|lower}}_link2 }
           {{env.name|lower}}_link_out_if2_subnet: { get_resource: network_{{env.name|lower}}_link2_subnet }
+          {{env.name|lower}}_link_out_if2_subnet_len: {str_split: ['/', {get_param: {{env.name|lower}}_prefix}, 1]}
           {{env.name|lower}}_rt_import: {get_param: {{env.name|lower}}_hub_import_rt}
           {{env.name|lower}}_hub: { get_attr: [ network_{{env.name|lower}}_hub, display_name ] }
           {{env.name|lower}}_hub_fqdn: { list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ] }
@@ -381,6 +382,7 @@ resources:
           mgnt_link_if1_id: { get_resource: network_mgnt_link1}
           mgnt_link_if2_id: { get_resource: network_mgnt_link2}
           mgnt_link_if2_subnet: { get_resource: network_mgnt_link2_subnet }
+          mgnt_link_if2_subnet_len: {str_split: ['/', {get_param: mgnt_prefix}, 1]}
           mgnt_gw: {get_param: mgnt_gw}
           #service_template: { get_resource: edge_router_tmpl_shared }
           service_instance_name: { list_join: [':', { get_attr: [ edge_router_svc_shared, fq_name ] } ] }
@@ -432,6 +434,7 @@ resources:
           link_out_if1_id: { get_resource: network_{{env.name|lower}}_link1 }
           link_out_if2_id: { get_resource:  network_{{env.name|lower}}_link2 }
           link_out_if2_subnet: { get_resource: network_{{env.name|lower}}_link2_subnet }
+          link_out_if2_subnet_len: {str_split: ['/', {get_param: {{env.name|lower}}_prefix}, 1]}
           rt_import: {get_param: {{env.name|lower}}_hub_import_rt}
           hub: { get_attr: [ network_{{env.name|lower}}_hub, display_name ] }
           hub_fqdn: { list_join: [':', { get_attr: [ network_{{env.name|lower}}_hub, fq_name ] } ] }
@@ -439,6 +442,7 @@ resources:
           mgnt_link_if1_id: { get_resource: network_mgnt_link1}
           mgnt_link_if2_id: { get_resource: network_mgnt_link2}
           mgnt_link_if2_subnet: { get_resource: network_mgnt_link2_subnet }
+          mgnt_link_if2_subnet_len: {str_split: ['/', {get_param: mgnt_prefix}, 1]}
           mgnt_gw: {get_param: mgnt_gw}
           #service_template: { get_resource: edge_router_tmpl }
           service_instance_name: { list_join: [':', { get_attr: [ edge_router_svc_{{env.name|lower}}, fq_name ] } ] }

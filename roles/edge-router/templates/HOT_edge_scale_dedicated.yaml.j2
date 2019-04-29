@@ -9,6 +9,8 @@ parameters:
     type: string
   link_out_if2_subnet:
     type: string
+  link_out_if2_subnet_len:
+    type: number
   gw:
     type: string
   hub:
@@ -25,6 +27,8 @@ parameters:
     type: string
   mgnt_link_if2_subnet:
     type: string
+  mgnt_link_if2_subnet_len:
+    type: number
   mgnt_gw:
     type: string
   image:
@@ -160,6 +164,7 @@ resources:
             export PEER_HOLDTIME="$$peer_holdtime"
             export $$vrf_name_OUT_MAC=$$out_mac
             export $$vrf_name_OUT_IP=$$out_ip
+            export $$vrf_name_OUT_IP_LEN=$$out_ip_len
             export $$vrf_name_GW=$$gw
             export $$vrf_name_RT=$$rt
             export $$vrf_name_IF_ID=$$lif_id
@@ -167,6 +172,7 @@ resources:
             export $$vrf_name_LIF_IP=$$lif_ip
             export MGNT_MAC=$$mgnt_mac
             export MGNT_IP=$$mgnt_ip
+            export MGNT_IP_LEN=$$mgnt_ip_len
             export MGNT_GW=$$mgnt_gw
             export ENVS="$$vrf_name"
             #----------------functions----
@@ -174,7 +180,8 @@ resources:
               local name=$1
               local mac=$2
               local ip=$3
-              local vrf=$4
+              local ip_len=$4
+              local vrf=$5
               if [ ! -z "$vrf" ];then
                 vrf_line="vrf $vrf"
               fi
@@ -187,7 +194,7 @@ resources:
               cat<<EOF>>/etc/network/interfaces.d/ifaces
             auto $name
             iface $name
-              address $ip/24
+              address $ip/$ip_len
               bond-slaves $slaves
               bond-mode balance-rr
               bond-miimon 100
@@ -200,7 +207,7 @@ resources:
             echo -e 'auto lo\niface lo inet loopback' > /etc/network/interfaces
             echo source /etc/network/interfaces.d/* >> /etc/network/interfaces
             # add mgnt interface
-            bond_conf MGNT ${MGNT_MAC} ${MGNT_IP} 
+            bond_conf MGNT ${MGNT_MAC} ${MGNT_IP} ${MGNT_IP_LEN}
             # add gw to default vrf
             echo "  gateway $MGNT_GW" >> /etc/network/interfaces.d/ifaces
             # config dns servers
@@ -235,6 +242,7 @@ resources:
             for env in $ENVS;do
               bond="${env}_OUT"
               bond_ip="${bond}_IP"
+              bond_ip_len="${bond}_IP_LEN"
               bond_mac="${bond}_MAC"
               lif_name="${env}_LIF"
               gw="${env}_GW"
@@ -251,7 +259,7 @@ resources:
               # add input(left) interface
               echo -e "auto ${!lif_name}\niface ${!lif_name} inet dhcp\n  vrf $env\n" >> /etc/network/interfaces.d/ifaces
               # add bond
-              bond_conf $bond ${!bond_mac} ${!bond_ip} $env
+              bond_conf $bond ${!bond_mac} ${!bond_ip} ${!bond_ip_len} $env
               cat<<EOF>>/opt/tf_sync/etc/vnc_sync/sync.conf
               $env:
                 bgp_peers:
@@ -276,12 +284,14 @@ resources:
           params:
             $$out_mac: {get_attr: [port_out_1,mac_address]}
             $$out_ip: {get_attr: [port_out_1,fixed_ips, 0, ip_address]}
+            $$out_ip_len: {get_param: link_out_if2_subnet_len}
             $$gw: {get_param: gw}
             $$rt: {get_param: rt_import}
             $$lif_id: {get_resource: port_in}
             $$lif_ip: {get_attr: [port_in_ip, instance_ip_address]}
             $$mgnt_mac: {get_attr: [port_mgnt1,mac_address]}
             $$mgnt_ip: {get_attr: [port_mgnt1, fixed_ips, 0, ip_address]}
+            $$mgnt_ip_len: {get_param: mgnt_link_if2_subnet_len}
             $$mgnt_gw: {get_param: mgnt_gw}
             $$tf_endpoint: {get_param: tf_endpoint}
             $$ks_endpoint: {get_param: ks_endpoint}
