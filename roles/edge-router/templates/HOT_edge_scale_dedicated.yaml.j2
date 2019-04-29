@@ -279,6 +279,7 @@ resources:
             iptables-save > /etc/iptables/rules.v4 
             echo '*/1 * * * * /opt/tf_sync/vnc_sync' | crontab -u root -
             systemctl restart networking
+            sleep 5
             systemctl restart systemd-resolved
             echo "Configuring edge router complete"
           params:
