@@ -35,7 +35,7 @@
     template:
       src: "HOT_edge_scale_dedicated.yaml.j2"
       dest: "{{inventory_dir}}/artifacts/HOT_edge_scale_dedicated.yaml"
-    register: "hot_template_scale_shared"
+    register: "hot_template_scale_dedicated"
     when: output_vrfs | map(attribute='dedicated_edge') | select('defined') | select('eq', True)  | list | length > 0
   - name: Deploy edge router
     os_stack:
