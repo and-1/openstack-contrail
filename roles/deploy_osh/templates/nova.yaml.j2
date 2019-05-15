@@ -183,7 +183,7 @@ conf:
   overrides:
     nova_compute:
       hosts:
-{% for node in groups['compute-plane'] %}
+{% for node in groups['compute-plane'] | sort %}
 {% if hostvars[node]['sriov_ifs'] is defined and hostvars[node]['sriov_ifs']|length > 0 %}
       - name: {{node}}
         conf:
