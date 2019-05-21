@@ -37,7 +37,7 @@ class Config:
   maas_api_key_file = "../share_creds/maas.apikey.creds"
   osh_ansible_env = "group_vars/all/osh.yml"
   min_compute_nodes = 3
-  min_control_nodes = 1
+  min_control_nodes = 3
   with open(os.path.join(os.path.dirname(__file__), osh_ansible_env),'r') as file:
     osh_config = yaml.safe_load(file)
   min_osd_nodes = osh_config['replication']
