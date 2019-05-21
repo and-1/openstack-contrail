@@ -44,7 +44,22 @@
       region_name: "{{region}}"
       state: present
       template: "{{inventory_dir}}/artifacts/HOT_edge.yaml"
-      timeout: 300
+      timeout: |- 
+        {% set f = namespace(flag=0) %}
+        {% set c = namespace(count=0) %}
+        {% for vrf in output_vrfs%}
+          {% if vrf.dedicated_edge|bool %}
+            {% if vrf.edge_count is defined %}
+              {% set c.count=vrf.edge_count %}
+            {% else %}
+              {% set c.count=c.count+edge_count %}
+            {% endif %}
+          {% elif f.flag == 0 %}
+              {% set c.count=c.count+edge_count %}
+              {% set f.flag=1 %}
+          {% endif %}
+        {% endfor %}
+        {{(c.count+1)*300}}
       wait: true
       name: EDGE_Router
     when: "(hot_template_common.results is defined and hot_template_common.results | selectattr('changed') | list | length > 0) or (hot_template_scale_shared is defined and hot_template_scale_shared.changed) or (hot_template_scale_dedicated is defined and hot_template_scale_dedicated.changed)"
