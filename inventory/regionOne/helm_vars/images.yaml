@@ -1,3 +1,10 @@
+# Set of images which use for deploy
+# Example:
+# GROUP_NAME:
+#   <helm chart image value name>:
+#     image: Image name without tag (required)
+#     repo: Docker registry for image if it not default
+#     tag: Image tag if it not default
 ---
 osh:
   barbican_api:

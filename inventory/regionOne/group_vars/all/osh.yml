@@ -71,6 +71,7 @@ tunables: "jewel"
 replication: 3 
 pg_per_osd: 100
 target_osds: 3
+# Recommendation for db, wal size (4Tb disk): db - 20Gb, wal - 1Gb
 bluestore_block_db_size: "1073741824"
 bluestore_block_wal_size: "2147483648"
 mon_osd_full_ratio: .90
@@ -82,6 +83,7 @@ ext_domain_suffix: "logistic.lan"
 pod_resources: true
 #--------------------------Infra-------------#
 infra:
+# Ceph pool name
   pool_name: 'cloud.infra'
 mariadb:
   storage: "5G"
@@ -102,9 +104,11 @@ alertmanager:
 # OpenStack release. Now only queens supported
 OS_release: "queens"
 region: "RegionOne"
+# Whether region contain keystone, horizon
 multi_region:
   master: true
 service_domain: "default"
+# Domains for Openstack users
 supplementary_domains:
 - prod
 - dev
@@ -114,6 +118,7 @@ gen_passwd: true
 # Whether use external ceph region. Available
 # values: false or <region name>
 cinder_backup_to_region: false
+# Percents of entire ceph storage capacity avaliable for pools
 cinder_pool_percent: 50
 cinder_backup_pool_percent: 5
 infra_pool_percent: 10

@@ -1,3 +1,12 @@
+# List of components(helm charts) assemled to groups
+# Example:
+# GROUP_NAME:
+# - name: Name of component/helm release name
+#   path: Path to helm chart
+#   namespace: K8s namespace for deploy
+# 
+# For disable component, comments out it.
+# IF component was installed already, you don't delete it when comment out
 ---
 INFRA_CORE:
 - name: ingress-kube-system
