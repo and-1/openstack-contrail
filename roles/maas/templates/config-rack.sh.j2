@@ -41,9 +41,9 @@ function set_zone {
     maas ${ADMIN_USERNAME} zones create name=${REGION}
   fi
 # Get rack id
-  export rack_id=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .system_id else "" end' | tr -d '[:space:]')
+  export rack_id=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .system_id else empty end')
 # Check current zone
-  cur_zone=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .zone.name else "" end' | tr -d '[:space:]')
+  cur_zone=$(maas ${ADMIN_USERNAME} rack-controllers read | jq -r '.[] | if .hostname == "'$(hostname)'" then .zone.name else empty end')
   if [ "x$cur_zone" != "x${REGION}" ];then
     maas admin rack-controllers set-zone zone=${REGION} nodes=${rack_id}
   fi
@@ -59,20 +59,24 @@ function config_pxe_net {
   subnet="{{(iface_dict['network']+'/'+iface_dict['netmask'])| ipaddr('net')}}"
   start_ip="{{(iface_dict['network'] | ipaddr('int') + MAAS_DHCP_RANGE.start) | ipaddr('address')}}"
   end_ip="{{(iface_dict['network'] | ipaddr('int') + MAAS_DHCP_RANGE.end) | ipaddr('address')}}"
+  if_name="{{iface}}"
 {% endif %}
 {% endfor %}
   while ! $(maas ${ADMIN_USERNAME} subnets read | jq -r ' .[] | .name' | grep -q "$subnet");do
     sleep 5
   done
-  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "DEFAULT_'${REGION}'" then .id else "" end' | tr -d '[:space:]' )
+  iface_id=$(maas ${ADMIN_USERNAME} rack-controller read $rack_id | jq -r ' .interface_set[] | if .name == "'$if_name'" then .id else empty end')
+
+  fabric_id=$(maas ${ADMIN_USERNAME} fabrics read | jq -r '.[] | if .name == "DEFAULT_'${REGION}'" then .id else empty end')
   if [ "x$fabric_id" == "x" ];then
      fabric_id=$(maas ${ADMIN_USERNAME} fabrics create name="DEFAULT_${REGION}" | jq '.id')
   fi
-  subnet_id=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .id else "" end' | tr -d '[:space:]')
-  vid=$(maas ${ADMIN_USERNAME} fabric read $fabric_id | jq -r '.vlans | .[] | if .vid == 0 then .id else "" end'| tr -d '[:space:]')
+  subnet_id=$(maas ${ADMIN_USERNAME} subnets read | jq -r '.[] | if .cidr == "'$subnet'" then .id else empty end')
+  vid=$(maas ${ADMIN_USERNAME} fabric read $fabric_id | jq -r '.vlans | .[] | if .vid == 0 then .id else empty end')
   maas ${ADMIN_USERNAME} subnet update $subnet_id vlan=$vid
   maas ${ADMIN_USERNAME} ipranges create type=dynamic start_ip=${start_ip} end_ip=${end_ip}
   maas ${ADMIN_USERNAME} ipranges create type=reserved start_ip={{vip_ip}} end_ip={{vip_ip}} comment="VIP"
+  maas ${ADMIN_USERNAME} interface update $rack_id $iface_id vlan=$vid
   maas ${ADMIN_USERNAME} vlan update $fabric_id 0 dhcp_on=true space=${REGION} primary_rack=${rack_id}
 }
 
