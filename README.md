@@ -6,6 +6,20 @@
 ## General MAAS architecture scheme
 ![Web Console](doc/images/MAAS_scheme.jpg) 
 
+## Install
+Walk through follow steps
+```bash
+apt install virtualenv python3-pip apt-transport-https ca-certificates curl gnupg-agent git python jq
+virtualenv osh-venv
+source osh-venv/bin/activate
+git clone <repository url>
+cd openstack-contrail
+git submodule init
+git submodule update
+for i in . kolla kubespray;do pip3 install -r $i/requirements.txt;done
+#Add dns server where resides keystone record
+```
+
 ## Description of inventory directory
 Some shell output was omitted
 ```bash
