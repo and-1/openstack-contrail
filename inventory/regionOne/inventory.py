@@ -54,7 +54,7 @@ class Inventory:
         self.maas = os.environ.get("MAAS_API_URL", None)
         if not self.maas:
             with open(os.path.join(os.path.dirname(__file__), Config.maas_api_url_file),'r') as f:
-              self.maas = "{}api/2.0/".format(f.read()).decode('utf-8').rstrip()
+              self.maas = "{}api/2.0/".format(f.read().rstrip()).decode('utf-8')
             if not self.maas:
               sys.exit("MAAS_API_URL environment variable not found. Set this to http<s>://<HOSTNAME or IP>/MAAS/api/{}".format(self.supported))
         self.token = os.environ.get("MAAS_API_KEY", None)
