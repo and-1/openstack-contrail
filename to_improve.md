@@ -1,0 +1,30 @@
+## List of items for research, develop and contain not critical issues
+- Delete genereated info while remove helm release
+- Use own certificate for contrail
+- Use ssl for openstack api
+- Increase memcache replicas to 2. Now exist issue with round robin algorithm of service.
+- Whether use tls in libvirt interconnection
+- Add dependency to contrail (start after openstack core services)
+- Add helm security policy
+- gnocchi to host network (research)
+- Add redis for gnocchi
+- Tune ceilometer metric interval
+- Tune nova scheduler (use existing or develop own filters)
+- Error messeges in ceilometer notification service
+- Change ldap admin user in monitoring services to regular
+- To find out rolling update timeout for services (ex. increase for elasticsearch)
+- Add ceilometer, contrail metrics to grafana
+- Adjust retension policy for prometheus
+- Whether use local disk for elasticsearch
+- Adjust fluentd to grab contrail logs
+- Adjust momory limit of pods (ex. ceph-osd)
+- Add limit of resources to all pods
+- Keystone init script overrides existing identity endpoints for all regions
+- Add HA mode for MAAS region controller
+- Add testing k8s before deploy OSH
+- Create docker image for deploy openstack-contrail
+- Add vrrp check script to keepalived (check nginx)
+- Add rally test for gnocchi
+- Add logging to MAAS config scripts
+- Change cinder bootstrap script to use internal endpoints
+- Add to MAAS config script reservation of edge ips
