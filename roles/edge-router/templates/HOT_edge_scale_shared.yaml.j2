@@ -304,6 +304,7 @@ resources:
     properties:
       name: edge_router
       flavor: { get_param: flavor }
+      flavor_update_policy: REPLACE
       config_drive: True
       key_name: infra-admin
       networks:
@@ -316,11 +317,8 @@ resources:
 {% endfor %}
       - port: { get_resource: port_mgnt1}
       - port: { get_resource: port_mgnt2}
-      block_device_mapping_v2:
-      - boot_index: 0
-        delete_on_termination: True
-        image_id: { get_param: image}
-        volume_size: 10
+      image: { get_param: image}
+      image_update_policy: REPLACE
       user_data_format: SOFTWARE_CONFIG
       user_data: {get_resource: bootstrap}
       scheduler_hints:

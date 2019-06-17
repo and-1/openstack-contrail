@@ -125,7 +125,7 @@ Edge router can work in two mode:
 ## TODO
 - [ ] Adding new node to cluster
 - [ ] Update OpenStack components (include update to new OS release)
-- [ ] Update edge image without downtime. Now complete with error
+- [x] Update edge image without downtime. Now complete with error
 - [ ] Deploy through gitlab-ci
 - [ ] Change manager of ceph-mon service endpoint from bash to k8s operator
 - [ ] Build all images by kolla. See inventory/regionOne/helm_vars/images.yaml to find out external images.
